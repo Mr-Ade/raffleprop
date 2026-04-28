@@ -1,0 +1,142 @@
+version: '3.9'
+
+# Development environment only — not for production use
+# Production: use managed PostgreSQL, Redis, and container orchestration (ECS, Railway, etc.)
+
+services:
+  # ─── PostgreSQL 16 ──────────────────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: raffleprop-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: raffleprop
+      POSTGRES_PASSWORD: devpassword
+      POSTGRES_DB: raffleprop_dev
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U raffleprop']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── Redis 7 ────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: raffleprop-redis
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ─── MinIO (S3/R2-compatible local dev) ─────────────────────────────────────
+  minio:
+    image: minio/minio:latest
+    container_name: raffleprop-minio
+    restart: unless-stopped
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - '9000:9000'
+      - '9001:9001' # MinIO Console
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ':9001'
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── MinIO bucket init ───────────────────────────────────────────────────────
+  minio-init:
+    image: minio/mc:latest
+    container_name: raffleprop-minio-init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: >
+      /bin/sh -c "
+        mc alias set local http://minio:9000 minioadmin minioadmin;
+        mc mb --ignore-existing local/raffleprop-regulatory-docs;
+        mc mb --ignore-existing local/raffleprop-media;
+        mc anonymous set download local/raffleprop-media;
+        echo 'MinIO buckets ready.';
+      "
+    restart: on-failure
+
+  # ─── Express API ─────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/api.Dockerfile
+    container_name: raffleprop-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://raffleprop:devpassword@postgres:5432/raffleprop_dev
+      REDIS_URL: redis://redis:6379
+      R2_ENDPOINT: http://minio:9000
+      NODE_ENV: development
+      PORT: 3001
+    ports:
+      - '3001:3001'
+    volumes:
+      - ../packages/api/src:/app/packages/api/src:ro  # live reload
+
+  # ─── BullMQ Workers ──────────────────────────────────────────────────────────
+  workers:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/workers.Dockerfile
+    container_name: raffleprop-workers
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    env_file:
+      - ../.env
+    environment:
+      DATABASE_URL: postgresql://raffleprop:devpassword@postgres:5432/raffleprop_dev
+      REDIS_URL: redis://redis:6379
+      NODE_ENV: development
+
+  # ─── Next.js Web App ─────────────────────────────────────────────────────────
+  web:
+    build:
+      context: ..
+      dockerfile: infra/dockerfiles/web.Dockerfile
+    container_name: raffleprop-web
+    restart: unless-stopped
+    depends_on:
+      - api
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3001
+      API_URL: http://api:3001
+      NODE_ENV: development
+    ports:
+      - '3000:3000'
+
+volumes:
+  postgres_data:
+  redis_data:
+  minio_data:

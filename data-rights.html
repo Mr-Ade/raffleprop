@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Rights Centre | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=data-rights.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item active"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="portal-main" id="main-content">
+    <div class="portal-mobile-header" id="portal-mobile-header">
+      <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+      <div>
+        <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+        <div class="portal-mobile-header-email" id="pmob-email"></div>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+    </div>
+
+    <div style="margin-bottom:1.25rem;">
+      <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;"><i class="fa-solid fa-shield-halved" style="color:var(--green-primary);"></i> Data Rights Centre</h1>
+      <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">Manage your personal data rights under the Nigeria Data Protection Regulation (NDPR) 2019.</p>
+    </div>
+
+    <!-- NDPR banner -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:0.875rem 1rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-info-circle" style="color:#3b82f6;flex-shrink:0;margin-top:0.125rem;"></i>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);">
+        Under the <strong>Nigeria Data Protection Regulation (NDPR) 2019</strong> and the <strong>Nigeria Data Protection Act 2023</strong>, you have the right to access, correct, delete, and transfer your personal data. RaffleProp is obligated to respond to all data rights requests within <strong>30 days</strong>. Note: certain data (FCCPA §118 transaction records, T&amp;C acceptance logs) must be retained regardless of deletion requests due to legal obligations — these will be noted in your response.
+      </div>
+    </div>
+
+    <!-- Rights grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1rem;margin-bottom:2rem;">
+
+      <!-- Right to Access / Download -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:var(--green-50);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-download" style="color:var(--green-primary);"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Download My Data</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right of Access — NDPR Art. 3.1(6)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6;">Export all personal data RaffleProp holds about you — including profile info, ticket purchases, T&amp;C acceptances, referral records, and communication preferences — in a machine-readable format.</p>
+        <button onclick="requestDataExport()" class="btn btn-primary btn-sm" style="width:100%;"><i class="fa-solid fa-download"></i> Request Data Export</button>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.5rem;text-align:center;">Delivered by email within 7 days</div>
+      </div>
+
+      <!-- Right to Rectification -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:#fefce8;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-pen-to-square" style="color:var(--gold);"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Correct My Data</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right to Rectification — NDPR Art. 3.1(7)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6;">Update inaccurate or incomplete personal information held about you. You can update most profile details directly from your Profile page. For KYC records, submit a correction request below.</p>
+        <a href="profile.html" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:0.5rem;"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+        <button onclick="submitRightRequest('correction')" class="btn btn-outline btn-sm" style="width:100%;"><i class="fa-solid fa-envelope"></i> Submit Correction Request</button>
+      </div>
+
+      <!-- Right to Erasure -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:#fef2f2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-trash-can" style="color:#ef4444;"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Delete My Account</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right to Erasure — NDPR Art. 3.1(9)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.75rem;line-height:1.6;">Request deletion of your account and associated personal data. Note: FCCPA §118 transaction records and T&amp;C acceptance logs are legally required to be retained and cannot be deleted per FCCPA 2018.</p>
+        <div style="background:#fef2f2;border-radius:6px;padding:0.5rem 0.75rem;font-size:0.75rem;color:#ef4444;margin-bottom:1rem;"><i class="fa-solid fa-triangle-exclamation"></i> This action is irreversible. Ensure you have downloaded your data first.</div>
+        <button onclick="submitRightRequest('deletion')" class="btn btn-sm" style="width:100%;background:#ef4444;color:#fff;border-color:#ef4444;"><i class="fa-solid fa-trash-can"></i> Request Account Deletion</button>
+      </div>
+
+      <!-- Right to Object / Withdraw Consent -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:#f5f3ff;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-hand" style="color:#7c3aed;"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Manage Consent</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right to Object — NDPR Art. 3.1(11)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6;">Control how your data is used for marketing, analytics, and communications. Withdraw or update your consent at any time.</p>
+
+        <div style="display:flex;flex-direction:column;gap:0.625rem;">
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:0.8125rem;cursor:pointer;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:8px;">
+            <span><i class="fa-solid fa-envelope" style="color:var(--text-muted);margin-right:0.375rem;"></i> Marketing emails</span>
+            <input type="checkbox" id="consent-email" checked style="width:1rem;height:1rem;accent-color:var(--green-primary);" onchange="updateConsent('email', this.checked)">
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:0.8125rem;cursor:pointer;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:8px;">
+            <span><i class="fa-solid fa-mobile" style="color:var(--text-muted);margin-right:0.375rem;"></i> SMS notifications</span>
+            <input type="checkbox" id="consent-sms" checked style="width:1rem;height:1rem;accent-color:var(--green-primary);" onchange="updateConsent('sms', this.checked)">
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:0.8125rem;cursor:pointer;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:8px;">
+            <span><i class="fa-solid fa-chart-bar" style="color:var(--text-muted);margin-right:0.375rem;"></i> Analytics &amp; personalisation</span>
+            <input type="checkbox" id="consent-analytics" checked style="width:1rem;height:1rem;accent-color:var(--green-primary);" onchange="updateConsent('analytics', this.checked)">
+          </label>
+          <label style="display:flex;align-items:center;justify-content:space-between;font-size:0.8125rem;cursor:pointer;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:8px;">
+            <span><i class="fa-solid fa-share-nodes" style="color:var(--text-muted);margin-right:0.375rem;"></i> Third-party partners</span>
+            <input type="checkbox" id="consent-partners" style="width:1rem;height:1rem;accent-color:var(--green-primary);" onchange="updateConsent('partners', this.checked)">
+          </label>
+        </div>
+      </div>
+
+      <!-- Right to Data Portability -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:#f0fdf4;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-file-export" style="color:var(--green-primary);"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Data Portability</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right to Portability — NDPR Art. 3.1(6)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6;">Receive your data in a structured, machine-readable format (JSON or CSV) that can be transferred to another service provider.</p>
+        <button onclick="requestPortability()" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:0.5rem;"><i class="fa-solid fa-file-code"></i> Export as JSON</button>
+        <button onclick="requestPortabilityCsv()" class="btn btn-outline btn-sm" style="width:100%;"><i class="fa-solid fa-file-csv"></i> Export as CSV</button>
+      </div>
+
+      <!-- Right to Complain -->
+      <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+        <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:#fff7ed;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+            <i class="fa-solid fa-flag" style="color:#ea580c;"></i>
+          </div>
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">Lodge a Complaint</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">Right to Complain — NDPR Art. 3.1(12)</div>
+          </div>
+        </div>
+        <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:1rem;line-height:1.6;">If you believe RaffleProp has not fulfilled a data rights request or has processed your data unlawfully, you can file a complaint with the Nigeria Data Protection Commission (NDPC).</p>
+        <button onclick="submitRightRequest('complaint')" class="btn btn-outline btn-sm" style="width:100%;margin-bottom:0.5rem;"><i class="fa-solid fa-envelope"></i> Complain to RaffleProp</button>
+        <a href="https://ndpc.gov.ng" target="_blank" rel="noopener" class="btn btn-outline btn-sm" style="width:100%;"><i class="fa-solid fa-arrow-up-right-from-square"></i> NDPC — ndpc.gov.ng</a>
+      </div>
+
+    </div>
+
+    <!-- What data we hold -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);margin-bottom:1.5rem;">
+      <div style="padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+        <div style="font-size:1rem;font-weight:800;">Data We Hold About You</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;">A complete inventory of personal data categories processed by RaffleProp</div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Data Category</th>
+              <th>Examples</th>
+              <th>Purpose</th>
+              <th>Legal Basis</th>
+              <th>Retention</th>
+              <th>Deletable?</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Account &amp; Identity</strong></td>
+              <td style="font-size:0.8125rem;">Name, email, phone, password hash</td>
+              <td style="font-size:0.8125rem;">Account access, authentication</td>
+              <td style="font-size:0.8125rem;">Contract</td>
+              <td style="font-size:0.8125rem;">Until account deleted</td>
+              <td><span class="badge badge-green">Yes</span></td>
+            </tr>
+            <tr>
+              <td><strong>KYC / Verification</strong></td>
+              <td style="font-size:0.8125rem;">ID doc, BVN reference, NIN reference</td>
+              <td style="font-size:0.8125rem;">AML/KYC compliance (SCUML)</td>
+              <td style="font-size:0.8125rem;">Legal obligation</td>
+              <td style="font-size:0.8125rem;">7 years per SCUML</td>
+              <td><span class="badge badge-gray">No — Legal Hold</span></td>
+            </tr>
+            <tr>
+              <td><strong>Transaction Records</strong></td>
+              <td style="font-size:0.8125rem;">Ticket purchases, amounts, receipts</td>
+              <td style="font-size:0.8125rem;">FCCPA §118 legal obligation</td>
+              <td style="font-size:0.8125rem;">Legal obligation</td>
+              <td style="font-size:0.8125rem;">7 years per FCCPA</td>
+              <td><span class="badge badge-gray">No — Legal Hold</span></td>
+            </tr>
+            <tr>
+              <td><strong>T&amp;C Acceptance Log</strong></td>
+              <td style="font-size:0.8125rem;">Timestamp, IP address, version</td>
+              <td style="font-size:0.8125rem;">Consent audit trail (NDPR)</td>
+              <td style="font-size:0.8125rem;">Legal obligation</td>
+              <td style="font-size:0.8125rem;">7 years</td>
+              <td><span class="badge badge-gray">No — Legal Hold</span></td>
+            </tr>
+            <tr>
+              <td><strong>Referral Records</strong></td>
+              <td style="font-size:0.8125rem;">Referral codes, commission earned</td>
+              <td style="font-size:0.8125rem;">Referral programme operation</td>
+              <td style="font-size:0.8125rem;">Contract</td>
+              <td style="font-size:0.8125rem;">5 years (financial records)</td>
+              <td><span class="badge badge-gray">No — Financial Hold</span></td>
+            </tr>
+            <tr>
+              <td><strong>Marketing Preferences</strong></td>
+              <td style="font-size:0.8125rem;">Email opt-in, SMS opt-in</td>
+              <td style="font-size:0.8125rem;">Marketing communications</td>
+              <td style="font-size:0.8125rem;">Consent</td>
+              <td style="font-size:0.8125rem;">Until withdrawn</td>
+              <td><span class="badge badge-green">Yes (withdraw above)</span></td>
+            </tr>
+            <tr>
+              <td><strong>Technical / Usage Data</strong></td>
+              <td style="font-size:0.8125rem;">IP address, browser, page visits</td>
+              <td style="font-size:0.8125rem;">Security, analytics</td>
+              <td style="font-size:0.8125rem;">Legitimate interest</td>
+              <td style="font-size:0.8125rem;">90 days</td>
+              <td><span class="badge badge-green">Yes</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Request status tracker -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;margin-bottom:1.5rem;" id="request-tracker">
+      <div style="font-size:1rem;font-weight:800;margin-bottom:1rem;">My Data Rights Requests</div>
+      <div id="requests-list">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.875rem;">
+          <i class="fa-solid fa-inbox" style="font-size:1.5rem;margin-bottom:0.5rem;display:block;"></i>
+          No open requests. Use the actions above to submit a new request.
+        </div>
+      </div>
+    </div>
+
+    <!-- DPO Contact -->
+    <div style="background:var(--bg-secondary);border-radius:14px;border:1px solid var(--border);padding:1.25rem 1.5rem;">
+      <div style="font-size:0.875rem;font-weight:700;margin-bottom:0.5rem;"><i class="fa-solid fa-user-shield" style="color:var(--green-primary);"></i> Data Protection Officer (DPO)</div>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.875rem;">
+        RaffleProp's Data Protection Officer is your primary point of contact for any NDPR-related enquiries. All data rights requests receive a written response within 30 days.
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.625rem;font-size:0.8125rem;">
+        <div><span style="color:var(--text-muted);">DPO Name:</span> <strong>Mrs Chinyere Okafor</strong></div>
+        <div><span style="color:var(--text-muted);">Email:</span> <a href="mailto:dpo@raffleprop.ng" style="color:var(--green-primary);font-weight:600;">dpo@raffleprop.ng</a></div>
+        <div><span style="color:var(--text-muted);">Phone:</span> <a href="tel:+2348001234568" style="color:var(--green-primary);">+234 800 1234 568</a></div>
+        <div><span style="color:var(--text-muted);">Response SLA:</span> <strong>30 days (NDPR)</strong></div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- Request Modal -->
+<div id="request-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeRequestModal()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:480px;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:1rem;font-weight:800;" id="modal-title">Submit Request</div>
+      <button onclick="closeRequestModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+    </div>
+    <div style="padding:1.5rem;">
+      <div id="modal-body"></div>
+      <div class="form-group" style="margin-top:1rem;">
+        <label class="form-label">Additional Details (optional)</label>
+        <textarea class="form-input" id="request-details" rows="3" placeholder="Any additional context or specific data categories to include..." style="resize:vertical;"></textarea>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button onclick="closeRequestModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
+        <button onclick="confirmRequest()" class="btn btn-primary" style="flex:2;" id="confirm-btn">Submit Request</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+let currentRequestType = '';
+let requestCount = 0;
+
+document.addEventListener('DOMContentLoaded', () => {
+  const _u = Auth.getUser();
+  if (_u) {
+    const greet = document.getElementById('user-greeting');
+    const emailEl = document.getElementById('user-email');
+    if (greet) greet.textContent = _u.name || 'Account';
+    if (emailEl) emailEl.textContent = _u.email || _u.phone || '';
+  }
+});
+
+function updateConsent(type, val) {
+  Toast.success('Consent Updated', `Your ${type} consent preference has been saved.`);
+}
+
+function requestDataExport() {
+  submitRightRequest('export');
+}
+
+function requestPortability() {
+  submitRightRequest('portability-json');
+}
+
+function requestPortabilityCsv() {
+  submitRightRequest('portability-csv');
+}
+
+const REQUEST_TYPES = {
+  'export': {
+    title: 'Request Data Export',
+    body: '<p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem;">We will compile all personal data held about your account and deliver it to your registered email address in PDF and JSON formats within <strong>7 working days</strong>.</p>',
+    btnLabel: 'Request Export',
+    btnClass: 'btn btn-primary'
+  },
+  'correction': {
+    title: 'Submit Correction Request',
+    body: '<p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem;">Please describe the data that needs to be corrected and provide the correct information. Our team will review and respond within <strong>30 days</strong>.</p>',
+    btnLabel: 'Submit Correction',
+    btnClass: 'btn btn-primary'
+  },
+  'deletion': {
+    title: 'Request Account Deletion',
+    body: `<div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.875rem;margin-bottom:1rem;font-size:0.8125rem;">
+      <strong style="color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> This action is irreversible.</strong>
+      <p style="margin-top:0.375rem;color:#7f1d1d;">Your account and personal data will be permanently deleted. The following data cannot be deleted due to legal obligations:</p>
+      <ul style="margin:0.5rem 0 0 1rem;color:#7f1d1d;">
+        <li>FCCPA §118 transaction records (7-year hold)</li>
+        <li>T&amp;C acceptance log (legal audit trail)</li>
+        <li>KYC records (SCUML 7-year hold)</li>
+      </ul>
+    </div>
+    <p style="font-size:0.875rem;color:var(--text-secondary);">We will process your deletion request within <strong>30 days</strong> and send a confirmation to your email.</p>`,
+    btnLabel: 'Confirm Deletion Request',
+    btnClass: 'btn'
+  },
+  'complaint': {
+    title: 'Lodge a Data Complaint',
+    body: '<p style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:1rem;">Describe your complaint in the field below. Our DPO will investigate and respond within <strong>30 days</strong>. If you are not satisfied with our response, you may escalate to the Nigeria Data Protection Commission at <a href="https://ndpc.gov.ng" target="_blank">ndpc.gov.ng</a>.</p>',
+    btnLabel: 'Submit Complaint',
+    btnClass: 'btn btn-primary'
+  },
+  'portability-json': {
+    title: 'Export Data as JSON',
+    body: '<p style="font-size:0.875rem;color:var(--text-secondary);">Your data will be exported in JSON format, suitable for machine processing or transfer to another service. Delivered to your registered email within <strong>7 working days</strong>.</p>',
+    btnLabel: 'Request JSON Export',
+    btnClass: 'btn btn-primary'
+  },
+  'portability-csv': {
+    title: 'Export Data as CSV',
+    body: '<p style="font-size:0.875rem;color:var(--text-secondary);">Your data will be exported in CSV format, viewable in spreadsheet applications. Delivered to your registered email within <strong>7 working days</strong>.</p>',
+    btnLabel: 'Request CSV Export',
+    btnClass: 'btn btn-primary'
+  }
+};
+
+function submitRightRequest(type) {
+  currentRequestType = type;
+  const cfg = REQUEST_TYPES[type];
+  if (!cfg) return;
+  document.getElementById('modal-title').textContent = cfg.title;
+  document.getElementById('modal-body').innerHTML = cfg.body;
+  const btn = document.getElementById('confirm-btn');
+  btn.textContent = cfg.btnLabel;
+  btn.className = cfg.btnClass;
+  if (type === 'deletion') {
+    btn.style.cssText = 'flex:2;background:#ef4444;color:#fff;border-color:#ef4444;';
+  } else {
+    btn.style.cssText = 'flex:2;';
+  }
+  document.getElementById('request-details').value = '';
+  document.getElementById('request-modal').style.display = 'flex';
+}
+
+function closeRequestModal() {
+  document.getElementById('request-modal').style.display = 'none';
+}
+
+function confirmRequest() {
+  const cfg = REQUEST_TYPES[currentRequestType];
+  if (!cfg) return;
+  requestCount++;
+  const refId = `DRR-2024-${String(requestCount).padStart(3,'0')}`;
+  const now = new Date();
+  const dateStr = now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  const due = new Date(now.getTime() + 30 * 86400000).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+
+  const list = document.getElementById('requests-list');
+  const existing = list.querySelector('.no-requests');
+  if (existing) existing.remove();
+
+  const entry = document.createElement('div');
+  entry.style.cssText = 'display:flex;align-items:flex-start;justify-content:space-between;padding:1rem;background:var(--bg-secondary);border-radius:10px;margin-bottom:0.5rem;gap:1rem;flex-wrap:wrap;';
+  entry.innerHTML = `
+    <div>
+      <div style="font-weight:700;font-size:0.875rem;">${cfg.title}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);">Ref: <code>${refId}</code> · Submitted ${dateStr}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);">Response due by ${due}</div>
+    </div>
+    <span class="badge" style="background:#fef3c7;color:#92400e;flex-shrink:0;">Pending Review</span>
+  `;
+  list.insertBefore(entry, list.firstChild);
+
+  closeRequestModal();
+  Toast.success('Request Submitted', `Your ${cfg.title.toLowerCase()} has been submitted. Reference: ${refId}. We will respond within 30 days.`);
+}
+</script>
+
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+  <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+  <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+  <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+  <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+  <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+  <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

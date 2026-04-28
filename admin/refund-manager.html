@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Refund Manager | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Refund Manager</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Bulk refund processing when minimum threshold not met. All refunds governed by FCCPA §123.</p>
+    </div>
+    <button onclick="openInitiateModal()" class="btn btn-primary"><i class="fa-solid fa-rotate-left"></i> Initiate Bulk Refund</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-total-refunds">0</div>
+        <div class="stat-label">Total Refund Batches</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--warning);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--warning);" id="stat-pending">0</div>
+        <div class="stat-label">Pending Refunds</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-completed">0</div>
+        <div class="stat-label">Completed Batches</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--text-primary);">
+        <div style="font-size:1.75rem;font-weight:900;" id="stat-total-amount">₦0</div>
+        <div class="stat-label">Total Refunded</div>
+      </div>
+    </div>
+
+    <!-- FCCPA §123 compliance notice -->
+    <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-scale-balanced" style="color:#3b82f6;margin-top:0.1rem;flex-shrink:0;font-size:1.125rem;"></i>
+      <div>
+        <strong style="font-size:0.875rem;color:#1d4ed8;">FCCPA 2018 §123 — Stated Representations Must Be Honoured</strong>
+        <p style="font-size:0.8125rem;color:#3b82f6;margin-top:0.25rem;line-height:1.6;">
+          If the minimum threshold of tickets is not reached by the close date, the promotion must not proceed. All ticket purchase monies must be refunded within the timeframe stated in the approved T&Cs. A Form CPC B must be filed with the FCCPC noting that the promotion did not proceed. Failure to refund is an offence under the FCCPA.
+        </p>
+      </div>
+    </div>
+
+    <!-- Campaign threshold monitor -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">Threshold Monitor — Active Campaigns</h3>
+        <span style="font-size:0.8125rem;color:var(--text-muted);">Campaigns below minimum threshold that may require refunds</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Close Date</th>
+              <th>Min Threshold</th>
+              <th>Tickets Sold</th>
+              <th>Threshold Met?</th>
+              <th>Days to Close</th>
+              <th>Refund Required?</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="threshold-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Refund batches -->
+    <div class="card">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">Refund Batch Log</h3>
+      </div>
+      <div id="refund-batch-list" style="padding:1.5rem;">
+        <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+          <i class="fa-solid fa-rotate-left" style="font-size:2rem;margin-bottom:0.75rem;display:block;"></i>
+          <div style="font-weight:600;">No refund batches initiated</div>
+          <div style="font-size:0.8125rem;margin-top:0.25rem;">Refund batches appear here when a campaign closes below threshold.</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Initiate Refund Modal -->
+<div id="initiate-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeInitiateModal()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:1rem;font-weight:800;">Initiate Bulk Refund</div>
+      <button onclick="closeInitiateModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+    </div>
+    <div style="padding:1.5rem;">
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:0.875rem;margin-bottom:1.25rem;font-size:0.8125rem;color:#9a3412;">
+        <i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;"></i> <strong>This action will initiate refunds to all ticket purchasers for the selected campaign.</strong> Ensure the campaign close date has passed and threshold was not met before proceeding.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Campaign</label>
+        <select class="form-select" id="refund-campaign-select">
+          <option value="">Select campaign...</option>
+          <option value="banana">Banana Island Penthouse (Threshold Not Met — 0/50,000 tickets)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Refund Reason</label>
+        <select class="form-select" id="refund-reason">
+          <option value="threshold">Minimum threshold not reached</option>
+          <option value="regulatory">Regulatory non-approval</option>
+          <option value="force_majeure">Force majeure</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Refund Deadline (per T&C)</label>
+        <input type="date" class="form-input" id="refund-deadline">
+        <div class="form-hint">This must match the refund timeline stated in the FCCPC-approved T&amp;Cs</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Payment Gateway for Processing</label>
+        <select class="form-select" id="refund-gateway">
+          <option value="paystack">Paystack (reverse transactions)</option>
+          <option value="flutterwave">Flutterwave (reverse transactions)</option>
+          <option value="manual">Manual bank transfer</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">File Form CPC B?</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;">
+          <input type="checkbox" id="refund-file-cpcb" checked style="width:1rem;height:1rem;accent-color:var(--green-primary);">
+          <span style="font-size:0.875rem;">Create Form CPC B task in Post-Draw Filing module noting promotion did not proceed (required by FCCPA §123)</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Authorisation Code</label>
+        <input type="password" class="form-input" id="refund-auth-code" placeholder="Enter admin authorisation code">
+        <div class="form-hint">Required to prevent accidental refund initiation</div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button onclick="closeInitiateModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
+        <button onclick="submitRefund()" class="btn" style="flex:2;background:#ef4444;color:#fff;border-color:#ef4444;"><i class="fa-solid fa-rotate-left"></i> Initiate Refunds</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item active"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const CAMPAIGNS_DATA = [
+  { id: 'lekki', name: '4-Bed Detached Duplex — Lekki', closeDate: '2024-11-30', minThreshold: 20000, sold: 18420 },
+  { id: 'gwarinpa', name: '3-Bed Semi-Detached — Gwarinpa', closeDate: '2024-12-20', minThreshold: 15000, sold: 8100 },
+  { id: 'banana', name: 'Banana Island Penthouse', closeDate: '2024-10-01', minThreshold: 40000, sold: 0 }
+];
+
+let refundBatches = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('refund-manager');
+  renderThresholdTable();
+  updateStats();
+});
+
+function renderThresholdTable() {
+  const tbody = document.getElementById('threshold-tbody');
+  tbody.innerHTML = CAMPAIGNS_DATA.map(c => {
+    const met = c.sold >= c.minThreshold;
+    const closeDate = new Date(c.closeDate);
+    const now = new Date();
+    const daysLeft = Math.ceil((closeDate - now) / 86400000);
+    const isClosed = daysLeft < 0;
+    const refundRequired = isClosed && !met;
+    const pct = Math.min(100, Math.round((c.sold / c.minThreshold) * 100));
+    return `
+    <tr>
+      <td data-label="Campaign"><div style="font-weight:600;">${c.name}</div></td>
+      <td data-label="Close Date" style="font-size:0.8125rem;">${closeDate.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="Min Threshold" style="font-weight:600;">${c.minThreshold.toLocaleString()}</td>
+      <td data-label="Tickets Sold">
+        <div style="display:flex;align-items:center;gap:0.5rem;">
+          <div style="flex:1;height:6px;border-radius:3px;background:var(--border);min-width:60px;">
+            <div style="height:100%;border-radius:3px;width:${pct}%;background:${pct>=100?'var(--green-primary)':pct>=50?'var(--gold)':'#ef4444'};"></div>
+          </div>
+          <span style="font-size:0.8125rem;font-weight:700;">${c.sold.toLocaleString()}</span>
+        </div>
+      </td>
+      <td data-label="Threshold Met?">${met ? '<span class="badge badge-green">Yes</span>' : '<span class="badge" style="background:#fef2f2;color:#ef4444;">No</span>'}</td>
+      <td data-label="Days to Close" style="font-size:0.875rem;font-weight:600;color:${daysLeft < 0 ? '#ef4444' : daysLeft <= 7 ? '#ea580c' : 'var(--text-primary)'};">${isClosed ? 'Closed' : daysLeft + ' days'}</td>
+      <td data-label="Refund Required?">${refundRequired ? '<span class="badge" style="background:#fef2f2;color:#ef4444;"><i class="fa-solid fa-triangle-exclamation"></i> Required</span>' : '<span class="badge badge-green">Not Required</span>'}</td>
+      <td data-label="Actions">
+        ${refundRequired
+          ? `<button onclick="openInitiateModal('${c.id}')" class="btn btn-sm" style="background:#ef4444;color:#fff;border-color:#ef4444;"><i class="fa-solid fa-rotate-left"></i> Refund</button>`
+          : `<button class="btn btn-outline btn-sm" disabled>Not Required</button>`
+        }
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function updateStats() {
+  document.getElementById('stat-total-refunds').textContent = refundBatches.length;
+  document.getElementById('stat-pending').textContent = refundBatches.filter(b => b.status === 'pending').length;
+  document.getElementById('stat-completed').textContent = refundBatches.filter(b => b.status === 'completed').length;
+  document.getElementById('stat-total-amount').textContent = '₦' + refundBatches.reduce((s, b) => s + b.amount, 0).toLocaleString();
+}
+
+function openInitiateModal(campId) {
+  if (campId) document.getElementById('refund-campaign-select').value = campId;
+  document.getElementById('initiate-modal').style.display = 'flex';
+}
+
+function closeInitiateModal() {
+  document.getElementById('initiate-modal').style.display = 'none';
+}
+
+function submitRefund() {
+  const camp = document.getElementById('refund-campaign-select').value;
+  const code = document.getElementById('refund-auth-code').value;
+  if (!camp) { Toast.error('Select Campaign', 'Please select a campaign to process refunds for.'); return; }
+  if (!code) { Toast.error('Auth Required', 'Please enter your admin authorisation code.'); return; }
+
+  const campData = CAMPAIGNS_DATA.find(c => c.id === camp);
+  const amount = campData ? campData.sold * 2000 : 0; // estimated
+  const refId = 'REF-' + Date.now().toString().slice(-6);
+  const batch = {
+    id: refId,
+    campaign: campData ? campData.name : camp,
+    initiatedAt: new Date().toISOString(),
+    gateway: document.getElementById('refund-gateway').value,
+    reason: document.getElementById('refund-reason').value,
+    status: 'pending',
+    ticketsCount: campData ? campData.sold : 0,
+    amount
+  };
+  refundBatches.unshift(batch);
+  renderBatchList();
+  updateStats();
+  closeInitiateModal();
+
+  if (document.getElementById('refund-file-cpcb').checked) {
+    Toast.success('Refund Initiated + CPC B Created', `Batch ${refId} queued. Form CPC B task created in Post-Draw Filing module.`);
+  } else {
+    Toast.success('Refund Batch Initiated', `Batch ${refId} has been queued for processing via the selected gateway.`);
+  }
+}
+
+function renderBatchList() {
+  const container = document.getElementById('refund-batch-list');
+  if (refundBatches.length === 0) return;
+  container.innerHTML = refundBatches.map(b => `
+    <div style="background:var(--bg-secondary);border-radius:10px;padding:1.125rem 1.25rem;margin-bottom:0.75rem;display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.375rem;">
+          <code style="font-size:0.875rem;font-weight:700;">${b.id}</code>
+          <span class="badge" style="background:${b.status==='completed'?'var(--green-50)':'#fef3c7'};color:${b.status==='completed'?'var(--green-primary)':'#92400e'};">${b.status.charAt(0).toUpperCase()+b.status.slice(1)}</span>
+        </div>
+        <div style="font-weight:600;margin-bottom:0.25rem;">${b.campaign}</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${b.ticketsCount.toLocaleString()} tickets · ₦${b.amount.toLocaleString()} via ${b.gateway} · Initiated: ${new Date(b.initiatedAt).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Reason: ${b.reason.replace('_',' ')}</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+        <button onclick="markComplete('${b.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-check"></i> Mark Complete</button>
+        <button onclick="Toast.info('Export','Refund batch report PDF is being generated.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function markComplete(id) {
+  const batch = refundBatches.find(b => b.id === id);
+  if (batch) { batch.status = 'completed'; renderBatchList(); updateStats(); }
+  Toast.success('Batch Completed', `Refund batch ${id} marked as completed. Users have been notified.`);
+}
+</script>
+</body>
+</html>

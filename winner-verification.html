@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Winner Verification Portal | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=winner-verification.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item active"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="portal-main" id="main-content">
+    <div class="portal-mobile-header" id="portal-mobile-header">
+      <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+      <div>
+        <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+        <div class="portal-mobile-header-email" id="pmob-email"></div>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+    </div>
+
+    <div style="margin-bottom:1.25rem;">
+      <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Verification Portal</h1>
+      <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">Secure identity verification and prize claim process for confirmed draw winners.</p>
+    </div>
+
+    <!-- Not-a-winner state (shown by default unless user is flagged as winner) -->
+    <div id="not-winner-panel">
+      <div style="background:var(--bg-secondary);border-radius:14px;border:1px solid var(--border);padding:2.5rem 2rem;text-align:center;margin-bottom:1.5rem;">
+        <i class="fa-solid fa-trophy" style="font-size:3rem;color:var(--border);margin-bottom:1rem;"></i>
+        <h3 style="font-weight:700;font-size:1.125rem;margin-bottom:0.5rem;">No active winner claim</h3>
+        <p style="color:var(--text-muted);font-size:0.875rem;max-width:400px;margin:0 auto;">If you have been notified that your ticket number was drawn as a winner, your claim portal will be activated here. Please check your registered email or phone for a winner notification.</p>
+      </div>
+      <div style="background:#fefce8;border:1px solid var(--gold);border-radius:10px;padding:0.875rem 1rem;display:flex;align-items:flex-start;gap:0.75rem;margin-bottom:1rem;">
+        <i class="fa-solid fa-triangle-exclamation" style="color:var(--gold);flex-shrink:0;margin-top:0.125rem;"></i>
+        <div style="font-size:0.8125rem;color:var(--text-secondary);">
+          <strong>Important:</strong> RaffleProp will never ask you to pay any fee to claim a prize. If you are contacted requesting payment to release a prize, report it immediately to <strong>support@raffleprop.ng</strong> and the FCCPC at <strong>complaints@fccpc.gov.ng</strong>.
+        </div>
+      </div>
+      <!-- Demo trigger -->
+      <div style="text-align:center;margin-top:1rem;">
+        <button onclick="showWinnerClaim()" class="btn btn-gold btn-sm"><i class="fa-solid fa-star"></i> Demo: Simulate Winner Claim</button>
+      </div>
+    </div>
+
+    <!-- Winner claim flow (hidden by default) -->
+    <div id="winner-claim-panel" style="display:none;">
+
+      <!-- Winner banner -->
+      <div style="background:linear-gradient(135deg,var(--gold) 0%,#f59e0b 100%);border-radius:14px;padding:1.5rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <i class="fa-solid fa-trophy" style="font-size:2.5rem;opacity:0.9;"></i>
+        <div>
+          <div style="font-weight:900;font-size:1.25rem;letter-spacing:-0.01em;">Congratulations! You are a winner.</div>
+          <div style="font-size:0.875rem;opacity:0.9;margin-top:0.25rem;">Your ticket <strong>RP-LEK-14207</strong> was drawn for the <strong>4-Bedroom Detached Duplex, Lekki Phase 1</strong>.</div>
+          <div style="font-size:0.8125rem;opacity:0.8;margin-top:0.25rem;">FCCPC Winner Submission Ref: FCCPC/W/2024/007 · Submit winner details by <strong>18 Dec 2024</strong></div>
+        </div>
+      </div>
+
+      <!-- Progress steps -->
+      <div style="display:flex;gap:0;margin-bottom:2rem;background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;" id="step-progress">
+        <div class="step-item active" data-step="1" style="flex:1;padding:0.75rem 0.5rem;text-align:center;border-right:1px solid var(--border);cursor:pointer;" onclick="goStep(1)">
+          <div style="font-size:1rem;margin-bottom:0.25rem;"><i class="fa-solid fa-id-card" style="color:var(--green-primary);"></i></div>
+          <div style="font-size:0.6875rem;font-weight:700;">1. ID Docs</div>
+        </div>
+        <div class="step-item" data-step="2" style="flex:1;padding:0.75rem 0.5rem;text-align:center;border-right:1px solid var(--border);cursor:pointer;opacity:0.5;" onclick="goStep(2)">
+          <div style="font-size:1rem;margin-bottom:0.25rem;"><i class="fa-solid fa-fingerprint"></i></div>
+          <div style="font-size:0.6875rem;font-weight:700;">2. BVN</div>
+        </div>
+        <div class="step-item" data-step="3" style="flex:1;padding:0.75rem 0.5rem;text-align:center;border-right:1px solid var(--border);cursor:pointer;opacity:0.5;" onclick="goStep(3)">
+          <div style="font-size:1rem;margin-bottom:0.25rem;"><i class="fa-solid fa-shield-halved"></i></div>
+          <div style="font-size:0.6875rem;font-weight:700;">3. NIN</div>
+        </div>
+        <div class="step-item" data-step="4" style="flex:1;padding:0.75rem 0.5rem;text-align:center;border-right:1px solid var(--border);cursor:pointer;opacity:0.5;" onclick="goStep(4)">
+          <div style="font-size:1rem;margin-bottom:0.25rem;"><i class="fa-solid fa-building-columns"></i></div>
+          <div style="font-size:0.6875rem;font-weight:700;">4. Bank</div>
+        </div>
+        <div class="step-item" data-step="5" style="flex:1;padding:0.75rem 0.5rem;text-align:center;cursor:pointer;opacity:0.5;" onclick="goStep(5)">
+          <div style="font-size:1rem;margin-bottom:0.25rem;"><i class="fa-solid fa-file-signature"></i></div>
+          <div style="font-size:0.6875rem;font-weight:700;">5. Agreement</div>
+        </div>
+      </div>
+
+      <!-- Step 1: Identity Documents -->
+      <div id="step-1" class="claim-step">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:0.25rem;"><i class="fa-solid fa-id-card" style="color:var(--green-primary);"></i> Step 1 — Identity Documents</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">Upload a valid government-issued photo ID. Accepted documents: National ID Card, International Passport, Drivers Licence, or Voters Card.</div>
+
+          <div class="form-group">
+            <label class="form-label">ID Document Type</label>
+            <select class="form-select" id="id-type">
+              <option value="">Select document type...</option>
+              <option>National ID Card (NIMC)</option>
+              <option>International Passport</option>
+              <option>Driver's Licence (FRSC)</option>
+              <option>Permanent Voter's Card (INEC)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Number</label>
+            <input type="text" class="form-input" id="id-number" placeholder="e.g. A12345678">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Upload ID Document (front + back)</label>
+            <div onclick="document.getElementById('id-file').click()" style="border:2px dashed var(--border);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;background:var(--bg-secondary);">
+              <i class="fa-solid fa-cloud-arrow-up" style="font-size:1.5rem;color:var(--text-muted);margin-bottom:0.5rem;"></i>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-muted);">Click to upload or drag &amp; drop</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">JPG, PNG or PDF · Max 5MB per file</div>
+            </div>
+            <input type="file" id="id-file" style="display:none;" accept="image/*,.pdf" multiple onchange="handleFileSelect(this,'id-preview')">
+            <div id="id-preview" style="margin-top:0.75rem;"></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Selfie with ID (for verification)</label>
+            <div onclick="document.getElementById('selfie-file').click()" style="border:2px dashed var(--border);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;background:var(--bg-secondary);">
+              <i class="fa-solid fa-camera" style="font-size:1.5rem;color:var(--text-muted);margin-bottom:0.5rem;"></i>
+              <div style="font-size:0.875rem;font-weight:600;color:var(--text-muted);">Upload a selfie holding your ID document</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">JPG or PNG · Max 5MB</div>
+            </div>
+            <input type="file" id="selfie-file" style="display:none;" accept="image/*" onchange="handleFileSelect(this,'selfie-preview')">
+            <div id="selfie-preview" style="margin-top:0.75rem;"></div>
+          </div>
+          <button onclick="nextStep(2)" class="btn btn-primary" style="width:100%;">Continue <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- Step 2: BVN -->
+      <div id="step-2" class="claim-step" style="display:none;">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:0.25rem;"><i class="fa-solid fa-fingerprint" style="color:var(--green-primary);"></i> Step 2 — Bank Verification Number (BVN)</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">Your BVN is required to verify your identity against CBN records. This is mandatory for all prize transfers above ₦500,000 under SCUML/AML requirements.</div>
+
+          <div style="background:#fefce8;border:1px solid var(--gold);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.8125rem;">
+            <i class="fa-solid fa-lock" style="color:var(--gold);"></i> <strong>Your BVN is encrypted in transit and at rest.</strong> RaffleProp stores only a masked reference (e.g. *****5678). Full BVN is transmitted directly to our KYC partner and never stored in plain text.
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">BVN (11 digits)</label>
+            <input type="text" class="form-input" id="bvn-input" placeholder="e.g. 22345678901" maxlength="11" pattern="[0-9]{11}">
+            <div class="form-hint">Dial *565*0# on any Nigerian network to retrieve your BVN</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm BVN</label>
+            <input type="text" class="form-input" id="bvn-confirm" placeholder="Re-enter your BVN" maxlength="11" pattern="[0-9]{11}">
+          </div>
+
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+            <button onclick="nextStep(1)" class="btn btn-outline" style="flex:1;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <button onclick="nextStep(3)" class="btn btn-primary" style="flex:2;">Continue <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: NIN -->
+      <div id="step-3" class="claim-step" style="display:none;">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:0.25rem;"><i class="fa-solid fa-shield-halved" style="color:var(--green-primary);"></i> Step 3 — National Identification Number (NIN)</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">Your NIN is required by NIMC Act and FCCPA regulations for winner identity verification. It must match the name on your uploaded ID document.</div>
+
+          <div class="form-group">
+            <label class="form-label">NIN (11 digits)</label>
+            <input type="text" class="form-input" id="nin-input" placeholder="e.g. 12345678901" maxlength="11" pattern="[0-9]{11}">
+            <div class="form-hint">Dial *346# (MTN) or *346# (Airtel/Glo) to retrieve your NIN</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Full Legal Name (as on NIN)</label>
+            <input type="text" class="form-input" id="nin-name" placeholder="e.g. ADEBAYO TAIWO SAMUEL">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Date of Birth</label>
+            <input type="date" class="form-input" id="nin-dob">
+          </div>
+
+          <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+            <button onclick="nextStep(2)" class="btn btn-outline" style="flex:1;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <button onclick="nextStep(4)" class="btn btn-primary" style="flex:2;">Continue <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Bank Details -->
+      <div id="step-4" class="claim-step" style="display:none;">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:0.25rem;"><i class="fa-solid fa-building-columns" style="color:var(--green-primary);"></i> Step 4 — Bank Account Details</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">Provide the Nigerian bank account where any cash component of the prize should be transferred. The account name must match your verified legal name.</div>
+
+          <div class="form-group">
+            <label class="form-label">Bank Name</label>
+            <select class="form-select" id="bank-name">
+              <option value="">Select your bank...</option>
+              <option>Access Bank</option>
+              <option>First Bank of Nigeria</option>
+              <option>Guaranty Trust Bank (GTBank)</option>
+              <option>United Bank for Africa (UBA)</option>
+              <option>Zenith Bank</option>
+              <option>Ecobank Nigeria</option>
+              <option>Fidelity Bank</option>
+              <option>First City Monument Bank (FCMB)</option>
+              <option>Polaris Bank</option>
+              <option>Sterling Bank</option>
+              <option>Union Bank</option>
+              <option>Wema Bank</option>
+              <option>OPay</option>
+              <option>Kuda Bank</option>
+              <option>Moniepoint</option>
+              <option>PalmPay</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Number (10 digits)</label>
+            <input type="text" class="form-input" id="bank-account" placeholder="e.g. 0123456789" maxlength="10" pattern="[0-9]{10}">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account Name</label>
+            <input type="text" class="form-input" id="bank-name-field" placeholder="Must match legal name on your NIN">
+          </div>
+
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.8125rem;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);"></i> Account details will be cross-verified with the CBN Bank Verification System before transfer is initiated. Transfers comply with SCUML AML/CFT requirements.
+          </div>
+
+          <div style="display:flex;gap:0.75rem;">
+            <button onclick="nextStep(3)" class="btn btn-outline" style="flex:1;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <button onclick="nextStep(5)" class="btn btn-primary" style="flex:2;">Continue <i class="fa-solid fa-arrow-right"></i></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Winner Transfer Agreement -->
+      <div id="step-5" class="claim-step" style="display:none;">
+        <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;">
+          <div style="font-size:1rem;font-weight:800;margin-bottom:0.25rem;"><i class="fa-solid fa-file-signature" style="color:var(--green-primary);"></i> Step 5 — Winner Transfer Agreement</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">Please read and accept the Winner Transfer Agreement. This agreement governs the transfer of the prize property and any cash components, as required under FCCPA 2018 and the property transfer laws of Nigeria.</div>
+
+          <div style="background:var(--bg-secondary);border-radius:10px;padding:1.25rem;font-size:0.8125rem;max-height:300px;overflow-y:auto;line-height:1.8;border:1px solid var(--border);margin-bottom:1.25rem;">
+            <p style="font-weight:800;font-size:0.875rem;margin-bottom:0.75rem;text-align:center;">WINNER TRANSFER AGREEMENT</p>
+            <p><strong>Between:</strong> RaffleProp Ltd, CAC Reg: RC-1234567, 14 Admiralty Way, Lekki Phase 1, Lagos ("<strong>The Company</strong>")</p>
+            <p><strong>And:</strong> The Winner, whose identity has been verified through Steps 1–4 of the RaffleProp Winner Verification Process ("<strong>The Winner</strong>")</p>
+            <br>
+            <p><strong>1. Prize Description.</strong> The prize is a 4-Bedroom Detached Duplex located at Lekki Phase 1, Lagos, with an independently certified NIESV market valuation of ₦85,000,000.</p>
+            <p><strong>2. FCCPC Submission.</strong> The Company has filed winner details with the Federal Competition &amp; Consumer Protection Commission within 3 working days of the draw as required by FCCPA 2018 §124. FCCPC Winner Ref: FCCPC/W/2024/007.</p>
+            <p><strong>3. Property Transfer.</strong> The Company undertakes to commence legal property transfer (Deed of Assignment / Governor's Consent) within 90 days of this Agreement being signed and KYC verification being completed.</p>
+            <p><strong>4. Identity Verification.</strong> The Winner consents to RaffleProp verifying their identity against NIMC, CBN, and FCCPC records. False information will invalidate this Agreement.</p>
+            <p><strong>5. Media Consent.</strong> The Winner consents to their first name and state of residence being published in RaffleProp's winners list and shared with the FCCPC, as required by FCCPA 2018 §123. Publication of full name, image, or contact details requires separate written consent.</p>
+            <p><strong>6. Tax Obligations.</strong> The Winner acknowledges that prize winnings may attract Capital Gains Tax under Nigerian tax law. The Winner is solely responsible for their own tax obligations. RaffleProp will issue a prize notification letter for tax purposes.</p>
+            <p><strong>7. Governing Law.</strong> This Agreement is governed by the laws of the Federal Republic of Nigeria. Any disputes shall be resolved by arbitration under the Arbitration and Conciliation Act Cap A18 LFN 2004.</p>
+          </div>
+
+          <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.875rem 1rem;margin-bottom:1.25rem;">
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+              <input type="checkbox" id="wta-accept" style="width:1.125rem;height:1.125rem;accent-color:var(--green-primary);flex-shrink:0;margin-top:0.125rem;">
+              <span style="font-size:0.875rem;font-weight:600;">I have read and accept the Winner Transfer Agreement. I confirm that all identity and bank details submitted are accurate and complete. I understand that providing false information is a criminal offence under FCCPA 2018 and the Criminal Code of Nigeria.</span>
+            </label>
+          </div>
+
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;font-size:0.8125rem;">
+            <label style="display:flex;align-items:flex-start;gap:0.75rem;cursor:pointer;">
+              <input type="checkbox" id="media-consent" style="width:1rem;height:1rem;accent-color:#3b82f6;flex-shrink:0;margin-top:0.125rem;">
+              <span><strong>Media consent (optional):</strong> I consent to RaffleProp publishing my full name and photograph in winners announcements, social media, and press materials. I understand I may withdraw this consent at any time by contacting RaffleProp.</span>
+            </label>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;">
+            <button onclick="nextStep(4)" class="btn btn-outline" style="flex:1;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <button onclick="submitClaim()" class="btn btn-primary" style="flex:2;background:var(--gold);border-color:var(--gold);"><i class="fa-solid fa-file-signature"></i> Submit Winner Claim</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /winner-claim-panel -->
+
+    <!-- Help section -->
+    <div style="background:var(--bg-secondary);border-radius:14px;border:1px solid var(--border);padding:1.25rem 1.5rem;margin-top:1.5rem;">
+      <div style="font-size:0.875rem;font-weight:700;margin-bottom:0.5rem;"><i class="fa-solid fa-circle-question" style="color:var(--green-primary);"></i> Winner Support</div>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.875rem;">Having difficulty with your winner verification? Our dedicated winner support team is available Monday – Friday, 9am – 5pm WAT.</div>
+      <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+        <a href="mailto:winners@raffleprop.ng" class="btn btn-outline btn-sm"><i class="fa-solid fa-envelope"></i> winners@raffleprop.ng</a>
+        <a href="tel:+2348001234567" class="btn btn-outline btn-sm"><i class="fa-solid fa-phone"></i> +234 800 RAFFLE</a>
+        <a href="trust-legal.html#draw-archive" class="btn btn-outline btn-sm"><i class="fa-solid fa-list"></i> Public Winners List</a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const _u = Auth.getUser();
+  if (_u) {
+    const greet = document.getElementById('user-greeting');
+    const emailEl = document.getElementById('user-email');
+    if (greet) greet.textContent = _u.name || 'Account';
+    if (emailEl) emailEl.textContent = _u.email || _u.phone || '';
+  }
+});
+
+function showWinnerClaim() {
+  document.getElementById('not-winner-panel').style.display = 'none';
+  document.getElementById('winner-claim-panel').style.display = 'block';
+}
+
+function goStep(n) {
+  document.querySelectorAll('.claim-step').forEach(el => el.style.display = 'none');
+  document.getElementById(`step-${n}`).style.display = 'block';
+  // Update progress indicators
+  document.querySelectorAll('#step-progress .step-item').forEach(el => {
+    const s = parseInt(el.dataset.step);
+    el.style.opacity = s <= n ? '1' : '0.5';
+    el.querySelector('i').style.color = s < n ? 'var(--green-primary)' : (s === n ? 'var(--green-primary)' : '');
+  });
+}
+
+function nextStep(n) {
+  goStep(n);
+  window.scrollTo({ top: document.getElementById('winner-claim-panel').offsetTop - 80, behavior: 'smooth' });
+}
+
+function handleFileSelect(input, previewId) {
+  const preview = document.getElementById(previewId);
+  preview.innerHTML = Array.from(input.files).map(f =>
+    `<div style="display:flex;align-items:center;gap:0.5rem;padding:0.5rem 0.75rem;background:var(--bg-secondary);border-radius:6px;font-size:0.8125rem;margin-bottom:0.25rem;">
+      <i class="fa-solid fa-file" style="color:var(--green-primary);"></i>
+      <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${f.name}</span>
+      <span style="color:var(--text-muted);">${(f.size/1024).toFixed(0)} KB</span>
+    </div>`
+  ).join('');
+}
+
+function submitClaim() {
+  if (!document.getElementById('wta-accept').checked) {
+    Toast.error('Agreement Required', 'You must read and accept the Winner Transfer Agreement to proceed.');
+    return;
+  }
+  Toast.success('Winner Claim Submitted', 'Your identity verification and Winner Transfer Agreement have been submitted. The RaffleProp team will contact you within 3 working days.');
+  setTimeout(() => {
+    document.getElementById('winner-claim-panel').innerHTML = `
+      <div style="background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 100%);border:2px solid var(--green-primary);border-radius:14px;padding:2.5rem 2rem;text-align:center;">
+        <i class="fa-solid fa-circle-check" style="font-size:3rem;color:var(--green-primary);margin-bottom:1rem;"></i>
+        <h2 style="font-weight:900;font-size:1.25rem;margin-bottom:0.5rem;">Claim Submitted Successfully</h2>
+        <p style="color:var(--text-muted);font-size:0.875rem;max-width:400px;margin:0 auto 1.5rem;">Our winner support team will review your submission and contact you within 3 working days. FCCPC ref FCCPC/W/2024/007 is on file.</p>
+        <a href="dashboard.html" class="btn btn-primary">Return to Dashboard</a>
+      </div>`;
+  }, 1500);
+}
+</script>
+
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+  <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+  <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+  <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+  <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+  <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+  <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

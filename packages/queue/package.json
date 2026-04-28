@@ -1,0 +1,25 @@
+{
+  "name": "@raffleprop/queue",
+  "version": "1.0.0",
+  "private": true,
+  "main": "./dist/index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only src/worker.ts",
+    "build": "tsc",
+    "start": "node dist/worker.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.12.0",
+    "@raffleprop/db": "workspace:*",
+    "@raffleprop/shared": "workspace:*",
+    "bullmq": "^5.4.0",
+    "ioredis": "^5.3.2",
+    "nodemailer": "^6.9.13"
+  },
+  "devDependencies": {
+    "@types/nodemailer": "^6.4.14",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.4.0"
+  }
+}

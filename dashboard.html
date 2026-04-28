@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Dashboard | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    // Auth guard — runs before DOM renders
+    if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=dashboard.html'); }
+  </script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <!-- Sidebar -->
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item active"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <!-- Main content -->
+  <main class="portal-main" id="main-content">
+<div class="portal-mobile-header" id="portal-mobile-header">
+  <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+  <div>
+    <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+    <div class="portal-mobile-header-email" id="pmob-email"></div>
+  </div>
+  <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+</div>
+    <!-- Page header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;" id="dash-welcome">My Dashboard</h1>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">Track your tickets, draws, and referral earnings.</p>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold"><i class="fa-solid fa-ticket"></i> Buy More Tickets</a>
+    </div>
+
+    <!-- Stats cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:1.25rem;margin-bottom:2.5rem;">
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Active Tickets</div>
+          <div style="width:36px;height:36px;background:var(--green-50);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-ticket" style="color:var(--green-primary);"></i></div>
+        </div>
+        <div class="stat-value" id="stat-tickets">—</div>
+        <div class="stat-label">across all campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Draws Entered</div>
+          <div style="width:36px;height:36px;background:#dbeafe;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-dice" style="color:#2563eb;"></i></div>
+        </div>
+        <div class="stat-value" id="stat-draws">—</div>
+        <div class="stat-label">live campaigns</div>
+      </div>
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Referral Earnings</div>
+          <div style="width:36px;height:36px;background:#fef9c3;border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-gift" style="color:var(--gold);"></i></div>
+        </div>
+        <div class="stat-value" id="stat-earnings">—</div>
+        <div class="stat-label">pending withdrawal</div>
+      </div>
+      <div class="stat-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Referrals</div>
+          <div style="width:36px;height:36px;background:var(--green-50);border-radius:8px;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-users" style="color:var(--green-primary);"></i></div>
+        </div>
+        <div class="stat-value" id="stat-refs">—</div>
+        <div class="stat-label">confirmed referrals</div>
+      </div>
+    </div>
+
+    <!-- Active campaigns user entered -->
+    <div style="margin-bottom:2.5rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+        <h2 style="font-size:1.125rem;font-weight:800;">My Active Campaigns</h2>
+        <a href="my-tickets.html" style="font-size:0.875rem;color:var(--green-primary);font-weight:600;">View all tickets →</a>
+      </div>
+      <div id="active-campaigns-list" style="display:flex;flex-direction:column;gap:0.875rem;"></div>
+    </div>
+
+    <!-- Upcoming draws timeline -->
+    <div style="margin-bottom:2.5rem;">
+      <h2 style="font-size:1.125rem;font-weight:800;margin-bottom:1.25rem;">Upcoming Draws</h2>
+      <div style="display:flex;flex-direction:column;gap:0.875rem;" id="draw-timeline"></div>
+    </div>
+
+    <!-- Referral quick-share -->
+    <div class="card" style="margin-bottom:2.5rem;">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-share-nodes" style="color:var(--green-primary);margin-right:0.5rem;"></i>Earn Free Tickets — Share Your Link</h3>
+      </div>
+      <div class="card-body">
+        <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem;">Earn 1 free ticket for every 5 paid referrals, plus ₦300 cash per confirmed referral.</p>
+        <div class="referral-link-box">
+          <div>
+            <div style="font-size:0.75rem;color:var(--green-primary);font-weight:700;margin-bottom:0.25rem;">Your Referral Code</div>
+            <div class="referral-code" id="dash-referral-code">REF-LOADING</div>
+          </div>
+          <button onclick="copyReferralLink()" class="btn btn-primary btn-sm"><i class="fa-solid fa-copy"></i> Copy Link</button>
+        </div>
+        <div style="display:flex;gap:0.625rem;margin-top:0.875rem;flex-wrap:wrap;">
+          <button onclick="shareReferralWhatsApp()" class="btn btn-sm" style="background:#25D366;color:#fff;"><i class="fab fa-whatsapp"></i> Share on WhatsApp</button>
+          <a href="referrals.html" class="btn btn-outline btn-sm">View Referral Dashboard →</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent notifications -->
+    <div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+        <h2 style="font-size:1.125rem;font-weight:800;">Recent Notifications</h2>
+        <a href="notifications.html" style="font-size:0.875rem;color:var(--green-primary);font-weight:600;">View all →</a>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:0.625rem;" id="notifications-list"></div>
+    </div>
+  </main>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = Auth.getUser();
+  if (!user) return;
+
+  // Greet
+  const firstName = user.name ? user.name.split(' ')[0] : 'there';
+  document.getElementById('dash-welcome').textContent = `Welcome back, ${firstName}! 👋`;
+  const greet = document.getElementById('user-greeting');
+  const email = document.getElementById('user-email');
+  if (greet) greet.textContent = user.name || 'Account';
+  if (email) email.textContent = user.email || user.phone || '';
+
+  // Stats
+  const savedTickets = JSON.parse(localStorage.getItem('rp_tickets') || '[]');
+  const totalTickets = savedTickets.reduce((s, t) => s + t.qty, 0);
+  document.getElementById('stat-tickets').textContent = totalTickets || '15';
+  document.getElementById('stat-draws').textContent = savedTickets.length > 0 ? new Set(savedTickets.map(t => t.campaignId)).size : '2';
+  document.getElementById('stat-earnings').textContent = Utils.formatNaira(user.referralEarnings || 15000);
+  document.getElementById('stat-refs').textContent = user.referralCount || 6;
+
+  // Referral code
+  const codeEl = document.getElementById('dash-referral-code');
+  if (codeEl) codeEl.textContent = user.referralCode || 'REF-USER25';
+
+  // Active campaigns
+  const acList = document.getElementById('active-campaigns-list');
+  if (acList) {
+    const campaigns = MOCK_DATA.campaigns.filter(c => c.status === 'active');
+    acList.innerHTML = campaigns.map(c => {
+      const userTickets = savedTickets.filter(t => t.campaignId === c.id);
+      const ticketCount = userTickets.reduce((s, t) => s + t.qty, 0) || (c.id === 'lekki-duplex-001' ? 10 : 5);
+      const endDate = Utils.getCountdownDate(c.daysToClose);
+      return `
+      <div style="background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div style="display:flex;align-items:center;gap:1rem;">
+          <img src="${c.images[0]}" alt="${c.title}" style="width:64px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;" loading="lazy">
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">${c.title}</div>
+            <div style="font-size:0.8125rem;color:var(--text-muted);"><i class="fa-solid fa-location-dot"></i> ${c.location}</div>
+            <div style="margin-top:0.375rem;display:flex;gap:0.375rem;flex-wrap:wrap;align-items:center;">
+              <span class="badge badge-green"><i class="fa-solid fa-ticket"></i> ${ticketCount} ticket${ticketCount !== 1 ? 's' : ''}</span>
+              ${c.fccpcRef ? `<span style="font-size:0.7rem;color:var(--green-primary);font-weight:600;font-family:monospace;background:var(--green-50);padding:0.1rem 0.375rem;border-radius:4px;" title="FCCPC Approval Reference"><i class="fa-solid fa-shield-halved" style="font-size:0.6rem;margin-right:0.2rem;"></i>${c.fccpcRef}</span>` : ''}
+            </div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:0.75rem;color:var(--text-muted);">Draw closes in</div>
+          <div class="countdown-row" data-countdown-end="${endDate}" style="margin-top:0.375rem;gap:0.25rem;">
+            <div class="countdown-unit" style="min-width:36px;"><span class="c-val value" style="font-size:1rem;">00</span><span class="label">D</span></div>
+            <div class="countdown-unit" style="min-width:36px;"><span class="c-val value" style="font-size:1rem;">00</span><span class="label">H</span></div>
+            <div class="countdown-unit" style="min-width:36px;"><span class="c-val value" style="font-size:1rem;">00</span><span class="label">M</span></div>
+          </div>
+          <a href="campaign-detail.html?id=${c.id}" style="font-size:0.8125rem;color:var(--green-primary);font-weight:600;margin-top:0.5rem;display:block;">View Campaign →</a>
+        </div>
+      </div>`;
+    }).join('');
+    Countdown.init();
+  }
+
+  // Draw timeline
+  const timeline = document.getElementById('draw-timeline');
+  if (timeline) {
+    timeline.innerHTML = MOCK_DATA.campaigns.filter(c => c.status === 'active').map(c => `
+      <div style="display:flex;gap:1rem;align-items:center;padding:1rem;background:#fff;border-radius:10px;border:1px solid var(--border);">
+        <div style="width:44px;height:44px;background:linear-gradient(135deg,var(--green-primary),var(--green-light));border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid fa-dice" style="color:#fff;"></i></div>
+        <div style="flex:1;">
+          <div style="font-weight:700;font-size:0.9rem;">${c.title}</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);">Draw in approximately ${c.daysToClose} days</div>
+        </div>
+        <span class="badge badge-green">Entered</span>
+      </div>`).join('');
+  }
+
+  // Notifications
+  const notifEl = document.getElementById('notifications-list');
+  if (notifEl) {
+    const notifications = [
+      { icon: 'fa-file-invoice', color: 'var(--green-primary)', msg: 'Payment confirmed. Your <strong>FCCPA §118 transaction record</strong> for 10 tickets (Lekki Phase 1 Duplex) has been issued. <a href="transaction-records.html" style="color:var(--green-primary);font-weight:600;">Download receipt →</a>', time: '2 hours ago' },
+      { icon: 'fa-shield-halved', color: 'var(--green-primary)', msg: 'Draw alert: <strong>Lekki Phase 1 Duplex</strong> draw is scheduled. FCCPC has been notified 14 days in advance per FCCPA 2018 §124. FCCPC will attend and monitor the draw.', time: '3 hours ago' },
+      { icon: 'fa-users', color: 'var(--gold)', msg: '<strong>Emeka O.</strong> used your referral link and purchased tickets. ₦300 earned — visible in your <a href="referrals.html" style="color:var(--gold);font-weight:600;">referral dashboard</a>.', time: '1 day ago' },
+      { icon: 'fa-bell', color: 'var(--info)', msg: 'New campaign launching in 14 days — <strong>Banana Island Mansion</strong>. ₦250M prize. FCCPC Ref: FCCPC/SP/2024/003.', time: '2 days ago' }
+    ];
+    notifEl.innerHTML = notifications.map(n => `
+      <div style="display:flex;gap:0.875rem;align-items:flex-start;padding:1rem;background:#fff;border-radius:10px;border:1px solid var(--border);">
+        <div style="width:36px;height:36px;background:${n.color}18;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><i class="fa-solid ${n.icon}" style="color:${n.color};"></i></div>
+        <div style="flex:1;"><div style="font-size:0.875rem;color:var(--text-secondary);">${n.msg}</div><div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">${n.time}</div></div>
+      </div>`).join('');
+  }
+});
+
+function copyReferralLink() {
+  const user = Auth.getUser();
+  const code = user ? (user.referralCode || 'REF-USER25') : 'REF-USER25';
+  copyLink(window.location.origin + '/campaigns.html?ref=' + code);
+}
+
+function shareReferralWhatsApp() {
+  const user = Auth.getUser();
+  const code = user ? (user.referralCode || 'REF-USER25') : 'REF-USER25';
+  shareWhatsApp(`Win a property in Nigeria from ₦2,500! Use my referral code ${code} when you register on RaffleProp: ${window.location.origin}?ref=${code}`);
+}
+</script>
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+    <a href="dashboard.html" class="pbn-item active"><i class="fa-solid fa-gauge-high"></i>Home</a>
+    <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+    <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+    <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+    <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+    <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

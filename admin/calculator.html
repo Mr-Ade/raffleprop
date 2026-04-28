@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Calculator | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    /* ── Layout ── */
+    .calc-grid { display: grid; grid-template-columns: minmax(0, 320px) minmax(0, 1fr); gap: 1.5rem; align-items: start; }
+    @media(max-width:860px){ .calc-grid { grid-template-columns: 1fr; } }
+
+    /* prevent any child overflowing its column */
+    .calc-grid > * { min-width: 0; overflow: hidden; }
+
+    /* ── Naira input ── */
+    .naira-input-wrap { position: relative; }
+    .naira-input-wrap .naira-prefix { position: absolute; left: 0.875rem; top: 50%; transform: translateY(-50%); font-weight: 800; font-size: 1rem; color: var(--green-primary); pointer-events: none; }
+    .naira-input-wrap input { padding-left: 2.25rem !important; font-size: 1.125rem !important; font-weight: 700; width: 100%; box-sizing: border-box; }
+
+    /* ── Sliders ── */
+    .slider-row { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 0.625rem; margin-bottom: 1rem; }
+    .slider-row label { font-size: 0.8125rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .slider-row input[type=range] { width: 100%; min-width: 80px; height: 28px; accent-color: var(--green-primary); cursor: pointer; touch-action: pan-x; }
+    .slider-val { font-size: 0.875rem; font-weight: 800; color: var(--green-primary); min-width: 38px; text-align: right; }
+
+    /* ── Cost breakdown rows ── */
+    .cost-row { display: flex; align-items: flex-start; gap: 0.75rem; padding: 0.625rem 0; border-bottom: 1px solid var(--border-light); }
+    .cost-row:last-child { border-bottom: none; }
+    .cost-row .cost-label { flex: 1; min-width: 0; color: var(--text-secondary); display: flex; align-items: flex-start; gap: 0.5rem; word-break: break-word; }
+    .cost-row .cost-label-text { min-width: 0; }
+    .cost-row .cost-label-text .cost-name { font-size: 0.875rem; font-weight: 600; color: var(--text-primary); }
+    .cost-row .cost-label-text .cost-note { font-size: 0.75rem; color: var(--text-muted); margin-top: 0.1rem; line-height: 1.4; }
+    .cost-row .cost-amount { flex-shrink: 0; font-weight: 700; color: var(--text-primary); font-size: 0.875rem; white-space: nowrap; padding-left: 0.5rem; padding-top: 0.125rem; }
+    .cost-row.cost-total { background: var(--green-50,#f0fdf4); margin: 0.5rem -1.25rem -1.25rem; padding: 1rem 1.25rem; border-radius: 0 0 12px 12px; }
+    .cost-row.cost-total .cost-label { font-weight: 800; color: var(--green-primary); font-size: 0.9375rem; }
+    .cost-row.cost-total .cost-amount { font-size: 1rem; font-weight: 900; color: var(--green-primary); }
+
+    /* ── Ticket preset cards ── */
+    .ticket-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.75rem; margin-bottom: 1rem; }
+    @media(max-width:640px){ .ticket-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
+    @media(max-width:400px){ .ticket-grid { grid-template-columns: 1fr; } }
+
+    .rec-card { border-radius: 12px; padding: 1rem; border: 2px solid var(--border); background: #fff; cursor: pointer; transition: border-color 0.2s, box-shadow 0.15s; }
+    .rec-card:hover { border-color: var(--green-primary); box-shadow: 0 4px 12px rgba(13,94,48,0.1); }
+    .rec-card.selected { border-color: var(--green-primary); background: var(--green-50,#f0fdf4); }
+    .rec-card .rec-tier { font-size: 0.6875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; }
+    .rec-card .rec-price { font-size: 1.375rem; font-weight: 900; line-height: 1.1; }
+    .rec-card .rec-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.375rem; margin-top: 0.75rem; }
+    .rec-stat { background: rgba(255,255,255,0.8); border-radius: 6px; padding: 0.4rem 0.5rem; text-align: center; border: 1px solid var(--border-light); }
+    .rec-stat .rv { font-size: 0.875rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+    .rec-stat .rl { font-size: 0.625rem; color: var(--text-muted); margin-top: 0.1rem; line-height: 1.3; }
+
+    /* ── Summary ── */
+    .summary-row { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; padding: 0.625rem 0; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; }
+    .summary-row:last-child { border-bottom: none; }
+    .summary-row .s-label { font-size: 0.875rem; color: var(--text-secondary); flex-shrink: 0; }
+    .summary-row .s-val { font-size: 0.9375rem; font-weight: 800; text-align: right; word-break: break-word; }
+
+    /* ── Misc ── */
+    .badge-info { display: inline-flex; align-items: center; gap: 0.3rem; background: #eff6ff; color: #1e40af; border: 1px solid #93c5fd; border-radius: 6px; font-size: 0.75rem; font-weight: 600; padding: 0.2rem 0.5rem; white-space: nowrap; }
+
+    /* ensure cards never overflow their container */
+    .card { overflow: hidden; }
+    .card-body { overflow-x: hidden; }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Campaign Economics Calculator</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Enter the property value — the calculator works out every cost and recommends your ticket structure.</p>
+    </div>
+    <button onclick="useTheseValues()" id="use-btn" class="btn btn-gold" disabled>
+      <i class="fa-solid fa-arrow-right"></i> Use These Values
+    </button>
+  </div>
+
+  <div class="admin-content">
+    <div class="calc-grid">
+
+      <!-- LEFT: Inputs -->
+      <div>
+
+        <!-- Property Value -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header">
+            <h3 style="font-size:0.9375rem;font-weight:700;"><i class="fa-solid fa-building" style="color:var(--green-primary);margin-right:0.5rem;"></i>Property Details</h3>
+          </div>
+          <div class="card-body">
+            <div class="form-group">
+              <label class="form-label">Property Market Value (NGN) <span class="required">*</span></label>
+              <div class="naira-input-wrap">
+                <span class="naira-prefix">₦</span>
+                <input type="number" id="prop-value" class="form-input" placeholder="e.g. 50000000" min="0" oninput="calc()" style="padding-left:2.25rem;font-size:1.125rem;font-weight:700;">
+              </div>
+              <div class="form-hint">This is the amount the property owner will receive. Use the NIESV-certified valuation figure.</div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Campaign Location</label>
+              <div style="display:flex;gap:1.5rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="location" value="lagos" id="loc-lagos" onchange="calc()" style="accent-color:var(--green-primary);"> Lagos State
+                </label>
+                <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;cursor:pointer;font-weight:600;">
+                  <input type="radio" name="location" value="other" id="loc-other" checked onchange="calc()" style="accent-color:var(--green-primary);"> Other State
+                </label>
+              </div>
+              <div class="form-hint">Lagos campaigns incur an additional LSLGA licence levy of ₦575,000.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Targets -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header">
+            <h3 style="font-size:0.9375rem;font-weight:700;"><i class="fa-solid fa-sliders" style="color:var(--gold);margin-right:0.5rem;"></i>Your Business Targets</h3>
+          </div>
+          <div class="card-body">
+            <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;">Adjust these to match your strategy. The calculator will factor them into the required revenue.</p>
+
+            <div class="slider-row">
+              <label>Company Profit Margin</label>
+              <input type="range" id="sl-profit" min="5" max="30" value="15" oninput="syncSlider('profit');calc()">
+              <span class="slider-val" id="sv-profit">15%</span>
+            </div>
+            <div class="slider-row">
+              <label>Marketing &amp; Advertising</label>
+              <input type="range" id="sl-marketing" min="5" max="25" value="12" oninput="syncSlider('marketing');calc()">
+              <span class="slider-val" id="sv-marketing">12%</span>
+            </div>
+            <div class="slider-row">
+              <label>Contingency Reserve</label>
+              <input type="range" id="sl-contingency" min="1" max="10" value="3" oninput="syncSlider('contingency');calc()">
+              <span class="slider-val" id="sv-contingency">3%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- How it works -->
+        <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:12px;padding:1rem 1.25rem;">
+          <div style="font-size:0.8125rem;font-weight:700;color:#1e40af;margin-bottom:0.5rem;"><i class="fa-solid fa-circle-info" style="margin-right:0.375rem;"></i>How the calculator works</div>
+          <ul style="font-size:0.8125rem;color:#1e40af;line-height:1.7;padding-left:1.25rem;margin:0;">
+            <li>All costs are added to the property value to get total revenue needed</li>
+            <li>FCCPC regulatory fees are auto-calculated by the official fee schedule</li>
+            <li>Revenue from ticket sales must cover everything before the company earns profit</li>
+            <li>The property owner always receives the full property value — nothing is deducted</li>
+            <li>Min threshold = tickets needed just to pay the property owner + regulatory costs</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- RIGHT: Results -->
+      <div>
+
+        <!-- Cost Breakdown -->
+        <div class="card" style="margin-bottom:1.5rem;" id="breakdown-card">
+          <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+            <h3 style="font-size:0.9375rem;font-weight:700;"><i class="fa-solid fa-list-check" style="color:var(--green-primary);margin-right:0.5rem;"></i>Full Cost Breakdown</h3>
+            <span id="fccpc-tier-badge" class="badge-info" style="display:none;"></span>
+          </div>
+          <div class="card-body" id="breakdown-body">
+            <div style="text-align:center;padding:2rem;color:var(--text-muted);">
+              <i class="fa-solid fa-building" style="font-size:2rem;margin-bottom:0.75rem;display:block;opacity:0.3;"></i>
+              Enter a property value to see the full cost breakdown
+            </div>
+          </div>
+        </div>
+
+        <!-- Ticket Options -->
+        <div class="card" id="ticket-card" style="display:none;margin-bottom:1.5rem;">
+          <div class="card-header">
+            <h3 style="font-size:0.9375rem;font-weight:700;"><i class="fa-solid fa-ticket" style="color:var(--gold);margin-right:0.5rem;"></i>Choose Your Ticket Price</h3>
+            <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;">Lower prices = more accessible but more tickets to sell. Higher = fewer tickets, more targeted audience.</p>
+          </div>
+          <div class="card-body">
+            <div class="ticket-grid" id="ticket-options-grid"></div>
+            <!-- Custom ticket price -->
+            <div style="display:flex;align-items:center;gap:0.75rem;padding:0.875rem;background:var(--bg-secondary);border-radius:10px;">
+              <span style="font-size:0.8125rem;font-weight:600;white-space:nowrap;">Custom price:</span>
+              <div class="naira-input-wrap" style="flex:1;">
+                <span class="naira-prefix" style="font-size:0.875rem;">₦</span>
+                <input type="number" id="custom-ticket-price" class="form-input" placeholder="e.g. 3500" min="500" step="500" oninput="selectCustomPrice()" style="padding-left:2rem;font-size:0.875rem;">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Payout Summary -->
+        <div class="card" id="summary-card" style="display:none;">
+          <div class="card-header">
+            <h3 style="font-size:0.9375rem;font-weight:700;"><i class="fa-solid fa-scale-balanced" style="color:var(--green-primary);margin-right:0.5rem;"></i>Campaign Summary</h3>
+          </div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.25rem;">
+              <div style="background:var(--green-50);border:2px solid var(--green-primary);border-radius:12px;padding:1rem;text-align:center;">
+                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--green-primary);margin-bottom:0.375rem;">Property Owner Receives</div>
+                <div style="font-size:1.25rem;font-weight:900;color:var(--green-primary);" id="sum-owner">—</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Full market value — 100% of input</div>
+              </div>
+              <div style="background:#fefce8;border:2px solid var(--gold);border-radius:12px;padding:1rem;text-align:center;">
+                <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--gold);margin-bottom:0.375rem;">Company Keeps (Profit)</div>
+                <div style="font-size:1.25rem;font-weight:900;color:var(--gold);" id="sum-profit">—</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;" id="sum-profit-pct">—</div>
+              </div>
+            </div>
+            <div id="summary-rows"></div>
+            <div style="background:#f3e8ff;border:1px solid #c4b5fd;border-radius:10px;padding:0.875rem 1rem;margin-top:1rem;font-size:0.8125rem;color:#6d28d9;" id="break-even-note"></div>
+            <button onclick="useTheseValues()" class="btn btn-gold btn-full" style="margin-top:1.25rem;font-size:1rem;padding:0.875rem;">
+              <i class="fa-solid fa-arrow-right"></i> Use These Values — Create Campaign
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="calculator.html" class="abn-item active"><i class="fa-solid fa-calculator"></i><span>Calculator</span></a>
+  <a href="compliance.html" class="abn-item"><i class="fa-solid fa-shield-halved"></i><span>Compliance</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+/* ── FCCPC fee schedule ──────────────────────────────────────── */
+const TIERS = [
+  { label: 'Below ₦2M',        max: 2e6,      rate: 0.12,   app: 25000 },
+  { label: '₦2M – ₦9.9M',     max: 10e6,     rate: 0.10,   app: 50000 },
+  { label: '₦10M – ₦29.9M',   max: 30e6,     rate: 0.085,  app: 75000 },
+  { label: '₦30M – ₦49.9M',   max: 50e6,     rate: 0.06,   app: 100000 },
+  { label: '₦50M – ₦99.9M',   max: 100e6,    rate: 0.052,  app: 150000 },
+  { label: '₦100M – ₦499.9M', max: 500e6,    rate: 0.045,  app: 200000 },
+  { label: 'Above ₦500M',      max: Infinity, rate: 0.03,   app: 250000 },
+];
+function getTier(pv) { return TIERS.find(t => pv < t.max) || TIERS[TIERS.length-1]; }
+
+/* ── Calculator state ────────────────────────────────────────── */
+let calcResult = null;
+let selectedTicketPrice = null;
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('calculator');
+});
+
+function syncSlider(key) {
+  const val = document.getElementById('sl-' + key).value;
+  document.getElementById('sv-' + key).textContent = val + '%';
+}
+
+function fmt(n) {
+  if (isNaN(n) || n === null) return '—';
+  return '₦' + Math.round(n).toLocaleString('en-NG');
+}
+function fmtN(n) { return Math.round(n).toLocaleString('en-NG'); }
+
+/* ── Main calculation ────────────────────────────────────────── */
+function calc() {
+  const propVal = parseFloat(document.getElementById('prop-value').value) || 0;
+  if (propVal <= 0) {
+    document.getElementById('breakdown-body').innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text-muted);"><i class="fa-solid fa-building" style="font-size:2rem;margin-bottom:0.75rem;display:block;opacity:0.3;"></i>Enter a property value to see the full cost breakdown</div>`;
+    document.getElementById('ticket-card').style.display = 'none';
+    document.getElementById('summary-card').style.display = 'none';
+    document.getElementById('fccpc-tier-badge').style.display = 'none';
+    document.getElementById('use-btn').disabled = true;
+    return;
+  }
+
+  const isLagos = document.getElementById('loc-lagos').checked;
+  const profitPct = parseFloat(document.getElementById('sl-profit').value) / 100;
+  const marketingPct = parseFloat(document.getElementById('sl-marketing').value) / 100;
+  const contingencyPct = parseFloat(document.getElementById('sl-contingency').value) / 100;
+
+  // ── Fixed costs (always paid regardless of revenue) ──────────
+  const tier = getTier(propVal);
+  const fccpcMonitoring = propVal * tier.rate;
+  const fccpcApp = tier.app;
+  const fccpcDraw = 25000;
+  const fccpcTotal = fccpcMonitoring + fccpcApp + fccpcDraw;
+
+  const lslgaFee = isLagos ? 575000 : 0;
+  const legalFee = propVal * 0.015;              // 1.5% — solicitors, title transfer
+  const nisvFee = 250000;                        // NIESV valuation certificate
+  const stampDuty = propVal * 0.015;             // 1.5% — property stamp duty
+  const adminFee = propVal * 0.02;               // 2% — general admin, staff, operations
+  const techFee = 500000 + propVal * 0.005;      // Platform, hosting, SMS gateway
+  const paymentProcessing = 0;                   // Will be variable (% of revenue)
+  const insuranceFee = propVal * 0.005;          // 0.5% — liability insurance
+
+  const fixedTotal = propVal + fccpcTotal + lslgaFee + legalFee + nisvFee
+                   + stampDuty + adminFee + techFee + insuranceFee;
+
+  // Contingency is % of fixed
+  const contingencyAmt = fixedTotal * contingencyPct;
+
+  const fixedPlusContingency = fixedTotal + contingencyAmt;
+
+  // ── Variable costs (% of total revenue R) ────────────────────
+  // payment processing ~1.5%, marketing, profit
+  const variablePct = marketingPct + 0.015 + profitPct;
+
+  // Solve: R × (1 - variablePct) = fixedPlusContingency
+  if (variablePct >= 1) {
+    alert('Your combined profit + marketing percentages exceed 100%. Please reduce the sliders.');
+    return;
+  }
+  const totalRevenue = fixedPlusContingency / (1 - variablePct);
+
+  // Derived variable amounts
+  const marketingAmt = totalRevenue * marketingPct;
+  const paymentFee = totalRevenue * 0.015;
+  const companyProfit = totalRevenue * profitPct;
+
+  // ── Min threshold revenue = just property + mandatory costs ──
+  // (no marketing, no contingency, no profit — bare minimum to honour obligations)
+  const minThresholdRevenue = propVal + fccpcTotal + lslgaFee + legalFee + nisvFee + stampDuty;
+
+  // Save result
+  calcResult = {
+    propVal, isLagos, tier,
+    fccpcMonitoring, fccpcApp, fccpcDraw, fccpcTotal,
+    lslgaFee, legalFee, nisvFee, stampDuty, adminFee, techFee, insuranceFee,
+    contingencyAmt, marketingAmt, paymentFee, companyProfit,
+    fixedTotal, totalRevenue, minThresholdRevenue,
+    profitPct, marketingPct, contingencyPct
+  };
+
+  renderBreakdown();
+  renderTicketOptions();
+  document.getElementById('fccpc-tier-badge').style.display = 'inline-flex';
+  document.getElementById('fccpc-tier-badge').textContent = `FCCPC Tier: ${tier.label} · ${(tier.rate*100).toFixed(1)}%`;
+}
+
+/* ── Render cost breakdown ───────────────────────────────────── */
+function renderBreakdown() {
+  const r = calcResult;
+  const rows = [
+    { icon: 'fa-house', color: '#166534', label: 'Property Payment to Owner', amount: r.propVal, note: '100% of property value — paid to owner on winner verification' },
+    { icon: 'fa-shield-halved', color: '#1e40af', label: 'FCCPC Monitoring Fee', amount: r.fccpcMonitoring, note: `${(r.tier.rate*100).toFixed(1)}% of property value · ${r.tier.label} tier` },
+    { icon: 'fa-shield-halved', color: '#1e40af', label: 'FCCPC Application Fee', amount: r.fccpcApp, note: 'One-time application submission fee' },
+    { icon: 'fa-shield-halved', color: '#1e40af', label: 'FCCPC Draw Attendance Fee', amount: r.fccpcDraw, note: 'Fixed fee for FCCPC monitor at draw' },
+    r.lslgaFee > 0 ? { icon: 'fa-building-columns', color: '#7c3aed', label: 'LSLGA Licence Levy', amount: r.lslgaFee, note: 'Lagos State Lotteries & Gaming Authority annual levy' } : null,
+    { icon: 'fa-scale-balanced', color: '#b45309', label: 'Legal Fees (Solicitors)', amount: r.legalFee, note: '1.5% — title transfer, T&C drafting, winner agreement' },
+    { icon: 'fa-file-certificate', color: '#6d28d9', label: 'NIESV Valuation Certificate', amount: r.nisvFee, note: 'Independent certified property valuation by NIESV-registered valuer' },
+    { icon: 'fa-stamp', color: '#b45309', label: 'Stamp Duty', amount: r.stampDuty, note: '1.5% — statutory stamp duty on property transfer' },
+    { icon: 'fa-laptop', color: '#0891b2', label: 'Platform & Technology', amount: r.techFee, note: 'Website, SMS gateway, payment integration, hosting' },
+    { icon: 'fa-clipboard-list', color: '#0891b2', label: 'Administrative & Operations', amount: r.adminFee, note: '2% — staff, office, customer care, draw logistics' },
+    { icon: 'fa-shield', color: '#0891b2', label: 'Liability Insurance', amount: r.insuranceFee, note: '0.5% — event liability and campaign insurance' },
+    { icon: 'fa-life-ring', color: '#dc2626', label: `Contingency Reserve (${Math.round(calcResult.contingencyPct*100)}%)`, amount: r.contingencyAmt, note: 'Buffer for unexpected costs — returned to company if unused' },
+    { divider: true, label: 'Variable Costs (from ticket revenue)' },
+    { icon: 'fa-bullhorn', color: '#c2410c', label: `Marketing & Advertising (${Math.round(calcResult.marketingPct*100)}%)`, amount: r.marketingAmt, note: 'Social media ads, influencer fees, content creation, outdoor' },
+    { icon: 'fa-credit-card', color: '#0891b2', label: 'Payment Processing Fees (1.5%)', amount: r.paymentFee, note: 'Paystack/Flutterwave gateway charges on ticket revenue' },
+    { icon: 'fa-sack-dollar', color: 'var(--gold)', label: `Company Profit (${Math.round(calcResult.profitPct*100)}%)`, amount: r.companyProfit, note: 'Net profit retained by RaffleProp after all costs' },
+  ].filter(Boolean);
+
+  let html = '';
+  rows.forEach(row => {
+    if (row.divider) {
+      html += `<div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0 0.375rem;">${row.label}</div>`;
+      return;
+    }
+    html += `<div class="cost-row">
+      <div class="cost-label">
+        <i class="fa-solid ${row.icon}" style="color:${row.color};width:14px;flex-shrink:0;margin-top:0.125rem;"></i>
+        <div class="cost-label-text">
+          <div class="cost-name">${row.label}</div>
+          <div class="cost-note">${row.note}</div>
+        </div>
+      </div>
+      <div class="cost-amount">${fmt(row.amount)}</div>
+    </div>`;
+  });
+
+  html += `<div class="cost-row cost-total">
+    <div class="cost-label"><i class="fa-solid fa-equals" style="margin-right:0.5rem;"></i>Total Revenue Required from Ticket Sales</div>
+    <div class="cost-amount">${fmt(r.totalRevenue)}</div>
+  </div>`;
+
+  document.getElementById('breakdown-body').innerHTML = html;
+}
+
+/* ── Render ticket options ───────────────────────────────────── */
+const TICKET_PRESETS = [
+  { price: 2500, label: 'Economy', color: '#166534', bg: '#f0fdf4' },
+  { price: 5000, label: 'Standard', color: '#0D5E30', bg: '#f0fdf4' },
+  { price: 10000, label: 'Premium', color: '#92400e', bg: '#fef9c3' },
+];
+
+function renderTicketOptions() {
+  const r = calcResult;
+  document.getElementById('ticket-card').style.display = 'block';
+
+  const grid = document.getElementById('ticket-options-grid');
+  grid.innerHTML = TICKET_PRESETS.map(p => {
+    const totalTix = roundUpTickets(r.totalRevenue / p.price);
+    const minTix = roundUpTickets(r.minThresholdRevenue / p.price, 100);
+    const maxPerPerson = Math.max(5, Math.ceil(totalTix * 0.005));
+    const sel = selectedTicketPrice === p.price ? ' selected' : '';
+    return `<div class="rec-card${sel}" style="background:${sel ? p.bg : '#fff'};" onclick="selectPreset(${p.price})">
+      <div class="rec-tier" style="color:${p.color};">${p.label}</div>
+      <div class="rec-price" style="color:${p.color};">₦${p.price.toLocaleString()}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.125rem;">per ticket</div>
+      <div class="rec-stats">
+        <div class="rec-stat"><div class="rv">${fmtN(totalTix)}</div><div class="rl">Total Tickets</div></div>
+        <div class="rec-stat"><div class="rv">${fmtN(minTix)}</div><div class="rl">Min Threshold</div></div>
+        <div class="rec-stat"><div class="rv">${fmtN(maxPerPerson)}</div><div class="rl">Max/Person</div></div>
+        <div class="rec-stat"><div class="rv">${Math.round(minTix/totalTix*100)}%</div><div class="rl">Break-even</div></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  if (selectedTicketPrice) renderSummary(selectedTicketPrice);
+}
+
+function selectPreset(price) {
+  selectedTicketPrice = price;
+  document.getElementById('custom-ticket-price').value = '';
+  renderTicketOptions();
+}
+
+function selectCustomPrice() {
+  const val = parseFloat(document.getElementById('custom-ticket-price').value);
+  if (val >= 100) {
+    selectedTicketPrice = val;
+    // deselect preset cards
+    document.querySelectorAll('.rec-card').forEach(c => c.classList.remove('selected'));
+    renderSummary(val);
+  }
+}
+
+/* ── Render summary ──────────────────────────────────────────── */
+function roundUpTickets(n, roundTo = 500) {
+  return Math.ceil(n / roundTo) * roundTo;
+}
+
+function renderSummary(ticketPrice) {
+  const r = calcResult;
+  const totalTix = roundUpTickets(r.totalRevenue / ticketPrice);
+  const minTix = roundUpTickets(r.minThresholdRevenue / ticketPrice, 100);
+  const maxPerPerson = Math.max(5, Math.ceil(totalTix * 0.005));
+  const actualRevenue = totalTix * ticketPrice;
+  const actualProfit = actualRevenue * r.profitPct;
+  const breakEvenPct = Math.round(minTix / totalTix * 100);
+
+  document.getElementById('summary-card').style.display = 'block';
+  document.getElementById('use-btn').disabled = false;
+
+  document.getElementById('sum-owner').textContent = fmt(r.propVal);
+  document.getElementById('sum-profit').textContent = fmt(actualProfit);
+  document.getElementById('sum-profit-pct').textContent = `${Math.round(r.profitPct*100)}% of gross revenue`;
+
+  const summaryData = [
+    { label: 'Recommended Ticket Price', val: fmt(ticketPrice), highlight: true },
+    { label: 'Total Tickets to Issue', val: fmtN(totalTix) + ' tickets' },
+    { label: 'Minimum Threshold (to proceed)', val: fmtN(minTix) + ' tickets sold (' + breakEvenPct + '% of total)' },
+    { label: 'Max Tickets per Person', val: fmtN(maxPerPerson) + ' tickets (0.5% of total)' },
+    { label: 'Gross Revenue at Full Sell-out', val: fmt(actualRevenue) },
+    { label: 'Total Costs (excl. profit)', val: fmt(actualRevenue - actualProfit) },
+    { label: 'Property Owner Payout', val: fmt(r.propVal) },
+    { label: 'Company Net Profit', val: fmt(actualProfit) },
+  ];
+
+  document.getElementById('summary-rows').innerHTML = summaryData.map(s => `
+    <div class="summary-row">
+      <div class="s-label">${s.label}</div>
+      <div class="s-val" style="${s.highlight ? 'color:var(--green-primary);font-size:1.125rem;' : ''}">${s.val}</div>
+    </div>`).join('');
+
+  document.getElementById('break-even-note').innerHTML = `
+    <i class="fa-solid fa-info-circle" style="margin-right:0.375rem;"></i>
+    <strong>Break-even point:</strong> If at least <strong>${fmtN(minTix)} tickets</strong> are sold (${breakEvenPct}% of total), the property owner is paid and all regulatory obligations are met. Below this threshold, the campaign must be cancelled and all ticket buyers refunded in full — as required by FCCPA 2018 §123.`;
+
+  // Store values for "Use These Values"
+  calcResult._selected = { ticketPrice, totalTix, minTix, maxPerPerson, actualRevenue, actualProfit };
+}
+
+/* ── Use These Values ────────────────────────────────────────── */
+function useTheseValues() {
+  if (!calcResult || !calcResult._selected) {
+    alert('Please select a ticket price first.');
+    return;
+  }
+  const s = calcResult._selected;
+  const vals = {
+    ticketPrice: s.ticketPrice,
+    totalTickets: s.totalTix,
+    minThreshold: s.minTix,
+    maxPerPerson: s.maxPerPerson,
+    grossRevenue: s.actualRevenue,
+    netProfit: s.actualProfit,
+    propertyValue: calcResult.propVal,
+    breakEven: s.minTix
+  };
+  localStorage.setItem('rp_calc_values', JSON.stringify(vals));
+  window.location.href = 'campaigns.html?from=calculator';
+}
+</script>
+</body>
+</html>

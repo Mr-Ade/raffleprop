@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Content Manager | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    .cm-tab { display:none; }
+    .cm-tab.active { display:block; }
+    .tab-btn { padding:.625rem 1.25rem;border:none;background:none;font-size:.875rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap; }
+    .tab-btn.active { color:var(--green-primary);border-bottom-color:var(--green-primary); }
+    .record-card { background:#fff;border:1px solid var(--border);border-radius:10px;padding:1.125rem 1.25rem;display:flex;align-items:flex-start;gap:1rem;transition:box-shadow .15s; }
+    .record-card:hover { box-shadow:0 2px 12px rgba(0,0,0,.08); }
+    .field-row { display:grid;grid-template-columns:1fr 1fr;gap:.875rem;margin-bottom:.875rem; }
+    .field-row.full { grid-template-columns:1fr; }
+    .page-override-row { display:flex;align-items:center;gap:.75rem;padding:.75rem 0;border-bottom:1px solid var(--border-light);font-size:.8125rem; }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+        <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-.02em;">Content Manager</h1>
+      <p style="font-size:.8125rem;color:var(--text-muted);">Edit any content, data, or settings across the entire website</p>
+    </div>
+    <div style="display:flex;gap:.75rem;">
+      <button onclick="exportAllContent()" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export Backup</button>
+      <button onclick="importContent()" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i> Import</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Tab nav -->
+    <div style="border-bottom:1px solid var(--border);margin-bottom:1.75rem;display:flex;gap:0;overflow-x:auto;">
+      <button class="tab-btn active" onclick="switchTab('settings',this)"><i class="fa-solid fa-gear" style="margin-right:.35rem;"></i>Site Settings</button>
+      <button class="tab-btn" onclick="switchTab('campaigns',this)"><i class="fa-solid fa-trophy" style="margin-right:.35rem;"></i>Campaigns</button>
+      <button class="tab-btn" onclick="switchTab('faqs',this)"><i class="fa-solid fa-circle-question" style="margin-right:.35rem;"></i>FAQs</button>
+      <button class="tab-btn" onclick="switchTab('testimonials',this)"><i class="fa-solid fa-quote-left" style="margin-right:.35rem;"></i>Testimonials</button>
+      <button class="tab-btn" onclick="switchTab('winners',this)"><i class="fa-solid fa-trophy" style="margin-right:.35rem;"></i>Winners</button>
+      <button class="tab-btn" onclick="switchTab('legal',this)"><i class="fa-solid fa-scale-balanced" style="margin-right:.35rem;"></i>Legal & Trust</button>
+      <button class="tab-btn" onclick="switchTab('documents',this)"><i class="fa-solid fa-file-arrow-up" style="margin-right:.35rem;"></i>Documents</button>
+      <button class="tab-btn" onclick="switchTab('overrides',this)"><i class="fa-solid fa-pen-to-square" style="margin-right:.35rem;"></i>Page Edits</button>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 1 — Site Settings
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-settings" class="cm-tab active">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+        <!-- Identity -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-id-badge" style="color:var(--green-primary);margin-right:.5rem;"></i>Brand Identity</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Site Name</label>
+              <input class="form-input" id="st-name" value="RaffleProp">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Tagline</label>
+              <input class="form-input" id="st-tagline" value="Nigeria's Most Transparent Property Raffle Platform">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">CAC Registration Number</label>
+              <input class="form-input" id="st-cac" value="RC-1234567">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Footer Copyright Text</label>
+              <input class="form-input" id="st-copyright" placeholder="© 2025 RaffleProp. All rights reserved.">
+            </div>
+          </div>
+        </div>
+
+        <!-- Contact -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-address-book" style="color:var(--green-primary);margin-right:.5rem;"></i>Contact Details</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Email Address</label>
+              <input class="form-input" id="st-email" value="hello@raffleprop.ng">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Phone Number</label>
+              <input class="form-input" id="st-phone" value="+234 901 234 5678">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">WhatsApp Number (digits only)</label>
+              <input class="form-input" id="st-whatsapp" value="2349012345678">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Office Address</label>
+              <input class="form-input" id="st-address" value="14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria">
+            </div>
+          </div>
+        </div>
+
+        <!-- Social links -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-share-nodes" style="color:var(--green-primary);margin-right:.5rem;"></i>Social Media Links</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label"><i class="fab fa-instagram" style="color:#e1306c;width:18px;"></i> Instagram URL</label>
+              <input class="form-input" id="st-instagram" placeholder="https://instagram.com/raffleprop">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label"><i class="fab fa-x-twitter" style="width:18px;"></i> Twitter / X URL</label>
+              <input class="form-input" id="st-twitter" placeholder="https://twitter.com/raffleprop">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label"><i class="fab fa-facebook-f" style="color:#1877F2;width:18px;"></i> Facebook URL</label>
+              <input class="form-input" id="st-facebook" placeholder="https://facebook.com/raffleprop">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label"><i class="fab fa-tiktok" style="width:18px;"></i> TikTok URL</label>
+              <input class="form-input" id="st-tiktok" placeholder="https://tiktok.com/@raffleprop">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label"><i class="fab fa-youtube" style="color:#FF0000;width:18px;"></i> YouTube URL</label>
+              <input class="form-input" id="st-youtube" placeholder="https://youtube.com/@raffleprop">
+            </div>
+          </div>
+        </div>
+
+        <!-- Legal / trust -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-scale-balanced" style="color:var(--green-primary);margin-right:.5rem;"></i>Legal & Trust Info</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Escrow Bank Name</label>
+              <input class="form-input" id="st-escrow-bank" placeholder="GTBank Plc">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Legal Counsel Name</label>
+              <input class="form-input" id="st-lawyer" placeholder="Adeyemi & Co. Legal">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Legal Counsel Phone</label>
+              <input class="form-input" id="st-lawyer-phone" placeholder="+234 ...">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Referral Cash Reward (₦ per referral)</label>
+              <input class="form-input" id="st-ref-reward" type="number" value="300">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Free Ticket Every N Referrals</label>
+              <input class="form-input" id="st-ref-n" type="number" value="5">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:flex-end;">
+        <button onclick="resetSettings()" class="btn btn-outline"><i class="fa-solid fa-rotate-left"></i> Reset to Defaults</button>
+        <button onclick="saveSettings()" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Site Settings</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 2 — Campaigns
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-campaigns" class="cm-tab">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;">Campaign Data</h2>
+          <p style="font-size:.8125rem;color:var(--text-muted);">These campaigns appear on the homepage, campaigns page, and user dashboards.</p>
+        </div>
+        <button onclick="addCampaign()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Campaign</button>
+      </div>
+      <div id="campaigns-list" style="display:flex;flex-direction:column;gap:1rem;"></div>
+      <div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">
+        <button onclick="saveMockSection('campaigns')" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save All Campaigns</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 3 — FAQs
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-faqs" class="cm-tab">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;">FAQ Items</h2>
+          <p style="font-size:.8125rem;color:var(--text-muted);">Displayed on the FAQ page and homepage FAQ teaser.</p>
+        </div>
+        <button onclick="addFaq()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Question</button>
+      </div>
+      <div id="faqs-list" style="display:flex;flex-direction:column;gap:.875rem;"></div>
+      <div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">
+        <button onclick="saveMockSection('faqs')" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save All FAQs</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 4 — Testimonials
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-testimonials" class="cm-tab">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;">Testimonials</h2>
+          <p style="font-size:.8125rem;color:var(--text-muted);">Shown on the homepage testimonials section.</p>
+        </div>
+        <button onclick="addTestimonial()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Testimonial</button>
+      </div>
+      <div id="testimonials-list" style="display:flex;flex-direction:column;gap:.875rem;"></div>
+      <div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">
+        <button onclick="saveMockSection('testimonials')" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Testimonials</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 5 — Winners
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-winners" class="cm-tab">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.75rem;">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;">Past Winners</h2>
+          <p style="font-size:.8125rem;color:var(--text-muted);">Displayed on the winners page and homepage winners teaser.</p>
+        </div>
+        <button onclick="addWinner()" class="btn btn-primary btn-sm"><i class="fa-solid fa-plus"></i> Add Winner</button>
+      </div>
+      <div id="winners-list" style="display:flex;flex-direction:column;gap:.875rem;"></div>
+      <div style="margin-top:1.25rem;display:flex;justify-content:flex-end;">
+        <button onclick="saveMockSection('winners')" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Winners</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 6 — Legal & Trust
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-legal" class="cm-tab">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;">
+
+        <!-- Company / CAC -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-building" style="color:var(--green-primary);margin-right:.5rem;"></i>Company / CAC Details</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Company Name</label>
+              <input class="form-input" id="lg-company-name" placeholder="RaffleProp Ltd">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">RC Number</label>
+              <input class="form-input" id="lg-cac" placeholder="RC-1234567">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Date Incorporated</label>
+              <input class="form-input" id="lg-incorporated" placeholder="March 2024">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Business Type</label>
+              <input class="form-input" id="lg-business-type" placeholder="Limited Liability Company">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lawyer -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-gavel" style="color:var(--green-primary);margin-right:.5rem;"></i>Independent Lawyer</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Lawyer Full Name + Title</label>
+              <input class="form-input" id="lg-lawyer-name" placeholder="Adaeze Obi-Nwosu (Esq.)">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Law Firm & Specialisation</label>
+              <input class="form-input" id="lg-lawyer-firm" placeholder="Obi-Nwosu & Partners — Property Law Specialists, Lagos">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">NBA Membership / LSN Number</label>
+              <input class="form-input" id="lg-lawyer-lsn" placeholder="NBA Member | LSN: LAG-2024-78921">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Lawyer Photo</label>
+              <div style="display:flex;gap:.5rem;">
+                <input class="form-input" id="lg-lawyer-photo" placeholder="https://..." style="flex:1;" oninput="document.getElementById('lg-lawyer-photo-prev').src=this.value">
+                <button type="button" onclick="document.getElementById('lg-lawyer-photo-file').click()" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i></button>
+                <input type="file" id="lg-lawyer-photo-file" accept="image/*" style="display:none;" onchange="uploadLegalImg(this,'lg-lawyer-photo','lg-lawyer-photo-prev')">
+              </div>
+              <img id="lg-lawyer-photo-prev" style="margin-top:.5rem;width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid var(--border);display:none;" onerror="this.style.display='none'" onload="this.style.display='block'" loading="lazy">
+            </div>
+          </div>
+        </div>
+
+        <!-- Lawyer Opinion (full width) -->
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-quote-left" style="color:var(--green-primary);margin-right:.5rem;"></i>Lawyer Opinion Text</h3></div>
+          <div class="card-body">
+            <textarea class="form-textarea" id="lg-lawyer-opinion" rows="5" placeholder="Enter the lawyer's full opinion statement as it should appear on the Trust & Legal page..."></textarea>
+          </div>
+        </div>
+
+        <!-- Escrow -->
+        <div class="card" style="grid-column:1/-1;">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-building-columns" style="color:var(--green-primary);margin-right:.5rem;"></i>Escrow Bank Details</h3></div>
+          <div class="card-body" style="display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;">
+            <div style="display:flex;flex-direction:column;gap:.75rem;">
+              <div style="font-size:.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Campaign 1</div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Section Label</label><input class="form-input" id="lg-escrow1-label" placeholder="Escrow Bank — Campaign 1"></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Bank Name</label><input class="form-input" id="lg-escrow1-bank" placeholder="GTBank Plc"></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Account Details</label><input class="form-input" id="lg-escrow1-account" placeholder="Account: 0123456789 | Sort: GTB-001"></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:.75rem;">
+              <div style="font-size:.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;">Campaign 2</div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Section Label</label><input class="form-input" id="lg-escrow2-label" placeholder="Escrow Bank — Campaign 2"></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Bank Name</label><input class="form-input" id="lg-escrow2-bank" placeholder="Zenith Bank Plc"></div>
+              <div class="form-group" style="margin-bottom:0;"><label class="form-label">Account Details</label><input class="form-input" id="lg-escrow2-account" placeholder="Account: 9876543210 | Sort: ZTH-002"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- T&C / Privacy dates -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-file-contract" style="color:var(--green-primary);margin-right:.5rem;"></i>Document Dates</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">T&C "Last Updated" Line</label>
+              <input class="form-input" id="lg-tc-updated" placeholder="Last updated: January 2025">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Privacy Policy "Last Updated" Line</label>
+              <input class="form-input" id="lg-pp-updated" placeholder="Last updated: January 2025 | Compliant with NDPR">
+            </div>
+          </div>
+        </div>
+
+        <!-- DPO / Privacy contact -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-lock" style="color:var(--green-primary);margin-right:.5rem;"></i>Data Protection Officer</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:.875rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">DPO Name</label>
+              <input class="form-input" id="lg-dpo-name" placeholder="Tunde Fashola">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Privacy Email</label>
+              <input class="form-input" id="lg-dpo-email" placeholder="privacy@raffleprop.ng">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">DPO Phone</label>
+              <input class="form-input" id="lg-dpo-phone" placeholder="+234 901 234 5678">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Privacy Contact Email (shown in policy)</label>
+              <input class="form-input" id="lg-privacy-email" placeholder="privacy@raffleprop.ng">
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div style="margin-top:1.5rem;display:flex;gap:.75rem;justify-content:flex-end;">
+        <button onclick="resetLegal()" class="btn btn-outline"><i class="fa-solid fa-rotate-left"></i> Reset to Defaults</button>
+        <button onclick="saveLegal()" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Legal & Trust</button>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         TAB 7 — Page Overrides (inline edits)
+    ═══════════════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════
+         TAB — Documents
+    ═══════════════════════════════════════════════════════════ -->
+    <div id="tab-documents" class="cm-tab">
+      <div style="margin-bottom:1.5rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;">
+        <div>
+          <h2 style="font-size:1rem;font-weight:800;">Document Vault</h2>
+          <p style="font-size:.8125rem;color:var(--text-muted);margin-top:.25rem;">Upload official documents that users can download from the website. Supports PDF, images, or external links (Google Drive, Dropbox, etc.).</p>
+        </div>
+        <div style="display:flex;gap:.625rem;">
+          <button onclick="clearAllDocuments()" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i> Clear All</button>
+        </div>
+      </div>
+
+      <!-- Storage usage bar -->
+      <div id="doc-storage-bar" style="margin-bottom:1.5rem;padding:1rem;background:#f8f9fa;border-radius:10px;border:1px solid var(--border-light);">
+        <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;">
+          <span style="font-size:.8125rem;font-weight:600;">localStorage Usage</span>
+          <span id="doc-storage-text" style="font-size:.8125rem;color:var(--text-muted);">Calculating…</span>
+        </div>
+        <div style="height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;">
+          <div id="doc-storage-fill" style="height:100%;background:var(--green-primary);border-radius:3px;transition:width .4s;width:0%;"></div>
+        </div>
+        <p style="font-size:.75rem;color:var(--text-muted);margin-top:.5rem;">Large files (PDFs >1MB) should be hosted externally and linked via URL to avoid storage limits. Total localStorage limit ≈ 5MB.</p>
+      </div>
+
+      <!-- PDF Accessibility Notice -->
+      <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;gap:.875rem;align-items:flex-start;" role="note" aria-label="PDF accessibility requirements">
+        <i class="fa-solid fa-circle-info" style="color:#2563eb;margin-top:.125rem;flex-shrink:0;font-size:1.125rem;" aria-hidden="true"></i>
+        <div>
+          <div style="font-weight:700;font-size:.875rem;color:#1e40af;margin-bottom:.375rem;">PDF Accessibility Requirements (WCAG 2.1 AA)</div>
+          <ul style="font-size:.8125rem;color:#1e3a8a;margin:0;padding-left:1.25rem;line-height:1.8;">
+            <li>PDFs must be <strong>tagged</strong> — do not upload scanned image-only PDFs (invisible to screen readers)</li>
+            <li>Use Word / Google Docs → Export as PDF, or Adobe Acrobat with tagging enabled</li>
+            <li>Set a document title and language in PDF properties before uploading</li>
+            <li>Run <strong>Adobe Acrobat Accessibility Check</strong> (Tools → Accessibility → Full Check) before uploading</li>
+            <li>External URL option: host PDFs on Google Drive or Dropbox — ensure sharing is set to "Anyone with the link"</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Document slots -->
+      <div id="doc-slots-container" style="display:flex;flex-direction:column;gap:1rem;"></div>
+    </div>
+
+    <div id="tab-overrides" class="cm-tab">
+      <div style="margin-bottom:1.25rem;">
+        <h2 style="font-size:1rem;font-weight:800;">Inline Page Edits</h2>
+        <p style="font-size:.8125rem;color:var(--text-muted);">Every change made via "Edit This Page" mode is listed here. You can revert individual edits or reset entire pages.</p>
+      </div>
+      <div id="overrides-container"></div>
+      <div style="margin-top:1.25rem;">
+        <button onclick="resetAllOverrides()" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;">
+          <i class="fa-solid fa-trash"></i> Reset ALL Inline Edits (restore entire site)
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Record edit modal ────────────────────────────────────── -->
+<div id="rec-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.55);overflow-y:auto;">
+  <div style="max-width:640px;margin:2rem auto;padding:1rem;">
+    <div class="card" style="border-radius:16px;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1.0625rem;font-weight:800;" id="rec-modal-title">Edit Record</h3>
+        <button onclick="closeRecModal()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+      </div>
+      <div class="card-body" id="rec-modal-body" style="padding:1.5rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+/* ─────────────────────────────────────────────────────────────
+   State
+───────────────────────────────────────────────────────────── */
+let cmsCampaigns    = [];
+let cmsFaqs         = [];
+let cmsTestimonials = [];
+let cmsWinners      = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('content');
+
+  // Load stored or fall back to MOCK_DATA defaults
+  const md = JSON.parse(localStorage.getItem('rp_cms_mockdata') || '{}');
+  cmsCampaigns    = md.campaigns    || deepClone(MOCK_DATA.campaigns);
+  cmsFaqs         = md.faqs         || deepClone(MOCK_DATA.faqs || []);
+  cmsTestimonials = md.testimonials || deepClone(MOCK_DATA.testimonials || []);
+  cmsWinners      = md.winners      || deepClone(MOCK_DATA.winners || []);
+
+  // Load site settings into form
+  loadSettings();
+  loadLegal();
+
+  // Render lists
+  renderCampaignsList();
+  renderFaqsList();
+  renderTestimonialsList();
+  renderWinnersList();
+  renderOverrides();
+  renderDocuments();
+});
+
+function deepClone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+/* ─────────────────────────────────────────────────────────────
+   Tabs
+───────────────────────────────────────────────────────────── */
+function switchTab(name, btn) {
+  document.querySelectorAll('.cm-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'overrides') renderOverrides();
+  if (name === 'documents') renderDocuments();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Site Settings
+───────────────────────────────────────────────────────────── */
+function loadSettings() {
+  const st = JSON.parse(localStorage.getItem('rp_cms_settings') || '{}');
+  const site = MOCK_DATA.site;
+  const v = (id, key) => {
+    const el = document.getElementById(id);
+    if (el) el.value = st[key] || site[key] || '';
+  };
+  v('st-name','name'); v('st-tagline','tagline'); v('st-email','email');
+  v('st-phone','phone'); v('st-whatsapp','whatsapp'); v('st-address','address');
+  v('st-cac','cac'); v('st-instagram','instagram'); v('st-twitter','twitter');
+  v('st-facebook','facebook'); v('st-tiktok','tiktok'); v('st-youtube','youtube');
+}
+
+function saveSettings() {
+  const g = id => (document.getElementById(id)||{}).value || '';
+  const st = {
+    name: g('st-name'), tagline: g('st-tagline'), email: g('st-email'),
+    phone: g('st-phone'), whatsapp: g('st-whatsapp'), address: g('st-address'),
+    cac: g('st-cac'), instagram: g('st-instagram'), twitter: g('st-twitter'),
+    facebook: g('st-facebook'), tiktok: g('st-tiktok'), youtube: g('st-youtube'),
+    escrowBank: g('st-escrow-bank'), lawyer: g('st-lawyer'),
+    lawyerPhone: g('st-lawyer-phone'),
+    refReward: parseInt(g('st-ref-reward')) || 300,
+    refN: parseInt(g('st-ref-n')) || 5,
+    copyright: g('st-copyright'),
+  };
+  localStorage.setItem('rp_cms_settings', JSON.stringify(st));
+  Toast.success('Settings Saved', 'Site settings are now live across all pages.');
+}
+
+function resetSettings() {
+  if (!confirm('Reset all site settings to defaults?')) return;
+  localStorage.removeItem('rp_cms_settings');
+  loadSettings();
+  Toast.info('Settings Reset', 'All settings restored to their original defaults.');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Save mock data section
+───────────────────────────────────────────────────────────── */
+function saveMockSection(section) {
+  const md = JSON.parse(localStorage.getItem('rp_cms_mockdata') || '{}');
+  if (section === 'campaigns')    md.campaigns    = cmsCampaigns;
+  if (section === 'faqs')         md.faqs         = cmsFaqs;
+  if (section === 'testimonials') md.testimonials = cmsTestimonials;
+  if (section === 'winners')      md.winners      = cmsWinners;
+  localStorage.setItem('rp_cms_mockdata', JSON.stringify(md));
+  Toast.success('Saved!', `${section.charAt(0).toUpperCase()+section.slice(1)} data updated. Changes are live site-wide.`);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Campaigns list
+───────────────────────────────────────────────────────────── */
+function renderCampaignsList() {
+  const el = document.getElementById('campaigns-list');
+  if (!el) return;
+  if (!cmsCampaigns.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">No campaigns yet. Click "Add Campaign" to create one.</div>'; return; }
+  el.innerHTML = cmsCampaigns.map((c, i) => `
+    <div class="record-card">
+      <img src="${c.images&&c.images[0]||''}" alt="${c.title}" style="width:72px;height:56px;object-fit:cover;border-radius:8px;flex-shrink:0;border:1px solid var(--border);" onerror="this.style.display='none'" loading="lazy">
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.9375rem;">${c.title}</div>
+        <div style="font-size:.8125rem;color:var(--text-muted);margin-top:.2rem;">${c.location} · ₦${(c.ticketPrice||0).toLocaleString()} / ticket · ${(c.soldTickets||0).toLocaleString()}/${(c.totalTickets||0).toLocaleString()} sold</div>
+        <div style="margin-top:.5rem;"><span class="badge ${c.status==='active'?'badge-green':c.status==='upcoming'?'badge-gold':'badge-gray'}">${c.status||'draft'}</span></div>
+      </div>
+      <div style="display:flex;gap:.5rem;flex-shrink:0;">
+        <button onclick="editCampaignRecord(${i})" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i> Edit</button>
+        <button onclick="deleteCampaignRecord(${i})" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function addCampaign() {
+  cmsCampaigns.push({ id:'camp-'+Date.now(), title:'New Campaign', location:'', status:'draft', ticketPrice:2500, totalTickets:10000, soldTickets:0, minThreshold:8000, worth:0, daysToClose:30, beds:3, baths:3, toilets:3, sqm:200, images:[], features:[], bundles:{5:10000,10:18000,20:32000}, escrowBank:'', description:'' });
+  renderCampaignsList();
+  editCampaignRecord(cmsCampaigns.length - 1);
+}
+
+function deleteCampaignRecord(i) {
+  if (!confirm('Delete this campaign?')) return;
+  cmsCampaigns.splice(i, 1);
+  renderCampaignsList();
+  Toast.warning('Deleted', 'Campaign removed. Click "Save All Campaigns" to apply.');
+}
+
+function editCampaignRecord(i) {
+  const c = cmsCampaigns[i];
+  document.getElementById('rec-modal-title').textContent = 'Edit Campaign';
+  document.getElementById('rec-modal-body').innerHTML = `
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Title *</label>
+        <input class="form-input" id="rc-title" value="${esc(c.title)}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Status</label>
+        <select class="form-select" id="rc-status">
+          ${['draft','upcoming','active','paused','sold-out','closed','draw-pending','draw-complete','archived'].map(s=>`<option ${c.status===s?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Location</label>
+        <input class="form-input" id="rc-location" value="${esc(c.location)}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Property Type</label>
+        <input class="form-input" id="rc-type" value="${esc(c.type||'')}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Ticket Price (₦)</label>
+        <input class="form-input" type="number" id="rc-price" value="${c.ticketPrice||2500}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Total Tickets</label>
+        <input class="form-input" type="number" id="rc-total" value="${c.totalTickets||10000}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Tickets Sold</label>
+        <input class="form-input" type="number" id="rc-sold" value="${c.soldTickets||0}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Min Threshold</label>
+        <input class="form-input" type="number" id="rc-threshold" value="${c.minThreshold||8000}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Property Worth (₦)</label>
+        <input class="form-input" type="number" id="rc-worth" value="${c.worth||0}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Days to Close</label>
+        <input class="form-input" type="number" id="rc-days" value="${c.daysToClose||30}">
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Bedrooms</label>
+        <input class="form-input" type="number" id="rc-beds" value="${c.beds||3}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Bathrooms</label>
+        <input class="form-input" type="number" id="rc-baths" value="${c.baths||3}">
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="rc-desc" rows="3">${esc(c.description||'')}</textarea>
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Features (comma-separated)</label>
+        <input class="form-input" id="rc-features" value="${esc((c.features||[]).join(', '))}">
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Hero Image URL</label>
+        <div style="display:flex;gap:.625rem;align-items:center;">
+          <input class="form-input" id="rc-img0" value="${esc((c.images||[])[0]||'')}" style="flex:1;" oninput="document.getElementById('rc-img-prev').src=this.value">
+          <button type="button" onclick="document.getElementById('rc-img-file').click()" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i></button>
+          <input type="file" id="rc-img-file" accept="image/*" style="display:none;" onchange="handleHeroFileUpload(this)">
+        </div>
+        <img id="rc-img-prev" src="${esc((c.images||[])[0]||'')}" style="margin-top:.5rem;max-height:80px;border-radius:6px;border:1px solid var(--border);" onerror="this.style.display='none'" onload="this.style.display='block'" loading="lazy">
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">All Image URLs (comma-separated)</label>
+        <textarea class="form-textarea" id="rc-imgs" rows="2">${esc((c.images||[]).join(', '))}</textarea>
+      </div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Escrow Bank</label>
+        <input class="form-input" id="rc-escrow" value="${esc(c.escrowBank||'')}">
+      </div>
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Escrow Account</label>
+        <input class="form-input" id="rc-escrow-acc" value="${esc(c.escrowAccount||'')}">
+      </div>
+    </div>
+    <div style="display:flex;gap:.625rem;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light);">
+      <button onclick="closeRecModal()" class="btn btn-outline">Cancel</button>
+      <button onclick="saveCampaignRecord(${i})" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Campaign</button>
+    </div>`;
+  openRecModal();
+}
+
+function handleHeroFileUpload(input) {
+  const f = input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('rc-img0').value = e.target.result;
+    document.getElementById('rc-img-prev').src = e.target.result;
+    document.getElementById('rc-img-prev').style.display = 'block';
+  };
+  r.readAsDataURL(f);
+}
+
+function saveCampaignRecord(i) {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  const imgUrls = g('rc-imgs').split(',').map(s=>s.trim()).filter(Boolean);
+  // Ensure hero image is first
+  const heroUrl = g('rc-img0').trim();
+  if (heroUrl && !imgUrls.includes(heroUrl)) imgUrls.unshift(heroUrl);
+
+  cmsCampaigns[i] = {
+    ...cmsCampaigns[i],
+    title: g('rc-title'), status: g('rc-status'), location: g('rc-location'),
+    type: g('rc-type'), description: g('rc-desc'),
+    ticketPrice: parseInt(g('rc-price'))||2500,
+    totalTickets: parseInt(g('rc-total'))||10000,
+    soldTickets: parseInt(g('rc-sold'))||0,
+    minThreshold: parseInt(g('rc-threshold'))||8000,
+    worth: parseInt(g('rc-worth'))||0,
+    daysToClose: parseInt(g('rc-days'))||30,
+    beds: parseInt(g('rc-beds'))||3,
+    baths: parseInt(g('rc-baths'))||3,
+    escrowBank: g('rc-escrow'), escrowAccount: g('rc-escrow-acc'),
+    features: g('rc-features').split(',').map(s=>s.trim()).filter(Boolean),
+    images: imgUrls,
+  };
+  closeRecModal();
+  renderCampaignsList();
+  Toast.info('Updated', 'Click "Save All Campaigns" to make changes live.');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   FAQs list
+───────────────────────────────────────────────────────────── */
+function renderFaqsList() {
+  const el = document.getElementById('faqs-list');
+  if (!el) return;
+  if (!cmsFaqs.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">No FAQs yet.</div>'; return; }
+  el.innerHTML = cmsFaqs.map((f, i) => `
+    <div class="record-card" style="align-items:flex-start;">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--green-50);color:var(--green-primary);font-weight:800;font-size:.8125rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${i+1}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;font-size:.875rem;">${esc(f.q||f.question||'')}</div>
+        <div style="font-size:.8125rem;color:var(--text-muted);margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc((f.a||f.answer||'').slice(0,100))}…</div>
+        ${f.category ? `<span class="badge badge-gold" style="margin-top:.375rem;">${esc(f.category)}</span>` : ''}
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="editFaqRecord(${i})" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="deleteFaqRecord(${i})" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function addFaq() {
+  cmsFaqs.push({ q:'New Question?', a:'Answer goes here.', category:'General' });
+  renderFaqsList();
+  editFaqRecord(cmsFaqs.length - 1);
+}
+
+function deleteFaqRecord(i) {
+  if (!confirm('Delete this FAQ?')) return;
+  cmsFaqs.splice(i, 1);
+  renderFaqsList();
+}
+
+function editFaqRecord(i) {
+  const f = cmsFaqs[i];
+  document.getElementById('rec-modal-title').textContent = 'Edit FAQ';
+  document.getElementById('rec-modal-body').innerHTML = `
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Category</label>
+        <input class="form-input" id="rf-cat" value="${esc(f.category||'')}">
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Question *</label>
+        <input class="form-input" id="rf-q" value="${esc(f.q||f.question||'')}">
+      </div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Answer *</label>
+        <textarea class="form-textarea" id="rf-a" rows="4">${esc(f.a||f.answer||'')}</textarea>
+      </div>
+    </div>
+    <div style="display:flex;gap:.625rem;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light);">
+      <button onclick="closeRecModal()" class="btn btn-outline">Cancel</button>
+      <button onclick="saveFaqRecord(${i})" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save FAQ</button>
+    </div>`;
+  openRecModal();
+}
+
+function saveFaqRecord(i) {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  cmsFaqs[i] = { q: g('rf-q'), a: g('rf-a'), category: g('rf-cat'), question: g('rf-q'), answer: g('rf-a') };
+  closeRecModal();
+  renderFaqsList();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Testimonials
+───────────────────────────────────────────────────────────── */
+function renderTestimonialsList() {
+  const el = document.getElementById('testimonials-list');
+  if (!el) return;
+  if (!cmsTestimonials.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">No testimonials yet.</div>'; return; }
+  el.innerHTML = cmsTestimonials.map((t, i) => `
+    <div class="record-card">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--green-primary),var(--green-light));color:#fff;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${(t.name||'?')[0]}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;">${esc(t.name||'')}</div>
+        <div style="font-size:.8125rem;color:var(--text-muted);">${esc(t.location||'')} · ${esc(t.role||'')}</div>
+        <div style="font-size:.8125rem;margin-top:.25rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">"${esc((t.quote||'').slice(0,80))}…"</div>
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="editTestimonialRecord(${i})" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="deleteTestimonialRecord(${i})" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function addTestimonial() {
+  cmsTestimonials.push({ name:'New Person', location:'Lagos', role:'Ticket Buyer', quote:'Great platform!', rating:5 });
+  renderTestimonialsList();
+  editTestimonialRecord(cmsTestimonials.length - 1);
+}
+
+function deleteTestimonialRecord(i) {
+  if (!confirm('Delete this testimonial?')) return;
+  cmsTestimonials.splice(i, 1);
+  renderTestimonialsList();
+}
+
+function editTestimonialRecord(i) {
+  const t = cmsTestimonials[i];
+  document.getElementById('rec-modal-title').textContent = 'Edit Testimonial';
+  document.getElementById('rec-modal-body').innerHTML = `
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Name</label><input class="form-input" id="rt-name" value="${esc(t.name||'')}"></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Location</label><input class="form-input" id="rt-loc" value="${esc(t.location||'')}"></div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Role / Context</label><input class="form-input" id="rt-role" value="${esc(t.role||'')}"></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Rating (1–5)</label><input class="form-input" type="number" min="1" max="5" id="rt-rating" value="${t.rating||5}"></div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Quote *</label><textarea class="form-textarea" id="rt-quote" rows="4">${esc(t.quote||'')}</textarea></div>
+    </div>
+    <div style="display:flex;gap:.625rem;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light);">
+      <button onclick="closeRecModal()" class="btn btn-outline">Cancel</button>
+      <button onclick="saveTestimonialRecord(${i})" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save</button>
+    </div>`;
+  openRecModal();
+}
+
+function saveTestimonialRecord(i) {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  cmsTestimonials[i] = { name:g('rt-name'), location:g('rt-loc'), role:g('rt-role'), quote:g('rt-quote'), rating:parseInt(g('rt-rating'))||5 };
+  closeRecModal();
+  renderTestimonialsList();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Winners
+───────────────────────────────────────────────────────────── */
+function renderWinnersList() {
+  const el = document.getElementById('winners-list');
+  if (!el) return;
+  if (!cmsWinners.length) { el.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text-muted);">No winners yet.</div>'; return; }
+  el.innerHTML = cmsWinners.map((w, i) => `
+    <div class="record-card">
+      <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#d97706);color:#fff;font-weight:700;font-size:1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${(w.name||'?')[0]}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:700;">${esc(w.name||'')} <span class="badge badge-green" style="margin-left:.5rem;">Winner</span></div>
+        <div style="font-size:.8125rem;color:var(--text-muted);">${esc(w.property||'')} · ${esc(w.location||'')} · ${esc(w.date||'')}</div>
+        ${w.ticket ? `<div style="font-size:.75rem;font-family:monospace;color:var(--green-primary);margin-top:.2rem;">${esc(w.ticket)}</div>` : ''}
+      </div>
+      <div style="display:flex;gap:.5rem;">
+        <button onclick="editWinnerRecord(${i})" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i></button>
+        <button onclick="deleteWinnerRecord(${i})" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function addWinner() {
+  cmsWinners.push({ name:'Winner Name', property:'Property Title', location:'City, State', date:'Jan 2025', ticket:'RP-XXX-00000', quote:'', prizeValue:0 });
+  renderWinnersList();
+  editWinnerRecord(cmsWinners.length - 1);
+}
+
+function deleteWinnerRecord(i) {
+  if (!confirm('Delete this winner record?')) return;
+  cmsWinners.splice(i, 1);
+  renderWinnersList();
+}
+
+function editWinnerRecord(i) {
+  const w = cmsWinners[i];
+  document.getElementById('rec-modal-title').textContent = 'Edit Winner';
+  document.getElementById('rec-modal-body').innerHTML = `
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Winner Name</label><input class="form-input" id="rw-name" value="${esc(w.name||'')}"></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Location (City, State)</label><input class="form-input" id="rw-loc" value="${esc(w.location||'')}"></div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Property Won</label><input class="form-input" id="rw-prop" value="${esc(w.property||'')}"></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Draw Date</label><input class="form-input" id="rw-date" value="${esc(w.date||'')}"></div>
+    </div>
+    <div class="field-row">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Winning Ticket Number</label><input class="form-input" id="rw-ticket" value="${esc(w.ticket||'')}"></div>
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Prize Value (₦)</label><input class="form-input" type="number" id="rw-value" value="${w.prizeValue||0}"></div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;"><label class="form-label">Winner Quote / Testimonial</label><textarea class="form-textarea" id="rw-quote" rows="3">${esc(w.quote||'')}</textarea></div>
+    </div>
+    <div class="field-row full">
+      <div class="form-group" style="margin-bottom:0;">
+        <label class="form-label">Winner Photo URL</label>
+        <div style="display:flex;gap:.625rem;">
+          <input class="form-input" id="rw-photo" value="${esc(w.photo||'')}" style="flex:1;" oninput="document.getElementById('rw-photo-prev').src=this.value">
+          <button type="button" onclick="document.getElementById('rw-photo-file').click()" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i></button>
+          <input type="file" id="rw-photo-file" accept="image/*" style="display:none;" onchange="uploadWinnerPhoto(this)">
+        </div>
+        <img id="rw-photo-prev" src="${esc(w.photo||'')}" style="margin-top:.5rem;max-height:70px;border-radius:50%;border:2px solid var(--border);" onerror="this.style.display='none'" onload="this.style.display='block'" loading="lazy">
+      </div>
+    </div>
+    <div style="display:flex;gap:.625rem;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:1px solid var(--border-light);">
+      <button onclick="closeRecModal()" class="btn btn-outline">Cancel</button>
+      <button onclick="saveWinnerRecord(${i})" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Winner</button>
+    </div>`;
+  openRecModal();
+}
+
+function uploadWinnerPhoto(input) {
+  const f = input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    document.getElementById('rw-photo').value = e.target.result;
+    const prev = document.getElementById('rw-photo-prev');
+    prev.src = e.target.result;
+    prev.style.display = 'block';
+  };
+  r.readAsDataURL(f);
+}
+
+function saveWinnerRecord(i) {
+  const g = id => (document.getElementById(id)||{}).value||'';
+  cmsWinners[i] = { name:g('rw-name'), location:g('rw-loc'), property:g('rw-prop'), date:g('rw-date'), ticket:g('rw-ticket'), prizeValue:parseInt(g('rw-value'))||0, quote:g('rw-quote'), photo:g('rw-photo') };
+  closeRecModal();
+  renderWinnersList();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Page Overrides viewer
+───────────────────────────────────────────────────────────── */
+function renderOverrides() {
+  const container = document.getElementById('overrides-container');
+  if (!container) return;
+  const all = JSON.parse(localStorage.getItem('rp_cms_pages') || '{}');
+  const pages = Object.keys(all);
+  if (!pages.length) {
+    container.innerHTML = `<div style="text-align:center;padding:4rem;background:#fff;border-radius:14px;border:1px solid var(--border);">
+      <i class="fa-solid fa-pen-to-square" style="font-size:2.5rem;color:var(--border);margin-bottom:1rem;"></i>
+      <div style="font-weight:700;color:var(--text-muted);">No inline edits yet</div>
+      <p style="font-size:.875rem;color:var(--text-muted);margin-top:.5rem;">Use the floating "Admin Edit" button on any page to start editing content inline.</p>
+    </div>`;
+    return;
+  }
+  container.innerHTML = pages.map(p => {
+    const edits = all[p];
+    const count = Object.keys(edits).length;
+    const pageLabel = p.replace('admin_','Admin / ').replace(/-/g,' ').replace(/^\w/,c=>c.toUpperCase()) || 'Index';
+    return `
+      <div class="card" style="margin-bottom:1.25rem;">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <div>
+            <h3 style="font-size:.9375rem;font-weight:700;"><i class="fa-solid fa-file" style="color:var(--green-primary);margin-right:.5rem;"></i>${pageLabel}</h3>
+            <div style="font-size:.75rem;color:var(--text-muted);">${count} edit${count!==1?'s':''}</div>
+          </div>
+          <button onclick="resetPageOverrides('${p}')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;">
+            <i class="fa-solid fa-rotate-left"></i> Reset Page
+          </button>
+        </div>
+        <div class="card-body">
+          ${Object.entries(edits).map(([sel, ov]) => `
+            <div class="page-override-row">
+              <div style="flex:1;min-width:0;">
+                <code style="font-size:.7rem;color:var(--text-muted);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(sel)}</code>
+                <div style="font-size:.8125rem;font-weight:600;margin-top:.2rem;">
+                  ${ov.type==='src' ? `<img src="${esc(ov.value)}" style="max-height:36px;border-radius:4px;border:1px solid var(--border);" onerror="this.style.display='none'" loading="lazy">` : `"${esc(String(ov.value||'').slice(0,80))}${(ov.value||'').length>80?'…':''}"`}
+                </div>
+                <span class="badge badge-gold" style="font-size:.6rem;margin-top:.25rem;">${ov.type}</span>
+              </div>
+              <button onclick="revertSingleOverride('${p}','${sel.replace(/'/g,"\\'")}',this)" class="btn btn-outline btn-sm" style="flex-shrink:0;">
+                <i class="fa-solid fa-rotate-left"></i> Revert
+              </button>
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function resetPageOverrides(pageKey) {
+  if (!confirm(`Reset all inline edits on the "${pageKey}" page?`)) return;
+  const all = JSON.parse(localStorage.getItem('rp_cms_pages') || '{}');
+  delete all[pageKey];
+  localStorage.setItem('rp_cms_pages', JSON.stringify(all));
+  renderOverrides();
+  Toast.success('Page Reset', `All edits on "${pageKey}" have been removed.`);
+}
+
+function revertSingleOverride(pageKey, selector, btn) {
+  const all = JSON.parse(localStorage.getItem('rp_cms_pages') || '{}');
+  if (all[pageKey]) { delete all[pageKey][selector]; if (!Object.keys(all[pageKey]).length) delete all[pageKey]; }
+  localStorage.setItem('rp_cms_pages', JSON.stringify(all));
+  btn.closest('.page-override-row').remove();
+  Toast.info('Reverted', 'That element will show its original content on reload.');
+}
+
+function resetAllOverrides() {
+  if (!confirm('Remove ALL inline edits across every page on the site? This cannot be undone.')) return;
+  localStorage.removeItem('rp_cms_pages');
+  renderOverrides();
+  Toast.success('All Edits Cleared', 'The entire site has been restored to its original content.');
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Record modal helpers
+───────────────────────────────────────────────────────────── */
+function openRecModal() {
+  document.getElementById('rec-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+function closeRecModal() {
+  document.getElementById('rec-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('rec-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeRecModal();
+  });
+});
+
+/* ─────────────────────────────────────────────────────────────
+   Export / Import backup
+───────────────────────────────────────────────────────────── */
+function exportAllContent() {
+  const backup = {
+    version: '1.0',
+    exportedAt: new Date().toISOString(),
+    settings:  JSON.parse(localStorage.getItem('rp_cms_settings')  || '{}'),
+    mockdata:  JSON.parse(localStorage.getItem('rp_cms_mockdata')  || '{}'),
+    pages:     JSON.parse(localStorage.getItem('rp_cms_pages')     || '{}'),
+    documents: JSON.parse(localStorage.getItem('rp_cms_documents') || '{}'),
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `raffleprop-content-${Date.now()}.json`;
+  a.click(); URL.revokeObjectURL(url);
+  Toast.success('Backup Exported', 'All site content downloaded as JSON.');
+}
+
+function importContent() {
+  const input = document.createElement('input');
+  input.type = 'file'; input.accept = '.json';
+  input.onchange = e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const r = new FileReader();
+    r.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data.version) throw new Error('Invalid backup file');
+        if (!confirm('This will overwrite all current site content with the backup. Continue?')) return;
+        if (data.settings)  localStorage.setItem('rp_cms_settings',  JSON.stringify(data.settings));
+        if (data.mockdata)  localStorage.setItem('rp_cms_mockdata',  JSON.stringify(data.mockdata));
+        if (data.pages)     localStorage.setItem('rp_cms_pages',     JSON.stringify(data.pages));
+        if (data.documents) localStorage.setItem('rp_cms_documents', JSON.stringify(data.documents));
+        Toast.success('Import Successful!', 'Content restored from backup. Reloading...');
+        setTimeout(() => location.reload(), 1200);
+      } catch (err) {
+        Toast.error('Import Failed', 'Invalid backup file. Make sure it was exported from RaffleProp.');
+      }
+    };
+    r.readAsText(f);
+  };
+  input.click();
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Utility
+───────────────────────────────────────────────────────────── */
+function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+/* ─────────────────────────────────────────────────────────────
+   Legal & Trust tab
+───────────────────────────────────────────────────────────── */
+function loadLegal() {
+  const st = JSON.parse(localStorage.getItem('rp_cms_settings') || '{}');
+  const v = (id, key, def) => {
+    const el = document.getElementById(id);
+    if (el) el.value = st[key] || def || '';
+  };
+  v('lg-company-name',    'companyName',   'RaffleProp Ltd');
+  v('lg-cac',             'cac',           'RC-1234567');
+  v('lg-incorporated',    'incorporated',  'March 2024');
+  v('lg-business-type',   'businessType',  'Limited Liability Company');
+  v('lg-lawyer-name',     'lawyerName',    'Adaeze Obi-Nwosu (Esq.)');
+  v('lg-lawyer-firm',     'lawyerFirm',    'Obi-Nwosu & Partners — Property Law Specialists, Lagos');
+  v('lg-lawyer-lsn',      'lawyerLSN',     'NBA Member | LSN: LAG-2024-78921');
+  v('lg-lawyer-photo',    'lawyerPhoto',   '');
+  v('lg-lawyer-opinion',  'lawyerOpinion', '');
+  v('lg-escrow1-label',   'escrow1Label',  'Escrow Bank — Campaign 1');
+  v('lg-escrow1-bank',    'escrow1Bank',   'GTBank Plc');
+  v('lg-escrow1-account', 'escrow1Account','Account: 0123456789 | Sort: GTB-001');
+  v('lg-escrow2-label',   'escrow2Label',  'Escrow Bank — Campaign 2');
+  v('lg-escrow2-bank',    'escrow2Bank',   'Zenith Bank Plc');
+  v('lg-escrow2-account', 'escrow2Account','Account: 9876543210 | Sort: ZTH-002');
+  v('lg-tc-updated',      'tcUpdated',     'Last updated: January 2025');
+  v('lg-pp-updated',      'ppUpdated',     'Last updated: January 2025 | Compliant with NDPR');
+  v('lg-dpo-name',        'dpoName',       'Tunde Fashola');
+  v('lg-dpo-email',       'dpoEmail',      'privacy@raffleprop.ng');
+  v('lg-dpo-phone',       'dpoPhone',      '+234 901 234 5678');
+  v('lg-privacy-email',   'privacyEmail',  'privacy@raffleprop.ng');
+  // Show photo preview if set
+  const photo = document.getElementById('lg-lawyer-photo');
+  const prev  = document.getElementById('lg-lawyer-photo-prev');
+  if (photo && prev && photo.value) { prev.src = photo.value; prev.style.display = 'block'; }
+}
+
+function saveLegal() {
+  const g = id => (document.getElementById(id)||{}).value || '';
+  const st = JSON.parse(localStorage.getItem('rp_cms_settings') || '{}');
+  Object.assign(st, {
+    companyName:    g('lg-company-name'),
+    cac:            g('lg-cac'),
+    incorporated:   g('lg-incorporated'),
+    businessType:   g('lg-business-type'),
+    lawyerName:     g('lg-lawyer-name'),
+    lawyerFirm:     g('lg-lawyer-firm'),
+    lawyerLSN:      g('lg-lawyer-lsn'),
+    lawyerPhoto:    g('lg-lawyer-photo'),
+    lawyerOpinion:  g('lg-lawyer-opinion'),
+    escrow1Label:   g('lg-escrow1-label'),
+    escrow1Bank:    g('lg-escrow1-bank'),
+    escrow1Account: g('lg-escrow1-account'),
+    escrow2Label:   g('lg-escrow2-label'),
+    escrow2Bank:    g('lg-escrow2-bank'),
+    escrow2Account: g('lg-escrow2-account'),
+    tcUpdated:      g('lg-tc-updated'),
+    ppUpdated:      g('lg-pp-updated'),
+    dpoName:        g('lg-dpo-name'),
+    dpoEmail:       g('lg-dpo-email'),
+    dpoPhone:       g('lg-dpo-phone'),
+    privacyEmail:   g('lg-privacy-email'),
+  });
+  localStorage.setItem('rp_cms_settings', JSON.stringify(st));
+  Toast.success('Legal & Trust Saved', 'All changes are now live on the Trust & Legal Centre page.');
+}
+
+function resetLegal() {
+  if (!confirm('Reset all Legal & Trust fields to defaults?')) return;
+  const keys = ['companyName','cac','incorporated','businessType','lawyerName','lawyerFirm',
+                 'lawyerLSN','lawyerPhoto','lawyerOpinion','escrow1Label','escrow1Bank',
+                 'escrow1Account','escrow2Label','escrow2Bank','escrow2Account',
+                 'tcUpdated','ppUpdated','dpoName','dpoEmail','dpoPhone','privacyEmail'];
+  const st = JSON.parse(localStorage.getItem('rp_cms_settings') || '{}');
+  keys.forEach(k => delete st[k]);
+  localStorage.setItem('rp_cms_settings', JSON.stringify(st));
+  loadLegal();
+  Toast.info('Legal Fields Reset', 'All legal content restored to default values.');
+}
+
+function uploadLegalImg(input, inputId, prevId) {
+  const f = input.files[0];
+  if (!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    const inp  = document.getElementById(inputId);
+    const prev = document.getElementById(prevId);
+    if (inp)  inp.value = e.target.result;
+    if (prev) { prev.src = e.target.result; prev.style.display = 'block'; }
+  };
+  r.readAsDataURL(f);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   Documents vault
+───────────────────────────────────────────────────────────── */
+const DOC_SLOTS = [
+  { key: 'cac-certificate',     name: 'CAC Certificate',                icon: 'fa-building',           desc: 'Corporate Affairs Commission registration certificate proving legal incorporation.',   accept: 'application/pdf,image/*' },
+  { key: 'lawyer-opinion',      name: "Lawyer's Opinion Letter",         icon: 'fa-scale-balanced',     desc: "Independent lawyer's opinion letter verifying the raffle's legal compliance.",        accept: 'application/pdf' },
+  { key: 'terms-conditions',    name: 'Terms & Conditions',              icon: 'fa-file-contract',      desc: 'Full Terms & Conditions document that governs ticket purchases and draws.',            accept: 'application/pdf' },
+  { key: 'privacy-policy',      name: 'Privacy Policy',                  icon: 'fa-shield-halved',      desc: 'NDPR-compliant privacy policy covering data collection, use, and user rights.',       accept: 'application/pdf' },
+  { key: 'deed-of-assignment',  name: 'Deed of Assignment Template',     icon: 'fa-file-signature',     desc: 'Template deed used to transfer property title to the winner after the draw.',         accept: 'application/pdf' },
+  { key: 'escrow-confirmation', name: 'Escrow Confirmation Letter',      icon: 'fa-landmark',           desc: 'Bank-issued letter confirming funds are held in escrow until draw completion.',        accept: 'application/pdf' },
+  { key: 'property-valuation',  name: 'Property Valuation Report',       icon: 'fa-house-chimney-user', desc: 'NIESV-certified valuation report stating the current market value of the property.',  accept: 'application/pdf' },
+  { key: 'draw-certificate',    name: 'Draw Certificate',                icon: 'fa-award',              desc: 'Official certificate issued after each draw, signed by lawyer and independent witness.', accept: 'application/pdf' },
+  { key: 'cof-o',               name: 'Certificate of Occupancy (C of O)', icon: 'fa-key',             desc: 'Government-issued title document proving ownership of the property.',                  accept: 'application/pdf,image/*' },
+  { key: 'survey-plan',         name: 'Survey Plan',                     icon: 'fa-map',                desc: 'Registered survey plan showing property boundaries and dimensions.',                   accept: 'application/pdf,image/*' },
+];
+
+function _getDocStore() {
+  return JSON.parse(localStorage.getItem('rp_cms_documents') || '{}');
+}
+function _setDocStore(docs) {
+  localStorage.setItem('rp_cms_documents', JSON.stringify(docs));
+}
+
+function _lsUsageKB() {
+  let total = 0;
+  for (const key in localStorage) {
+    if (Object.prototype.hasOwnProperty.call(localStorage, key)) {
+      total += (localStorage.getItem(key) || '').length;
+    }
+  }
+  return Math.round(total / 1024);
+}
+
+function _updateStorageBar() {
+  const usedKB = _lsUsageKB();
+  const limitKB = 5120; // 5MB in KB
+  const pct = Math.min((usedKB / limitKB) * 100, 100);
+  const fill = document.getElementById('doc-storage-fill');
+  const text = document.getElementById('doc-storage-text');
+  if (!fill || !text) return;
+  fill.style.width = pct.toFixed(1) + '%';
+  fill.style.background = pct > 80 ? '#dc2626' : pct > 60 ? '#d97706' : 'var(--green-primary)';
+  text.textContent = `${usedKB.toLocaleString()} KB / ~${(limitKB).toLocaleString()} KB used (${pct.toFixed(0)}%)`;
+  if (pct > 80) text.style.color = '#dc2626';
+}
+
+function renderDocuments() {
+  const docs = _getDocStore();
+  const container = document.getElementById('doc-slots-container');
+  if (!container) return;
+
+  container.innerHTML = DOC_SLOTS.map(slot => {
+    const doc = docs[slot.key];
+    const hasDoc = doc && doc.value;
+    const isExternal = hasDoc && !doc.value.startsWith('data:');
+    const isFile = hasDoc && doc.value.startsWith('data:');
+    const sizeStr = doc && doc.size ? _formatBytes(doc.size) : '';
+    const uploadedStr = doc && doc.uploadedAt ? new Date(doc.uploadedAt).toLocaleDateString('en-NG', { day:'numeric', month:'short', year:'numeric' }) : '';
+
+    return `
+    <div class="card" style="border-left:3px solid ${hasDoc ? 'var(--green-primary)' : 'var(--border)'};">
+      <div class="card-body" style="padding:1.25rem;">
+        <div style="display:flex;align-items:flex-start;gap:1rem;flex-wrap:wrap;">
+          <!-- Icon + info -->
+          <div style="display:flex;align-items:flex-start;gap:.875rem;flex:1;min-width:240px;">
+            <div style="width:44px;height:44px;border-radius:10px;background:${hasDoc?'var(--green-50)':'#f3f4f6'};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <i class="fa-solid ${slot.icon}" style="font-size:1.125rem;color:${hasDoc?'var(--green-primary)':'#9ca3af'};"></i>
+            </div>
+            <div>
+              <div style="font-weight:700;font-size:.9375rem;">${esc(slot.name)}</div>
+              <div style="font-size:.8125rem;color:var(--text-muted);margin-top:.2rem;line-height:1.4;">${esc(slot.desc)}</div>
+              ${hasDoc ? `
+              <div style="margin-top:.5rem;display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;">
+                <span class="badge badge-green"><i class="fa-solid fa-circle-check" style="margin-right:.3rem;"></i>Uploaded</span>
+                ${isExternal ? '<span class="badge badge-gold">External URL</span>' : '<span class="badge" style="background:var(--green-50);color:var(--green-primary);">File Upload</span>'}
+                ${sizeStr ? `<span style="font-size:.75rem;color:var(--text-muted);">${sizeStr}</span>` : ''}
+                ${uploadedStr ? `<span style="font-size:.75rem;color:var(--text-muted);">${uploadedStr}</span>` : ''}
+              </div>` : `<div style="margin-top:.5rem;"><span class="badge badge-gray"><i class="fa-solid fa-circle-xmark" style="margin-right:.3rem;"></i>Not Uploaded</span></div>`}
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div style="display:flex;gap:.5rem;align-items:flex-start;flex-wrap:wrap;">
+            ${hasDoc ? `<button onclick="previewDocument('${slot.key}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> Preview</button>` : ''}
+            <button onclick="openDocUpload('${slot.key}')" class="btn btn-sm ${hasDoc ? 'btn-outline' : 'btn-primary'}">
+              <i class="fa-solid fa-${hasDoc ? 'pen' : 'upload'}"></i> ${hasDoc ? 'Replace' : 'Upload'}
+            </button>
+            ${hasDoc ? `<button onclick="removeDocument('${slot.key}')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-trash"></i></button>` : ''}
+          </div>
+        </div>
+
+        <!-- Inline upload panel (hidden by default) -->
+        <div id="doc-upload-panel-${slot.key}" style="display:none;margin-top:1.25rem;padding-top:1.25rem;border-top:1px solid var(--border-light);">
+          <!-- Tabs -->
+          <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;width:fit-content;margin-bottom:1rem;">
+            <button onclick="switchDocTab('${slot.key}','url')" id="dtab-url-${slot.key}" class="btn btn-sm" style="border-radius:0;background:var(--green-primary);color:#fff;border:none;">
+              <i class="fa-solid fa-link"></i> Paste URL
+            </button>
+            <button onclick="switchDocTab('${slot.key}','file')" id="dtab-file-${slot.key}" class="btn btn-sm" style="border-radius:0;background:#fff;color:var(--text-muted);border:none;">
+              <i class="fa-solid fa-upload"></i> Upload File
+            </button>
+          </div>
+
+          <!-- URL panel -->
+          <div id="dpanel-url-${slot.key}">
+            <label class="form-label">Document URL <span style="font-size:.75rem;color:var(--text-muted);">(Google Drive, Dropbox, OneDrive, or direct link)</span></label>
+            <div style="display:flex;gap:.625rem;">
+              <input class="form-input" id="durl-${slot.key}" placeholder="https://drive.google.com/file/d/…" value="${hasDoc && isExternal ? esc(doc.value) : ''}" style="flex:1;">
+              <button onclick="saveDocUrl('${slot.key}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-save"></i> Save</button>
+            </div>
+            <p style="font-size:.75rem;color:var(--text-muted);margin-top:.375rem;">
+              <i class="fa-solid fa-circle-info"></i> For Google Drive: File → Share → "Anyone with link" → Copy link
+            </p>
+          </div>
+
+          <!-- File panel -->
+          <div id="dpanel-file-${slot.key}" style="display:none;">
+            <label class="form-label">Upload File <span style="font-size:.75rem;color:var(--text-muted);">(Max recommended: 1MB)</span></label>
+            <div id="ddrop-${slot.key}" onclick="document.getElementById('dfile-${slot.key}').click()"
+              role="button" tabindex="0" aria-label="Drop file here or click to browse"
+              onkeydown="if(event.key==='Enter'||event.key===' '){document.getElementById('dfile-${slot.key}').click();event.preventDefault();}"
+              style="border:2px dashed var(--border);border-radius:10px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .2s,background .2s;"
+              ondragover="event.preventDefault();this.style.borderColor='var(--green-primary)';this.style.background='var(--green-50)'"
+              ondragleave="this.style.borderColor='var(--border)';this.style.background=''"
+              ondrop="handleDocDrop(event,'${slot.key}')">
+              <i class="fa-solid fa-file-arrow-up" style="font-size:2rem;color:var(--border);margin-bottom:.5rem;"></i>
+              <p style="font-size:.875rem;font-weight:600;color:var(--text-muted);">Click to browse or drag file here</p>
+              <p style="font-size:.75rem;color:var(--text-muted);margin-top:.25rem;">PDF, images accepted · Stored in browser · ~1MB limit recommended</p>
+            </div>
+            <input type="file" id="dfile-${slot.key}" accept="${esc(slot.accept)}" style="display:none;" onchange="handleDocFile(this,'${slot.key}')">
+            <div id="dfile-preview-${slot.key}" style="display:none;margin-top:.75rem;"></div>
+          </div>
+
+          <button onclick="closeDocUpload('${slot.key}')" class="btn btn-outline btn-sm" style="margin-top:.75rem;"><i class="fa-solid fa-xmark"></i> Cancel</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  _updateStorageBar();
+}
+
+function switchDocTab(key, tab) {
+  const urlPanel  = document.getElementById(`dpanel-url-${key}`);
+  const filePanel = document.getElementById(`dpanel-file-${key}`);
+  const urlBtn    = document.getElementById(`dtab-url-${key}`);
+  const fileBtn   = document.getElementById(`dtab-file-${key}`);
+  if (!urlPanel) return;
+  if (tab === 'url') {
+    urlPanel.style.display  = '';
+    filePanel.style.display = 'none';
+    urlBtn.style.background  = 'var(--green-primary)'; urlBtn.style.color = '#fff';
+    fileBtn.style.background = '#fff'; fileBtn.style.color = 'var(--text-muted)';
+  } else {
+    urlPanel.style.display  = 'none';
+    filePanel.style.display = '';
+    fileBtn.style.background  = 'var(--green-primary)'; fileBtn.style.color = '#fff';
+    urlBtn.style.background = '#fff'; urlBtn.style.color = 'var(--text-muted)';
+  }
+}
+
+function openDocUpload(key) {
+  // Close any other open panels first
+  DOC_SLOTS.forEach(s => {
+    if (s.key !== key) {
+      const p = document.getElementById(`doc-upload-panel-${s.key}`);
+      if (p) p.style.display = 'none';
+    }
+  });
+  const panel = document.getElementById(`doc-upload-panel-${key}`);
+  if (!panel) return;
+  panel.style.display = panel.style.display === 'none' ? '' : 'none';
+  if (panel.style.display !== 'none') panel.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function closeDocUpload(key) {
+  const panel = document.getElementById(`doc-upload-panel-${key}`);
+  if (panel) panel.style.display = 'none';
+}
+
+function saveDocUrl(key) {
+  const input = document.getElementById(`durl-${key}`);
+  const val = (input ? input.value : '').trim();
+  if (!val) { Toast.error('Empty URL', 'Please enter a valid URL.'); return; }
+  const slot = DOC_SLOTS.find(s => s.key === key);
+  const docs = _getDocStore();
+  docs[key] = { name: slot ? slot.name : key, filename: '', value: val, uploadedAt: new Date().toISOString(), size: 0, type: 'url' };
+  _setDocStore(docs);
+  Toast.success('Document Saved', `${slot ? slot.name : key} link saved. Users can now access it from the website.`);
+  renderDocuments();
+}
+
+function handleDocFile(input, key) {
+  const f = input.files[0];
+  if (!f) return;
+  _processDocFile(f, key);
+}
+
+function handleDocDrop(e, key) {
+  e.preventDefault();
+  const drop = document.getElementById(`ddrop-${key}`);
+  if (drop) { drop.style.borderColor = 'var(--border)'; drop.style.background = ''; }
+  const f = e.dataTransfer.files[0];
+  if (!f) return;
+  _processDocFile(f, key);
+}
+
+function _processDocFile(f, key) {
+  const slot = DOC_SLOTS.find(s => s.key === key);
+  const sizeKB = Math.round(f.size / 1024);
+  if (sizeKB > 2048) {
+    if (!confirm(`This file is ${_formatBytes(f.size)}. Large files may fill localStorage quickly and cause issues. For files over 1MB, we recommend using an external URL instead.\n\nContinue anyway?`)) return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    // Show preview
+    const prevEl = document.getElementById(`dfile-preview-${key}`);
+    if (prevEl) {
+      prevEl.style.display = '';
+      if (f.type.startsWith('image/')) {
+        prevEl.innerHTML = `<img src="${dataUrl}" style="max-height:80px;border-radius:6px;border:1px solid var(--border);" loading="lazy">`;
+      } else {
+        prevEl.innerHTML = `<div style="display:flex;align-items:center;gap:.5rem;padding:.625rem 1rem;background:#f8f9fa;border-radius:8px;border:1px solid var(--border);">
+          <i class="fa-solid fa-file-pdf" style="color:#dc2626;font-size:1.25rem;"></i>
+          <div>
+            <div style="font-weight:600;font-size:.875rem;">${esc(f.name)}</div>
+            <div style="font-size:.75rem;color:var(--text-muted);">${_formatBytes(f.size)}</div>
+          </div>
+          <button onclick="confirmSaveDocFile('${key}', document.getElementById('dfile-${key}'))" class="btn btn-primary btn-sm" style="margin-left:auto;"><i class="fa-solid fa-save"></i> Save This File</button>
+        </div>`;
+        // Store temporarily on the input for later retrieval
+        const fileInput = document.getElementById(`dfile-${key}`);
+        if (fileInput) fileInput._pendingDataUrl = dataUrl;
+        return; // Don't save yet — user must confirm
+      }
+      // For images, save immediately after preview
+    }
+
+    // Save the doc
+    const docs = _getDocStore();
+    docs[key] = { name: slot ? slot.name : key, filename: f.name, value: dataUrl, uploadedAt: new Date().toISOString(), size: f.size, type: 'file' };
+    _setDocStore(docs);
+    Toast.success('Document Saved', `${slot ? slot.name : key} (${_formatBytes(f.size)}) uploaded successfully.`);
+    _updateStorageBar();
+    setTimeout(() => renderDocuments(), 800);
+  };
+  reader.readAsDataURL(f);
+}
+
+function confirmSaveDocFile(key, inputEl) {
+  const dataUrl = inputEl ? inputEl._pendingDataUrl : null;
+  if (!dataUrl) { Toast.error('Error', 'No file data found. Please re-select the file.'); return; }
+  const slot = DOC_SLOTS.find(s => s.key === key);
+  const docs = _getDocStore();
+  const existing = docs[key] || {};
+  docs[key] = { ...existing, name: slot ? slot.name : key, value: dataUrl, uploadedAt: new Date().toISOString(), type: 'file' };
+  _setDocStore(docs);
+  Toast.success('Document Saved', `${slot ? slot.name : key} saved successfully.`);
+  renderDocuments();
+}
+
+function previewDocument(key) {
+  const docs = _getDocStore();
+  const doc = docs[key];
+  if (!doc || !doc.value) return;
+  if (doc.value.startsWith('data:')) {
+    const win = window.open('', '_blank');
+    win.document.write(`<html><body style="margin:0;background:#222;">
+      <iframe src="${doc.value}" style="width:100%;height:100vh;border:none;"></iframe>
+      <nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item active"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body></html>`);
+  } else {
+    window.open(doc.value, '_blank');
+  }
+}
+
+function removeDocument(key) {
+  const slot = DOC_SLOTS.find(s => s.key === key);
+  if (!confirm(`Remove "${slot ? slot.name : key}"? Users will see a "Not Yet Uploaded" message when they try to download it.`)) return;
+  const docs = _getDocStore();
+  delete docs[key];
+  _setDocStore(docs);
+  Toast.info('Document Removed', `${slot ? slot.name : key} has been removed.`);
+  renderDocuments();
+}
+
+function clearAllDocuments() {
+  if (!confirm('Remove ALL uploaded documents? Users will be unable to download any documents until you re-upload them.')) return;
+  localStorage.removeItem('rp_cms_documents');
+  Toast.warning('All Documents Cleared', 'Document vault is now empty.');
+  renderDocuments();
+}
+
+function _formatBytes(bytes) {
+  if (!bytes) return '';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(2) + ' MB';
+}
+</script>
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item active"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body>
+</html>

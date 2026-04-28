@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Post-Draw Compliance | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    .workflow-step { display:flex;align-items:flex-start;gap:1rem;padding:1rem;border-radius:10px;background:var(--bg-secondary);margin-bottom:0.75rem; }
+    .workflow-num { width:2rem;height:2rem;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:0.875rem;flex-shrink:0; }
+    .workflow-num.done { background:var(--green-50);color:var(--green-primary); }
+    .workflow-num.active { background:var(--gold);color:#fff; }
+    .workflow-num.pending { background:var(--border);color:var(--text-muted); }
+    .deadline-badge { font-size:0.75rem;font-weight:700;padding:0.2rem 0.625rem;border-radius:20px;white-space:nowrap; }
+    .deadline-overdue { background:#fef2f2;color:#ef4444; }
+    .deadline-urgent { background:#fff7ed;color:#ea580c; }
+    .deadline-ok { background:var(--green-50);color:var(--green-primary); }
+    .workflow-grid { display:grid;grid-template-columns:1fr 1fr;gap:1.5rem; }
+    @media (max-width: 768px) { .workflow-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Post-Draw Compliance</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">FCCPC winner submission (3-day deadline) and Form CPC B End of Promotion Report (21 days)</p>
+    </div>
+    <select class="form-select" id="draw-selector" onchange="loadDraw(this.value)" style="width:240px;">
+      <option value="">Select completed draw...</option>
+      <option value="lekki">4-Bed Duplex — Lekki (Draw: 15 Dec 2024)</option>
+      <option value="gwarinpa">3-Bed Semi-Detached — Gwarinpa (Draw: 29 Dec 2024)</option>
+    </select>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--error);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--error);" id="stat-overdue">0</div>
+        <div class="stat-label">Overdue Filings</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--warning);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--warning);" id="stat-due-soon">2</div>
+        <div class="stat-label">Due Within 7 Days</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-filed">0</div>
+        <div class="stat-label">Filed &amp; Acknowledged</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-draws">2</div>
+        <div class="stat-label">Completed Draws</div>
+      </div>
+    </div>
+
+    <!-- FCCPA obligation notice -->
+    <div style="background:#eff6ff;border:1px solid #3b82f6;border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-circle-info" style="color:#3b82f6;margin-top:0.1rem;flex-shrink:0;font-size:1.125rem;"></i>
+      <div>
+        <strong style="font-size:0.875rem;color:#1d4ed8;">FCCPA 2018 §124 — Mandatory Post-Draw Obligations</strong>
+        <p style="font-size:0.8125rem;color:#3b82f6;margin-top:0.25rem;line-height:1.6;">
+          <strong>3 working days after draw:</strong> Submit winner details to FCCPC (full name, address, phone, prize description, ticket number).<br>
+          <strong>21 days after draw close:</strong> File Form CPC B — End of Promotion Report with FCCPC.<br>
+          Failure to meet these deadlines is an offence under FCCPA 2018 and may result in sanction.
+        </p>
+      </div>
+    </div>
+
+    <!-- Draws pending post-draw compliance -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">Post-Draw Filing Status</h3>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Draw Date</th>
+              <th>Winner Submission (3-day)</th>
+              <th>Form CPC B (21-day)</th>
+              <th>FCCPC Acknowledgement</th>
+              <th>Overall Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="post-draw-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Workflow panel (shown when draw selected) -->
+    <div id="workflow-panel" style="display:none;">
+      <div class="workflow-grid">
+
+        <!-- Winner Submission Workflow -->
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Step A: Winner Submission to FCCPC</h3>
+            <span id="winner-deadline-badge" class="deadline-badge deadline-urgent">Due in 3 days</span>
+          </div>
+          <div class="card-body">
+            <div id="winner-workflow"></div>
+            <button onclick="submitWinnerToFCCPC()" class="btn btn-primary btn-sm" style="width:100%;margin-top:1rem;" id="submit-winner-btn"><i class="fa-solid fa-paper-plane"></i> Submit Winner Details to FCCPC</button>
+          </div>
+        </div>
+
+        <!-- Form CPC B Workflow -->
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-file-lines" style="color:var(--info);"></i> Step B: Form CPC B — End of Promotion Report</h3>
+            <span id="cpcb-deadline-badge" class="deadline-badge deadline-ok">Due in 21 days</span>
+          </div>
+          <div class="card-body">
+            <div id="cpcb-workflow"></div>
+            <button onclick="fileCPCB()" class="btn btn-primary btn-sm" style="width:100%;margin-top:1rem;" id="file-cpcb-btn"><i class="fa-solid fa-file-circle-check"></i> File Form CPC B</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Form CPC B template reference -->
+    <div class="card" style="margin-top:1.5rem;">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">Form CPC B — Required Fields Reference</h3>
+        <span style="font-size:0.8125rem;color:var(--text-muted);">End of Promotion Report to be filed with FCCPC</span>
+      </div>
+      <div class="card-body">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:0.75rem;font-size:0.8125rem;" id="cpcb-fields"></div>
+        <button onclick="Toast.info('Generate PDF','Form CPC B pre-filled PDF is being generated. Review before submission to FCCPC.')" class="btn btn-primary btn-sm" style="margin-top:1.25rem;"><i class="fa-solid fa-file-pdf"></i> Generate Pre-filled Form CPC B PDF</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item active"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const DRAW_DATA = {
+  lekki: {
+    campaign: '4-Bedroom Detached Duplex — Lekki Phase 1',
+    drawDate: '2024-12-15',
+    winner: { name: 'Adaeze Nwosu', phone: '+234 803 456 7890', address: 'Plot 12, Ikeja GRA, Lagos', ticket: 'RP-LEK-14207', prize: '4-Bedroom Detached Duplex, Lekki Phase 1 (NIESV Value: ₦85,000,000)' },
+    winnerSubmitted: false,
+    winnerAcknowledged: false,
+    cpcbFiled: false,
+    cpcbAcknowledged: false,
+    fccpcRef: 'FCCPC/SP/2024/001'
+  },
+  gwarinpa: {
+    campaign: '3-Bedroom Semi-Detached — Gwarinpa, Abuja',
+    drawDate: '2024-12-29',
+    winner: { name: 'Ibrahim Mohammed', phone: '+234 706 789 0123', address: '7B Wuse Zone 5, Abuja', ticket: 'RP-GWA-08879', prize: '3-Bedroom Semi-Detached, Gwarinpa (NIESV Value: ₦42,000,000)' },
+    winnerSubmitted: false,
+    winnerAcknowledged: false,
+    cpcbFiled: false,
+    cpcbAcknowledged: false,
+    fccpcRef: 'FCCPC/SP/2024/002'
+  }
+};
+
+const CPCB_FIELDS = [
+  ['Promoter Name & Address', 'RaffleProp Ltd, 14 Admiralty Way, Lekki Phase 1'],
+  ['FCCPC Approval Reference', 'Required — from campaign record'],
+  ['Campaign Title & Description', 'Property campaign details'],
+  ['Draw Date, Venue & Method', 'As recorded in draw manager'],
+  ['Total Tickets Sold', 'From ticket registry'],
+  ['Gross Revenue Collected', 'From revenue dashboard'],
+  ['Winner Details (Name, Address, Phone)', 'From winner verification portal'],
+  ['Prize Description & Certified Value', 'NIESV valuation'],
+  ['FCCPC Monitor Present (Name & Sig)', 'From draw manager records'],
+  ['RNG Method & Seed Hash', 'From draw manager records'],
+  ['Escrow Release Confirmation', 'From escrow bank'],
+  ['Promotional Status', 'Completed / Did Not Proceed'],
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('post-draw');
+  renderPostDrawTable();
+  document.getElementById('cpcb-fields').innerHTML = CPCB_FIELDS.map(([field, note]) =>
+    `<div style="background:var(--bg-secondary);border-radius:8px;padding:0.75rem;">
+      <div style="font-weight:700;margin-bottom:0.25rem;">${field}</div>
+      <div style="color:var(--text-muted);">${note}</div>
+    </div>`
+  ).join('');
+});
+
+function daysFromDraw(drawDateStr, offset) {
+  const d = new Date(drawDateStr);
+  d.setDate(d.getDate() + offset);
+  return Math.ceil((d - new Date()) / 86400000);
+}
+
+function deadlineClass(days) {
+  if (days < 0) return 'deadline-overdue';
+  if (days <= 2) return 'deadline-urgent';
+  return 'deadline-ok';
+}
+
+function renderPostDrawTable() {
+  const tbody = document.getElementById('post-draw-tbody');
+  tbody.innerHTML = Object.entries(DRAW_DATA).map(([key, d]) => {
+    const winnerDays = daysFromDraw(d.drawDate, 3);
+    const cpcbDays = daysFromDraw(d.drawDate, 21);
+    const allDone = d.winnerSubmitted && d.cpcbFiled && d.winnerAcknowledged;
+    return `
+    <tr>
+      <td data-label="Campaign"><div style="font-weight:600;">${d.campaign}</div><div style="font-size:0.75rem;color:var(--text-muted);">FCCPC Ref: ${d.fccpcRef}</div></td>
+      <td data-label="Draw Date" style="font-size:0.8125rem;">${new Date(d.drawDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="Winner Submission (3-day)">
+        ${d.winnerSubmitted
+          ? `<span class="badge badge-green"><i class="fa-solid fa-check"></i> Submitted</span>`
+          : `<span class="deadline-badge ${deadlineClass(winnerDays)}">${winnerDays < 0 ? 'OVERDUE' : 'Due in ' + winnerDays + ' days'}</span>`}
+      </td>
+      <td data-label="Form CPC B (21-day)">
+        ${d.cpcbFiled
+          ? `<span class="badge badge-green"><i class="fa-solid fa-check"></i> Filed</span>`
+          : `<span class="deadline-badge ${deadlineClass(cpcbDays)}">${cpcbDays < 0 ? 'OVERDUE' : 'Due in ' + cpcbDays + ' days'}</span>`}
+      </td>
+      <td data-label="FCCPC Acknowledgement">
+        ${d.winnerAcknowledged
+          ? '<span class="badge badge-green">Received</span>'
+          : '<span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);">Awaiting</span>'}
+      </td>
+      <td data-label="Overall Status">
+        ${allDone
+          ? '<span class="badge badge-green">Complete</span>'
+          : '<span class="badge" style="background:#fef3c7;color:#92400e;">In Progress</span>'}
+      </td>
+      <td data-label="Actions">
+        <button onclick="loadDraw('${key}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-file-circle-check"></i> Manage</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+let currentDraw = null;
+
+function loadDraw(key) {
+  if (!key || !DRAW_DATA[key]) return;
+  currentDraw = key;
+  document.getElementById('draw-selector').value = key;
+  const d = DRAW_DATA[key];
+  const winnerDays = daysFromDraw(d.drawDate, 3);
+  const cpcbDays = daysFromDraw(d.drawDate, 21);
+
+  document.getElementById('winner-deadline-badge').className = 'deadline-badge ' + deadlineClass(winnerDays);
+  document.getElementById('winner-deadline-badge').textContent = winnerDays < 0 ? 'OVERDUE' : 'Due in ' + winnerDays + ' days';
+  document.getElementById('cpcb-deadline-badge').className = 'deadline-badge ' + deadlineClass(cpcbDays);
+  document.getElementById('cpcb-deadline-badge').textContent = cpcbDays < 0 ? 'OVERDUE' : 'Due in ' + cpcbDays + ' days';
+
+  // Winner workflow
+  document.getElementById('winner-workflow').innerHTML = `
+    <div class="workflow-step">
+      <div class="workflow-num done">1</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">Draw Completed</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Draw date: ${d.drawDate} · Winning ticket: <strong>${d.winner.ticket}</strong></div>
+      </div>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-num ${d.winnerSubmitted ? 'done' : 'active'}">2</div>
+      <div style="flex:1;">
+        <div style="font-weight:700;font-size:0.875rem;">Prepare Winner Details</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;">Winner: <strong>${d.winner.name}</strong></div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Phone: ${d.winner.phone} · Address: ${d.winner.address}</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Prize: ${d.winner.prize}</div>
+      </div>
+    </div>
+    <div class="workflow-step" style="${d.winnerSubmitted ? '' : 'opacity:0.5;'}">
+      <div class="workflow-num ${d.winnerSubmitted ? 'done' : 'pending'}">3</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">Submit to FCCPC</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${d.winnerSubmitted ? 'Submitted — awaiting FCCPC acknowledgement' : 'Not yet submitted'}</div>
+      </div>
+    </div>
+    <div class="workflow-step" style="${d.winnerAcknowledged ? '' : 'opacity:0.5;'}">
+      <div class="workflow-num ${d.winnerAcknowledged ? 'done' : 'pending'}">4</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">FCCPC Acknowledgement</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${d.winnerAcknowledged ? 'FCCPC acknowledgement received and filed.' : 'Awaiting confirmation from FCCPC'}</div>
+        ${d.winnerSubmitted && !d.winnerAcknowledged ? `<button onclick="markAcknowledged('${key}','winner')" class="btn btn-outline btn-sm" style="margin-top:0.5rem;"><i class="fa-solid fa-check"></i> Mark Acknowledged</button>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('submit-winner-btn').disabled = d.winnerSubmitted;
+  document.getElementById('submit-winner-btn').textContent = d.winnerSubmitted ? '✓ Winner Submitted' : 'Submit Winner Details to FCCPC';
+
+  // Form CPC B workflow
+  document.getElementById('cpcb-workflow').innerHTML = `
+    <div class="workflow-step">
+      <div class="workflow-num done">1</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">Compile Report Data</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Revenue, winner, draw details, escrow release all required</div>
+      </div>
+    </div>
+    <div class="workflow-step">
+      <div class="workflow-num ${d.cpcbFiled ? 'done' : 'active'}">2</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">Complete Form CPC B</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">All 12 mandatory fields required. Generate PDF below.</div>
+        <button onclick="Toast.info('Generate PDF','Pre-filled Form CPC B PDF being generated from draw records.')" class="btn btn-outline btn-sm" style="margin-top:0.5rem;font-size:0.75rem;"><i class="fa-solid fa-file-pdf"></i> Generate PDF</button>
+      </div>
+    </div>
+    <div class="workflow-step" style="${d.cpcbFiled ? '' : 'opacity:0.5;'}">
+      <div class="workflow-num ${d.cpcbFiled ? 'done' : 'pending'}">3</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">File with FCCPC</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${d.cpcbFiled ? 'Form CPC B filed with FCCPC' : 'Submit completed form to FCCPC (physical + email)'}</div>
+      </div>
+    </div>
+    <div class="workflow-step" style="${d.cpcbAcknowledged ? '' : 'opacity:0.5;'}">
+      <div class="workflow-num ${d.cpcbAcknowledged ? 'done' : 'pending'}">4</div>
+      <div>
+        <div style="font-weight:700;font-size:0.875rem;">FCCPC Acknowledgement</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${d.cpcbAcknowledged ? 'Acknowledged — compliance complete' : 'Awaiting FCCPC filing receipt'}</div>
+        ${d.cpcbFiled && !d.cpcbAcknowledged ? `<button onclick="markAcknowledged('${key}','cpcb')" class="btn btn-outline btn-sm" style="margin-top:0.5rem;"><i class="fa-solid fa-check"></i> Mark Acknowledged</button>` : ''}
+      </div>
+    </div>`;
+
+  document.getElementById('file-cpcb-btn').disabled = d.cpcbFiled;
+  document.getElementById('file-cpcb-btn').textContent = d.cpcbFiled ? '✓ Form CPC B Filed' : 'File Form CPC B';
+
+  document.getElementById('workflow-panel').style.display = 'block';
+  document.getElementById('workflow-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function submitWinnerToFCCPC() {
+  if (!currentDraw) return;
+  DRAW_DATA[currentDraw].winnerSubmitted = true;
+  loadDraw(currentDraw);
+  renderPostDrawTable();
+  Toast.success('Winner Submitted to FCCPC', 'Winner details have been submitted. Awaiting FCCPC acknowledgement. Ref: ' + DRAW_DATA[currentDraw].fccpcRef);
+}
+
+function fileCPCB() {
+  if (!currentDraw) return;
+  DRAW_DATA[currentDraw].cpcbFiled = true;
+  loadDraw(currentDraw);
+  renderPostDrawTable();
+  Toast.success('Form CPC B Filed', 'End of Promotion Report submitted to FCCPC. Reference has been noted.');
+}
+
+function markAcknowledged(key, type) {
+  if (type === 'winner') DRAW_DATA[key].winnerAcknowledged = true;
+  if (type === 'cpcb') DRAW_DATA[key].cpcbAcknowledged = true;
+  loadDraw(key);
+  renderPostDrawTable();
+  Toast.success('Acknowledged', 'FCCPC acknowledgement recorded.');
+}
+</script>
+</body>
+</html>

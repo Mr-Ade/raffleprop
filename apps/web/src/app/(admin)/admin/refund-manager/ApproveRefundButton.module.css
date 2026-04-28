@@ -1,0 +1,50 @@
+.success {
+  font-size: 0.75rem;
+  color: var(--green-primary);
+  font-weight: 600;
+}
+
+.confirmWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.confirmText {
+  font-size: 0.75rem;
+  color: #92400e;
+  font-weight: 600;
+}
+
+.confirmRow {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.btnYes {
+  background: var(--green-primary);
+  color: #fff;
+  border: none;
+  padding: 0.2rem 0.6rem;
+}
+
+.btnNo {
+  padding: 0.2rem 0.6rem;
+}
+
+.errorText {
+  font-size: 0.75rem;
+  color: #b91c1c;
+  margin-top: 0.25rem;
+}
+
+.approveBtn {
+  background: var(--green-50);
+  color: var(--green-primary);
+  border: 1px solid var(--green-primary);
+  white-space: nowrap;
+}
+
+.approveIcon {
+  margin-right: 0.375rem;
+}

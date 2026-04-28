@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Influencer Compliance | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Influencer Compliance</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Manage influencer agreements, content briefs, and FCCPC approval statement compliance</p>
+    </div>
+    <button onclick="openAddInfluencerModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> Add Influencer</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-active">3</div>
+        <div class="stat-label">Active Influencers</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--gold);" id="stat-pending-review">1</div>
+        <div class="stat-label">Pending Review</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--error);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--error);" id="stat-blocked">1</div>
+        <div class="stat-label">Blocked (Missing Statement)</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-content-items">8</div>
+        <div class="stat-label">Content Items Logged</div>
+      </div>
+    </div>
+
+    <!-- FCCPA obligation notice -->
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;margin-top:0.1rem;flex-shrink:0;font-size:1.125rem;"></i>
+      <div>
+        <strong style="font-size:0.875rem;color:#9a3412;">FCCPA 2018 — All Influencer Content Must Carry FCCPC Approval Statement</strong>
+        <p style="font-size:0.8125rem;color:#ea580c;margin-top:0.25rem;line-height:1.6;">
+          Every piece of influencer content promoting a RaffleProp campaign must include the FCCPC approval statement. Before any content goes live: (1) admin must upload the approved content brief issued to the influencer, (2) confirm the FCCPC approval statement is included, (3) confirm content has been reviewed and approved. Content cannot be marked "Approved for Use" without completing all three steps.
+        </p>
+      </div>
+    </div>
+
+    <!-- Influencer table -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <h3 style="font-size:1rem;font-weight:700;">Influencer Registry</h3>
+        <input type="text" placeholder="Search influencers..." class="form-input" style="width:220px;" oninput="filterInfluencers(this.value)">
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>Influencer</th>
+              <th>Platform(s)</th>
+              <th>Campaign</th>
+              <th>Agreement Signed</th>
+              <th>Brief Uploaded</th>
+              <th>FCCPC Statement</th>
+              <th>Content Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="influencer-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Content log -->
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <h3 style="font-size:1rem;font-weight:700;">Influencer Content Log</h3>
+        <button onclick="openAddContentModal()" class="btn btn-outline btn-sm"><i class="fa-solid fa-plus"></i> Log Content Item</button>
+      </div>
+      <div id="content-log-list" style="padding:1.5rem;display:flex;flex-direction:column;gap:0.75rem;"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Add Influencer Modal -->
+<div id="add-influencer-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeAddInfluencerModal()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:1rem;font-weight:800;">Add Influencer</div>
+      <button onclick="closeAddInfluencerModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+    </div>
+    <div style="padding:1.5rem;">
+      <div class="form-group"><label class="form-label">Influencer Full Name</label><input type="text" class="form-input" id="inf-name" placeholder="e.g. Chidinma Adeyemi"></div>
+      <div class="form-group"><label class="form-label">Handle / Username</label><input type="text" class="form-input" id="inf-handle" placeholder="@username"></div>
+      <div class="form-group"><label class="form-label">Platforms</label>
+        <div style="display:flex;flex-wrap:wrap;gap:0.5rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;">
+          <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.875rem;cursor:pointer;"><input type="checkbox" value="Instagram" style="accent-color:var(--green-primary);"> Instagram</label>
+          <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.875rem;cursor:pointer;"><input type="checkbox" value="TikTok" style="accent-color:var(--green-primary);"> TikTok</label>
+          <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.875rem;cursor:pointer;"><input type="checkbox" value="YouTube" style="accent-color:var(--green-primary);"> YouTube</label>
+          <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.875rem;cursor:pointer;"><input type="checkbox" value="Twitter/X" style="accent-color:var(--green-primary);"> Twitter/X</label>
+          <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.875rem;cursor:pointer;"><input type="checkbox" value="Facebook" style="accent-color:var(--green-primary);"> Facebook</label>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Campaign</label>
+        <select class="form-select" id="inf-campaign">
+          <option value="">Select campaign...</option>
+          <option>4-Bed Detached Duplex — Lekki</option>
+          <option>3-Bed Semi-Detached — Gwarinpa</option>
+          <option>Banana Island Penthouse</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Follower Count (approx.)</label><input type="number" class="form-input" id="inf-followers" placeholder="e.g. 125000"></div>
+      <div class="form-group"><label class="form-label">Agreement Signed?</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;">
+          <input type="checkbox" id="inf-agreement" style="width:1rem;height:1rem;accent-color:var(--green-primary);">
+          <span style="font-size:0.875rem;">Influencer agreement signed and uploaded</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button onclick="closeAddInfluencerModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
+        <button onclick="saveInfluencer()" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-plus"></i> Add Influencer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item active"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const INFLUENCERS = [
+  { id: 'INF001', name: 'Chidinma Adeyemi', handle: '@chidinma_luxe', platforms: ['Instagram','TikTok'], campaign: '4-Bed Detached Duplex — Lekki', followers: 287000, agreementSigned: true, briefUploaded: true, fccpcStatement: true, contentApproved: true },
+  { id: 'INF002', name: 'Tunde Fashola Jr.', handle: '@tunde_builds', platforms: ['YouTube','Instagram'], campaign: '4-Bed Detached Duplex — Lekki', followers: 142000, agreementSigned: true, briefUploaded: true, fccpcStatement: true, contentApproved: true },
+  { id: 'INF003', name: 'Adaeze Properties', handle: '@adaeze_ng', platforms: ['TikTok','Instagram'], campaign: '3-Bed Semi-Detached — Gwarinpa', followers: 98000, agreementSigned: true, briefUploaded: false, fccpcStatement: false, contentApproved: false },
+  { id: 'INF004', name: 'Lagos Luxury Homes', handle: '@lagosl uxury', platforms: ['Instagram'], campaign: 'Banana Island Penthouse', followers: 445000, agreementSigned: false, briefUploaded: false, fccpcStatement: false, contentApproved: false }
+];
+
+const CONTENT_LOG = [
+  { id: 'CT001', influencer: 'Chidinma Adeyemi', platform: 'Instagram', type: 'Reel', date: '2024-11-08', fccpcStatement: true, reviewed: true, status: 'approved', campaign: '4-Bed Detached Duplex — Lekki' },
+  { id: 'CT002', influencer: 'Chidinma Adeyemi', platform: 'TikTok', type: 'Short Video', date: '2024-11-15', fccpcStatement: true, reviewed: true, status: 'approved', campaign: '4-Bed Detached Duplex — Lekki' },
+  { id: 'CT003', influencer: 'Tunde Fashola Jr.', platform: 'YouTube', type: 'Long-form Video', date: '2024-11-20', fccpcStatement: true, reviewed: true, status: 'approved', campaign: '4-Bed Detached Duplex — Lekki' },
+  { id: 'CT004', influencer: 'Adaeze Properties', platform: 'TikTok', type: 'Video', date: '2024-11-28', fccpcStatement: false, reviewed: false, status: 'blocked', campaign: '3-Bed Semi-Detached — Gwarinpa' }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('influencer');
+  renderInfluencerTable(INFLUENCERS);
+  renderContentLog();
+});
+
+function renderInfluencerTable(list) {
+  document.getElementById('influencer-tbody').innerHTML = list.map(inf => {
+    const allClear = inf.agreementSigned && inf.briefUploaded && inf.fccpcStatement && inf.contentApproved;
+    return `
+    <tr>
+      <td data-label="Influencer">
+        <div style="font-weight:600;">${inf.name}</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${inf.handle} · ${(inf.followers/1000).toFixed(0)}K followers</div>
+      </td>
+      <td data-label="Platform(s)" style="font-size:0.8125rem;">${inf.platforms.join(', ')}</td>
+      <td data-label="Campaign" style="font-size:0.8125rem;">${inf.campaign}</td>
+      <td data-label="Agreement Signed">${tick(inf.agreementSigned)}</td>
+      <td data-label="Brief Uploaded">${tick(inf.briefUploaded)}</td>
+      <td data-label="FCCPC Statement">
+        ${inf.fccpcStatement
+          ? '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Confirmed</span>'
+          : '<span class="badge" style="background:#fef2f2;color:#ef4444;"><i class="fa-solid fa-xmark"></i> Missing</span>'}
+      </td>
+      <td data-label="Content Status">
+        ${allClear
+          ? '<span class="badge badge-green">Approved for Use</span>'
+          : !inf.agreementSigned
+            ? '<span class="badge" style="background:#fef2f2;color:#ef4444;">No Agreement</span>'
+            : '<span class="badge" style="background:#fef3c7;color:#92400e;">Pending Review</span>'}
+      </td>
+      <td data-label="Actions">
+        <div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+          ${!inf.briefUploaded ? `<button onclick="uploadBrief('${inf.id}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-upload"></i> Upload Brief</button>` : ''}
+          ${inf.briefUploaded && !inf.fccpcStatement ? `<button onclick="confirmFCCPCStatement('${inf.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-shield-halved"></i> Confirm Statement</button>` : ''}
+          ${inf.briefUploaded && inf.fccpcStatement && !inf.contentApproved ? `<button onclick="approveContent('${inf.id}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-check"></i> Approve Content</button>` : ''}
+          ${allClear ? '<span style="font-size:0.75rem;color:var(--green-primary);"><i class="fa-solid fa-circle-check"></i> Ready</span>' : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function tick(v) {
+  return v
+    ? '<i class="fa-solid fa-circle-check" style="color:var(--green-primary);font-size:1.125rem;"></i>'
+    : '<i class="fa-solid fa-circle-xmark" style="color:#ef4444;font-size:1.125rem;"></i>';
+}
+
+function renderContentLog() {
+  document.getElementById('content-log-list').innerHTML = CONTENT_LOG.map(c => `
+    <div style="background:var(--bg-secondary);border-radius:10px;padding:1rem;display:flex;align-items:flex-start;justify-content:space-between;gap:1rem;flex-wrap:wrap;${c.status==='blocked'?'border:1px solid #fecaca;background:#fef2f2;':''}">
+      <div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.25rem;">
+          <strong style="font-size:0.875rem;">${c.influencer}</strong>
+          <span style="font-size:0.75rem;color:var(--text-muted);">· ${c.platform} · ${c.type}</span>
+        </div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Campaign: ${c.campaign} · Date: ${c.date}</div>
+        <div style="display:flex;gap:0.5rem;margin-top:0.5rem;flex-wrap:wrap;">
+          <span class="${c.fccpcStatement ? 'badge badge-green' : 'badge'}" style="${!c.fccpcStatement ? 'background:#fef2f2;color:#ef4444;' : ''}">${c.fccpcStatement ? 'FCCPC Statement ✓' : 'FCCPC Statement Missing'}</span>
+          <span class="${c.reviewed ? 'badge badge-green' : 'badge'}" style="${!c.reviewed ? 'background:#fef3c7;color:#92400e;' : ''}">${c.reviewed ? 'Reviewed ✓' : 'Pending Review'}</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+        <span class="badge ${c.status==='approved'?'badge-green':''}" style="${c.status==='blocked'?'background:#fef2f2;color:#ef4444;':''}">
+          ${c.status.charAt(0).toUpperCase()+c.status.slice(1)}
+        </span>
+        <code style="font-size:0.75rem;color:var(--text-muted);">${c.id}</code>
+      </div>
+    </div>`).join('');
+}
+
+function uploadBrief(id) {
+  const inf = INFLUENCERS.find(i => i.id === id);
+  if (inf) { inf.briefUploaded = true; renderInfluencerTable(INFLUENCERS); }
+  Toast.success('Brief Uploaded', `Content brief for ${inf.name} has been uploaded.`);
+}
+
+function confirmFCCPCStatement(id) {
+  const inf = INFLUENCERS.find(i => i.id === id);
+  if (inf) { inf.fccpcStatement = true; renderInfluencerTable(INFLUENCERS); }
+  Toast.success('FCCPC Statement Confirmed', `Confirmed that all ${inf.name} content includes the FCCPC approval statement.`);
+}
+
+function approveContent(id) {
+  const inf = INFLUENCERS.find(i => i.id === id);
+  if (inf) { inf.contentApproved = true; renderInfluencerTable(INFLUENCERS); }
+  Toast.success('Content Approved', `${inf.name} content is now approved for use.`);
+}
+
+function filterInfluencers(q) {
+  const lq = q.toLowerCase();
+  renderInfluencerTable(INFLUENCERS.filter(i =>
+    i.name.toLowerCase().includes(lq) || i.handle.toLowerCase().includes(lq) || i.campaign.toLowerCase().includes(lq)
+  ));
+}
+
+function openAddInfluencerModal() { document.getElementById('add-influencer-modal').style.display = 'flex'; }
+function closeAddInfluencerModal() { document.getElementById('add-influencer-modal').style.display = 'none'; }
+function openAddContentModal() { Toast.info('Log Content', 'Content logging form available in production platform.'); }
+
+function saveInfluencer() {
+  const name = document.getElementById('inf-name').value.trim();
+  if (!name) { Toast.error('Name Required', 'Please enter the influencer name.'); return; }
+  Toast.success('Influencer Added', `${name} has been added to the influencer registry.`);
+  closeAddInfluencerModal();
+}
+</script>
+</body>
+</html>

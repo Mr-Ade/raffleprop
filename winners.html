@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Past Winners & Draw Archives | RaffleProp</title>
+  <meta name="description" content="See all past RaffleProp winners, draw archives, and property handover documentation. Full transparency.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+<main id="main-content">
+
+<div style="background:linear-gradient(135deg,var(--gold-dark),#a67720);padding:4.5rem 0 3.5rem;margin-top:65px;">
+  <div class="container" style="text-align:center;">
+    <div class="section-label" style="justify-content:center;color:rgba(255,255,255,0.6);"><i class="fa-solid fa-trophy"></i> Hall of Fame</div>
+    <h1 style="font-size:2.5rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-top:0.75rem;">Past Winners</h1>
+    <p style="color:rgba(255,255,255,0.75);max-width:500px;margin:0.875rem auto 0;font-size:1.0625rem;">Every draw is permanently archived. Every winner is publicly announced. Every transfer is documented.</p>
+  </div>
+</div>
+
+<!-- Stats bar -->
+<div style="background:#fff;border-bottom:1px solid var(--border);padding:1.5rem 0;">
+  <div class="container">
+    <div style="display:flex;gap:3rem;justify-content:center;flex-wrap:wrap;">
+      <div style="text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--green-primary);">2</div><div style="font-size:0.875rem;color:var(--text-muted);">Properties Won</div></div>
+      <div style="text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--gold);">₦66M+</div><div style="font-size:0.875rem;color:var(--text-muted);">Total Prize Value</div></div>
+      <div style="text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--green-primary);">100%</div><div style="font-size:0.875rem;color:var(--text-muted);">Transfers Completed</div></div>
+      <div style="text-align:center;"><div style="font-size:2rem;font-weight:900;color:var(--green-primary);">2</div><div style="font-size:0.875rem;color:var(--text-muted);">Live Draw Archives</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- Winners -->
+<section class="section-pad">
+  <div class="container">
+    <div style="display:flex;flex-direction:column;gap:3rem;" id="winners-list"></div>
+  </div>
+</section>
+
+<!-- Draw Transparency -->
+<section class="section-pad" style="background:#fff;">
+  <div class="container">
+    <div style="text-align:center;margin-bottom:2.5rem;">
+      <div class="section-label" style="justify-content:center;"><i class="fa-solid fa-eye"></i> Draw Transparency</div>
+      <h2 style="font-size:2rem;font-weight:900;letter-spacing:-0.02em;">How We Ensure Fairness</h2>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.5rem;max-width:900px;margin:0 auto;">
+      <div style="text-align:center;padding:2rem 1.5rem;">
+        <div style="width:64px;height:64px;background:var(--green-50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;"><i class="fa-solid fa-dice" style="font-size:1.75rem;color:var(--green-primary);"></i></div>
+        <h4 style="font-weight:700;margin-bottom:0.5rem;">Certified RNG</h4>
+        <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.6;">We use Random.org's certified random number generator. The full RNG log is published and verifiable by anyone.</p>
+      </div>
+      <div style="text-align:center;padding:2rem 1.5rem;">
+        <div style="width:64px;height:64px;background:var(--green-50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;"><i class="fa-solid fa-ballot" style="font-size:1.75rem;color:var(--green-primary);"></i></div>
+        <h4 style="font-weight:700;margin-bottom:0.5rem;">Physical Ballot Backup</h4>
+        <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.6;">In addition to digital RNG, a physical ballot draw provides a second layer of verification.</p>
+      </div>
+      <div style="text-align:center;padding:2rem 1.5rem;">
+        <div style="width:64px;height:64px;background:var(--green-50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;"><i class="fa-solid fa-video" style="font-size:1.75rem;color:var(--green-primary);"></i></div>
+        <h4 style="font-weight:700;margin-bottom:0.5rem;">Live Streamed</h4>
+        <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.6;">Every draw is live on YouTube, Facebook, and Instagram. Professional video crew. Permanently archived.</p>
+      </div>
+      <div style="text-align:center;padding:2rem 1.5rem;">
+        <div style="width:64px;height:64px;background:var(--green-50);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;"><i class="fa-solid fa-users" style="font-size:1.75rem;color:var(--green-primary);"></i></div>
+        <h4 style="font-weight:700;margin-bottom:0.5rem;">Independent Witnesses</h4>
+        <p style="font-size:0.875rem;color:var(--text-muted);line-height:1.6;">Lawyer, notary, bank rep, and 2 community witnesses — all unaffiliated with RaffleProp.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const list = document.getElementById('winners-list');
+  if (!list) return;
+  list.innerHTML = MOCK_DATA.winners.map(w => `
+    <div style="background:#fff;border-radius:20px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border-light);">
+      <div style="display:grid;grid-template-columns:350px 1fr;gap:0;" id="winner-card-${w.id}">
+        <div style="position:relative;">
+          <img src="${w.photo}" alt="${w.name}" style="width:100%;height:100%;min-height:300px;object-fit:cover;" loading="lazy">
+          <div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,0.7),transparent);display:flex;align-items:flex-end;padding:1.5rem;">
+            <div>
+              <span class="winner-badge" style="margin-bottom:0.5rem;display:inline-flex;"><i class="fa-solid fa-trophy"></i> Winner</span>
+              <div style="font-size:1.25rem;font-weight:800;color:#fff;">${w.name}</div>
+              <div style="font-size:0.875rem;color:rgba(255,255,255,0.7);"><i class="fa-solid fa-location-dot"></i> ${w.location}</div>
+            </div>
+          </div>
+        </div>
+        <div style="padding:2rem;">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:1rem;margin-bottom:1.5rem;">
+            <div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Won</div>
+              <div style="font-size:1.375rem;font-weight:800;margin-top:0.25rem;">${w.property}</div>
+              <div style="font-size:1.125rem;font-weight:700;color:var(--green-primary);">Worth ${Utils.formatNaira(w.worth)}</div>
+            </div>
+            <div style="text-align:right;">
+              <div style="font-size:0.8125rem;color:var(--text-muted);">Draw Date</div>
+              <div style="font-weight:700;">${w.date}</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.375rem;">Winning Ticket</div>
+              <div style="font-family:monospace;font-weight:700;color:var(--green-primary);">${w.ticketNumber}</div>
+            </div>
+          </div>
+
+          <blockquote style="font-style:italic;color:var(--text-secondary);line-height:1.75;padding:1rem;background:var(--green-50);border-left:3px solid var(--green-primary);border-radius:0 8px 8px 0;margin:0 0 1.5rem;">
+            "${w.testimonial}"
+          </blockquote>
+
+          <div style="display:flex;flex-direction:column;gap:0.625rem;margin-bottom:1.5rem;">
+            <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;color:var(--text-secondary);"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i>Winner identity verified (ID + BVN)</div>
+            <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;color:var(--text-secondary);"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i>Deed of Assignment prepared by property lawyer</div>
+            <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;color:var(--text-secondary);"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i>Property title transferred with Governor's Consent</div>
+            <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;color:var(--text-secondary);"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i>Keys and original documents handed over</div>
+          </div>
+
+          ${w.fccpcWinnerRef ? `<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8125rem;padding:0.625rem 0.875rem;background:var(--green-50);border-radius:8px;margin-bottom:1rem;"><i class="fa-solid fa-shield-halved" style="color:var(--green-primary);flex-shrink:0;"></i><span>FCCPC Winner Submission Reference: <strong style="font-family:monospace;">${w.fccpcWinnerRef}</strong> — Winner details submitted to the FCCPC within 3 days of draw date per FCCPA 2018 §124.</span></div>` : ''}
+          ${w.consentGiven ? `<div style="display:flex;align-items:center;gap:0.5rem;font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;"><i class="fa-solid fa-file-signature" style="color:var(--text-muted);flex-shrink:0;"></i><span>Winner <strong>${w.name}</strong> has provided written consent for their name, location, and testimonial to be displayed publicly (NDPR compliant).</span></div>` : ''}
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
+            <a href="${w.drawVideo}" class="btn btn-primary btn-sm"><i class="fa-solid fa-video"></i> Watch Draw Recording</a>
+            <button onclick="Toast.info('Download', 'Draw archive and ticket registry available after login.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Download Draw Archive</button>
+            <a href="trust-legal.html#draw-archive" class="btn btn-outline btn-sm"><i class="fa-solid fa-list-check"></i> FCCPC Winner List</a>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+
+  // Make responsive
+  document.querySelectorAll('[id^="winner-card-"]').forEach(el => {
+    if (window.innerWidth < 700) el.style.gridTemplateColumns = '1fr';
+  });
+});
+</script>
+</body>
+</html>

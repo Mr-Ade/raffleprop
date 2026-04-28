@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>T&amp;C Acceptance Log | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=t-and-c-acceptance.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item active"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="portal-main" id="main-content">
+    <div class="portal-mobile-header" id="portal-mobile-header">
+      <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+      <div>
+        <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+        <div class="portal-mobile-header-email" id="pmob-email"></div>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+    </div>
+
+    <div style="margin-bottom:1.25rem;">
+      <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;">T&amp;C Acceptance Log</h1>
+      <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">A permanent audit trail of every Terms &amp; Conditions acceptance recorded against your account.</p>
+    </div>
+
+    <!-- Legal notice -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:0.875rem 1rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);flex-shrink:0;margin-top:0.125rem;"></i>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);">
+        <strong>Permanent legal record.</strong> Each entry records your explicit acceptance of the applicable Terms &amp; Conditions, including timestamp, IP address, T&amp;C version, and the specific campaign or platform context. These records are retained under FCCPA 2018 and NDPR 2019 compliance requirements and cannot be deleted.
+      </div>
+    </div>
+
+    <!-- NDPR consent notice -->
+    <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:0.875rem 1rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-info-circle" style="color:#3b82f6;flex-shrink:0;margin-top:0.125rem;"></i>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);">
+        Under the <strong>Nigeria Data Protection Regulation (NDPR) 2019</strong>, you have the right to access records of your consent. This log fulfils RaffleProp's obligation to demonstrate lawful processing under NDPR Article 2.2. To withdraw consent or request data deletion, visit the <a href="data-rights.html" style="color:#3b82f6;font-weight:600;">Data Rights Centre</a>.
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-total">—</div>
+        <div class="stat-label">Total Acceptances</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-versions">—</div>
+        <div class="stat-label">T&amp;C Versions</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--text-primary);" id="stat-latest">—</div>
+        <div class="stat-label">Current Version</div>
+      </div>
+    </div>
+
+    <!-- Acceptance log table -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive" id="tandc-table">
+          <thead>
+            <tr>
+              <th>Date &amp; Time</th>
+              <th>T&amp;C Version</th>
+              <th>Context / Campaign</th>
+              <th>IP Address</th>
+              <th>Device / Browser</th>
+              <th>Action Taken</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="tandc-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Current T&C version panel -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;margin-top:1.5rem;">
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;">Current Terms &amp; Conditions</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem;">
+        <div>
+          <div style="font-size:1rem;font-weight:700;">Platform T&amp;C — Version 3.1</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;">Effective date: 1 March 2024 &nbsp;·&nbsp; Replaces v2.8 (Nov 2023)</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);">Governs all promotional competition entries, ticket purchases, and winner claim procedures.</div>
+        </div>
+        <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+          <a href="terms.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> Read T&amp;C</a>
+          <button onclick="Toast.info('Download T&amp;C PDF','A copy of the current Terms & Conditions v3.1 is being prepared for download.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+const DEMO_LOG = [
+  {
+    id: 'TC001',
+    datetime: new Date(Date.now() - 5 * 86400000).toISOString(),
+    version: 'v3.1',
+    context: 'Ticket Purchase — 4-Bedroom Detached Duplex (Lekki)',
+    ip: '41.58.xxx.xxx',
+    device: 'Chrome 122 / Windows 10',
+    action: 'Explicit checkbox acceptance before purchase',
+    active: true
+  },
+  {
+    id: 'TC002',
+    datetime: new Date(Date.now() - 12 * 86400000).toISOString(),
+    version: 'v3.1',
+    context: 'Ticket Purchase — 3-Bedroom Semi-Detached (Gwarinpa)',
+    ip: '41.58.xxx.xxx',
+    device: 'Chrome 122 / Windows 10',
+    action: 'Explicit checkbox acceptance before purchase',
+    active: true
+  },
+  {
+    id: 'TC003',
+    datetime: new Date(Date.now() - 90 * 86400000).toISOString(),
+    version: 'v3.1',
+    context: 'Account Registration',
+    ip: '41.58.xxx.xxx',
+    device: 'Safari 17 / iPhone iOS 17',
+    action: 'Accepted during registration flow',
+    active: true
+  },
+  {
+    id: 'TC004',
+    datetime: new Date(Date.now() - 220 * 86400000).toISOString(),
+    version: 'v2.8',
+    context: 'Platform T&C Update Notification',
+    ip: '197.210.xxx.xxx',
+    device: 'Firefox 119 / macOS',
+    action: 'Accepted updated T&C via email link',
+    active: false
+  }
+];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const _u = Auth.getUser();
+  if (_u) {
+    const greet = document.getElementById('user-greeting');
+    const emailEl = document.getElementById('user-email');
+    if (greet) greet.textContent = _u.name || 'Account';
+    if (emailEl) emailEl.textContent = _u.email || _u.phone || '';
+  }
+
+  const versions = [...new Set(DEMO_LOG.map(e => e.version))];
+  const latest = versions.sort().reverse()[0];
+
+  document.getElementById('stat-total').textContent = DEMO_LOG.length;
+  document.getElementById('stat-versions').textContent = versions.length;
+  document.getElementById('stat-latest').textContent = latest;
+
+  const tbody = document.getElementById('tandc-tbody');
+  tbody.innerHTML = DEMO_LOG.map(e => {
+    const dt = new Date(e.datetime);
+    const dateStr = dt.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const timeStr = dt.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+    return `
+    <tr>
+      <td data-label="Date &amp; Time">
+        <div style="font-weight:600;font-size:0.875rem;">${dateStr}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);font-family:monospace;">${timeStr} WAT</div>
+      </td>
+      <td data-label="T&amp;C Version">
+        <span class="badge ${e.active ? 'badge-green' : 'badge-gray'}">${e.version}</span>
+        ${e.active ? '<div style="font-size:0.7rem;color:var(--green-primary);margin-top:0.2rem;">Current</div>' : '<div style="font-size:0.7rem;color:var(--text-muted);margin-top:0.2rem;">Superseded</div>'}
+      </td>
+      <td data-label="Context / Campaign"><div style="font-size:0.8125rem;">${e.context}</div></td>
+      <td data-label="IP Address"><code style="font-size:0.8125rem;">${e.ip}</code></td>
+      <td data-label="Device / Browser"><div style="font-size:0.8125rem;color:var(--text-muted);">${e.device}</div></td>
+      <td data-label="Action Taken"><div style="font-size:0.8125rem;">${e.action}</div></td>
+      <td data-label="Status">
+        <div style="display:flex;align-items:center;gap:0.375rem;font-size:0.75rem;">
+          <i class="fa-solid fa-lock" style="color:var(--text-muted);font-size:0.7rem;"></i>
+          <span style="color:var(--text-muted);">Permanent</span>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+});
+</script>
+
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+  <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+  <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+  <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+  <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+  <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+  <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

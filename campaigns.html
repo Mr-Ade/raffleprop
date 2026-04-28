@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>All Campaigns | RaffleProp</title>
+  <meta name="description" content="Browse all active, upcoming, and past property raffle campaigns on RaffleProp. Buy tickets from ₦2,500.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+<main id="main-content">
+
+<!-- Page Header -->
+<div style="background:linear-gradient(135deg,var(--green-primary),#0a3a1e);padding:4rem 0 3rem;margin-top:65px;">
+  <div class="container">
+    <div class="section-label" style="color:rgba(255,255,255,0.6);"><i class="fa-solid fa-trophy"></i> All Campaigns</div>
+    <h1 style="font-size:2.5rem;font-weight:900;color:#fff;letter-spacing:-0.02em;margin-top:0.5rem;">Property Raffle Campaigns</h1>
+    <p style="color:rgba(255,255,255,0.7);margin-top:0.75rem;max-width:500px;">Browse active draws, upcoming launches, and past campaigns. Every draw is live-streamed and publicly verified.</p>
+  </div>
+</div>
+
+<!-- Filter Tabs -->
+<div style="background:#fff;border-bottom:1px solid var(--border);position:sticky;top:65px;z-index:90;">
+  <div class="container">
+    <div style="display:flex;gap:0;overflow-x:auto;scrollbar-width:none;">
+      <button class="filter-tab active" data-filter="all" onclick="filterCampaigns('all',this)" style="padding:1rem 1.5rem;font-size:0.9rem;font-weight:600;white-space:nowrap;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;color:var(--text-muted);transition:all 0.2s;">All Campaigns</button>
+      <button class="filter-tab" data-filter="active" onclick="filterCampaigns('active',this)" style="padding:1rem 1.5rem;font-size:0.9rem;font-weight:600;white-space:nowrap;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;color:var(--text-muted);transition:all 0.2s;">🔴 Active <span id="active-count" style="background:var(--green-50);color:var(--green-primary);padding:0.125rem 0.5rem;border-radius:100px;font-size:0.75rem;margin-left:0.375rem;"></span></button>
+      <button class="filter-tab" data-filter="upcoming" onclick="filterCampaigns('upcoming',this)" style="padding:1rem 1.5rem;font-size:0.9rem;font-weight:600;white-space:nowrap;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;color:var(--text-muted);transition:all 0.2s;">⏰ Upcoming</button>
+      <button class="filter-tab" data-filter="past" onclick="filterCampaigns('past',this)" style="padding:1rem 1.5rem;font-size:0.9rem;font-weight:600;white-space:nowrap;border:none;border-bottom:3px solid transparent;background:none;cursor:pointer;color:var(--text-muted);transition:all 0.2s;">✅ Past Draws</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.filter-tab.active { color: var(--green-primary) !important; border-bottom-color: var(--green-primary) !important; }
+.filter-tab:hover:not(.active) { color: var(--text-primary) !important; background: var(--bg) !important; }
+</style>
+
+<!-- Main Content -->
+<section style="padding:3rem 0 5rem;">
+  <div class="container">
+    <!-- Active campaigns notice -->
+    <div id="filter-label" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem;flex-wrap:wrap;gap:0.75rem;">
+      <div style="font-size:1rem;font-weight:700;color:var(--text-primary);">Showing all campaigns</div>
+      <div style="font-size:0.875rem;color:var(--text-muted);">Draws are live-streamed and independently witnessed</div>
+    </div>
+
+    <!-- Campaign Grid -->
+    <div id="campaigns-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:1.5rem;"></div>
+
+    <!-- Empty state -->
+    <div id="empty-state" style="display:none;text-align:center;padding:5rem 2rem;">
+      <i class="fa-solid fa-search" style="font-size:3rem;color:var(--border);"></i>
+      <h3 style="margin-top:1rem;font-weight:700;color:var(--text-muted);">No campaigns in this category</h3>
+      <p style="color:var(--text-muted);margin-top:0.5rem;">Check back soon for new launches.</p>
+      <button onclick="filterCampaigns('all',document.querySelector('[data-filter=all]'))" class="btn btn-outline" style="margin-top:1.5rem;">View All Campaigns</button>
+    </div>
+
+    <!-- Past draws section -->
+    <div id="past-section" style="display:none;margin-top:4rem;">
+      <div class="section-label"><i class="fa-solid fa-check-circle"></i> Completed Draws</div>
+      <h2 style="font-size:1.5rem;font-weight:800;margin-bottom:1.5rem;">Past Campaigns & Winners</h2>
+      <div id="past-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:1.25rem;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Newsletter signup -->
+<section style="background:linear-gradient(135deg,#fef9c3,#fffbeb);padding:4rem 0;">
+  <div class="container" style="text-align:center;">
+    <h2 style="font-size:1.75rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:0.75rem;">Be First to Know About New Campaigns</h2>
+    <p style="color:var(--text-muted);margin-bottom:1.5rem;">Get notified when new properties are listed. No spam — only campaign announcements.</p>
+    <form onsubmit="handleNewsletterSignup(event)" style="display:flex;gap:0.625rem;max-width:420px;margin:0 auto;flex-wrap:wrap;">
+      <input type="email" placeholder="Your email address" class="form-input" style="flex:1;min-width:200px;" required>
+      <button type="submit" class="btn btn-gold">Notify Me <i class="fa-solid fa-bell"></i></button>
+    </form>
+  </div>
+</section>
+
+</main>
+<div id="footer-placeholder"></div>
+
+<script defer src="js/main.js"></script>
+<script>
+// allCampaigns and pastCampaigns are initialised inside DOMContentLoaded
+// so they run after the deferred main.js has defined MOCK_DATA.
+let allCampaigns;
+let pastCampaigns;
+
+function filterCampaigns(filter, btn) {
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+
+  const grid = document.getElementById('campaigns-grid');
+  const empty = document.getElementById('empty-state');
+  const pastSection = document.getElementById('past-section');
+  const label = document.getElementById('filter-label').querySelector('div');
+
+  pastSection.style.display = 'none';
+
+  let filtered = allCampaigns;
+  if (filter === 'active') filtered = allCampaigns.filter(c => c.status === 'active');
+  else if (filter === 'upcoming') filtered = allCampaigns.filter(c => c.status === 'upcoming');
+  else if (filter === 'past') { filtered = []; pastSection.style.display = 'block'; renderPastGrid(); }
+
+  if (filtered.length === 0 && filter !== 'past') {
+    grid.innerHTML = ''; empty.style.display = 'block';
+    label.textContent = 'No campaigns found';
+  } else {
+    empty.style.display = 'none';
+    grid.innerHTML = filtered.map(c => renderCampaignCard(c)).join('');
+    label.textContent = `Showing ${filtered.length} campaign${filtered.length !== 1 ? 's' : ''}`;
+    ProgressBar.init();
+    Countdown.init();
+  }
+}
+
+function renderPastGrid() {
+  const pg = document.getElementById('past-grid');
+  if (!pg) return;
+  pg.innerHTML = pastCampaigns.map(c => `
+    <div class="campaign-card">
+      <div class="campaign-card-image">
+        <img src="${c.image}" alt="${c.title}" style="height:180px;" loading="lazy">
+        <span class="campaign-status-badge status-draw-complete">Winner Announced</span>
+      </div>
+      <div class="campaign-card-body">
+        <div class="campaign-location"><i class="fa-solid fa-location-dot"></i>${c.location}</div>
+        <div class="campaign-card-title">${c.title}</div>
+        <div class="campaign-worth">${Utils.formatNaira(c.worth)}</div>
+        <div style="margin:0.75rem 0;padding:0.75rem;background:#f0fdf4;border-radius:8px;display:flex;align-items:center;gap:0.75rem;">
+          <i class="fa-solid fa-trophy" style="color:var(--gold);font-size:1.25rem;"></i>
+          <div><div style="font-size:0.8125rem;color:var(--text-muted);">Winner</div><div style="font-weight:700;">${c.winner}</div></div>
+          <div style="margin-left:auto;text-align:right;"><div style="font-size:0.75rem;color:var(--text-muted);">${c.date}</div></div>
+        </div>
+        <a href="winners.html" class="btn btn-outline btn-sm btn-full">View Draw Archive <i class="fa-solid fa-arrow-right"></i></a>
+      </div>
+    </div>`).join('');
+}
+
+function handleNewsletterSignup(e) {
+  e.preventDefault();
+  Toast.success('You\'re on the list!', 'We\'ll notify you of new campaigns and launches.');
+  e.target.reset();
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  // Initialise after main.js (deferred) has run and MOCK_DATA is available
+  allCampaigns = MOCK_DATA.campaigns;
+  pastCampaigns = [
+    { title: '3-Bedroom Terrace, Ikeja GRA', location: 'Ikeja GRA, Lagos', worth: 38000000, winner: 'Adaeze O.', date: 'January 2025', image: MOCK_DATA.winners[0].photo, tickets: 20000, status: 'draw_complete' },
+    { title: '2-Bedroom Flat, Maitama', location: 'Maitama, Abuja', worth: 28000000, winner: 'Tunde B.', date: 'October 2024', image: MOCK_DATA.winners[1].photo, tickets: 15000, status: 'draw_complete' }
+  ];
+
+  // Count active campaigns
+  const activeCount = allCampaigns.filter(c => c.status === 'active').length;
+  const el = document.getElementById('active-count');
+  if (el) el.textContent = activeCount;
+
+  // Check URL filter param
+  const params = new URLSearchParams(window.location.search);
+  const filterParam = params.get('filter');
+  const grid = document.getElementById('campaigns-grid');
+
+  if (filterParam === 'upcoming') {
+    filterCampaigns('upcoming', document.querySelector('[data-filter="upcoming"]'));
+  } else {
+    grid.innerHTML = allCampaigns.filter(c => c.status !== 'draw_complete' && c.status !== 'closed').map(c => renderCampaignCard(c)).join('');
+    ProgressBar.init();
+    Countdown.init();
+  }
+});
+</script>
+</body>
+</html>

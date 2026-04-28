@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Manager | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    /* ── Campaigns page mobile overrides ── */
+    @media (max-width: 540px) {
+      .loc-grid { grid-template-columns: 1fr !important; }
+    }
+    @media (max-width: 640px) {
+      .bundle-price-grid { grid-template-columns: repeat(2,1fr) !important; }
+      /* Property beds/baths/toilets/size grid: 2 cols */
+      .prop-spec-grid { grid-template-columns: repeat(2,1fr) !important; }
+    }
+    @media (max-width: 400px) {
+      .bundle-price-grid { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+        <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Campaign Manager</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Create, edit, and manage all property campaigns</p>
+    </div>
+    <div style="display:flex;gap:0.625rem;align-items:center;flex-wrap:wrap;">
+      <a href="calculator.html" class="btn btn-primary"><i class="fa-solid fa-calculator"></i> New Campaign via Calculator</a>
+      <button onclick="showCampaignForm()" class="btn btn-outline btn-sm" title="Create campaign without running the economics calculator first">Create Without Calculator</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats row -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);">2</div>
+        <div class="stat-label">Active</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--gold);">1</div>
+        <div class="stat-label">Upcoming</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--text-muted);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--text-muted);">3</div>
+        <div class="stat-label">Archived</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);">26,520</div>
+        <div class="stat-label">Total Tickets Sold</div>
+      </div>
+    </div>
+
+    <!-- Campaigns table -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <h3 style="font-size:1rem;font-weight:700;">All Campaigns</h3>
+        <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+          <input type="text" placeholder="Search campaigns..." class="form-input" style="width:220px;" oninput="filterCampaignTable(this.value)">
+          <select class="form-select" style="width:140px;" onchange="filterByStatus(this.value)">
+            <option value="all">All Status</option>
+            <option value="active">Active</option>
+            <option value="upcoming">Upcoming</option>
+            <option value="archived">Archived</option>
+          </select>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Status</th>
+              <th>Tickets</th>
+              <th>Progress</th>
+              <th>Revenue</th>
+              <th>Draw Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="campaigns-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Past campaigns -->
+    <div class="card">
+      <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Archived Campaigns</h3></div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Draw Date</th>
+              <th>Tickets Sold</th>
+              <th>Revenue</th>
+              <th>Winner</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="archived-tbody">
+            <tr>
+              <td><div style="font-weight:600;">3-Bedroom Terrace, Ikeja GRA</div><div style="font-size:0.8125rem;color:var(--text-muted);">Lagos</div></td>
+              <td style="font-size:0.8125rem;">15 Jan 2025</td>
+              <td>20,000 / 20,000</td>
+              <td style="font-weight:700;color:var(--green-primary);">₦50,000,000</td>
+              <td><span class="badge badge-green">Adaeze O. — Enugu</span></td>
+              <td><button onclick="Toast.info('View Archive','Campaign archive loaded.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View</button></td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:600;">2-Bedroom Flat, Victoria Island</div><div style="font-size:0.8125rem;color:var(--text-muted);">Lagos</div></td>
+              <td style="font-size:0.8125rem;">22 Oct 2024</td>
+              <td>10,000 / 10,000</td>
+              <td style="font-weight:700;color:var(--green-primary);">₦25,000,000</td>
+              <td><span class="badge badge-green">Bello K. — Kano</span></td>
+              <td><button onclick="Toast.info('View Archive','Campaign archive loaded.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View</button></td>
+            </tr>
+            <tr>
+              <td><div style="font-weight:600;">4-Bedroom Mansion, Asokoro</div><div style="font-size:0.8125rem;color:var(--text-muted);">Abuja</div></td>
+              <td style="font-size:0.8125rem;">5 Jul 2024</td>
+              <td>30,000 / 30,000</td>
+              <td style="font-weight:700;color:var(--green-primary);">₦90,000,000</td>
+              <td><span class="badge badge-green">Ngozi U. — Anambra</span></td>
+              <td><button onclick="Toast.info('View Archive','Campaign archive loaded.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Campaign Form Modal -->
+<div id="campaign-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);overflow-y:auto;">
+  <div style="max-width:760px;margin:2rem auto;padding:1rem;">
+    <div class="card" style="border-radius:16px;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1.125rem;font-weight:800;" id="form-title">New Campaign</h3>
+        <button onclick="hideCampaignForm()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+      </div>
+      <div class="card-body" style="padding:1.5rem;">
+        <form id="campaign-form" onsubmit="saveCampaign(event)">
+
+          <!-- Section: Basic Info -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Basic Information</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Campaign Title *</label>
+              <input type="text" class="form-input" id="cf-title" placeholder="e.g. 4-Bedroom Detached Duplex" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Status *</label>
+              <select class="form-select" id="cf-status" required>
+                <option value="draft">Draft</option>
+                <option value="upcoming">Upcoming</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+              </select>
+            </div>
+          </div>
+          <!-- Location: cascading State → Area → Address -->
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Property Location *</label>
+            <div class="loc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:0.625rem;">
+              <select class="form-select" id="cf-state" required onchange="onStateChange()">
+                <option value="">— Select State —</option>
+                <option value="Abuja (FCT)">Abuja (FCT)</option>
+                <option value="Abia">Abia State</option>
+                <option value="Adamawa">Adamawa State</option>
+                <option value="Akwa Ibom">Akwa Ibom State</option>
+                <option value="Anambra">Anambra State</option>
+                <option value="Bauchi">Bauchi State</option>
+                <option value="Bayelsa">Bayelsa State</option>
+                <option value="Benue">Benue State</option>
+                <option value="Borno">Borno State</option>
+                <option value="Cross River">Cross River State</option>
+                <option value="Delta">Delta State</option>
+                <option value="Ebonyi">Ebonyi State</option>
+                <option value="Edo">Edo State</option>
+                <option value="Ekiti">Ekiti State</option>
+                <option value="Enugu">Enugu State</option>
+                <option value="Gombe">Gombe State</option>
+                <option value="Imo">Imo State</option>
+                <option value="Jigawa">Jigawa State</option>
+                <option value="Kaduna">Kaduna State</option>
+                <option value="Kano">Kano State</option>
+                <option value="Katsina">Katsina State</option>
+                <option value="Kebbi">Kebbi State</option>
+                <option value="Kogi">Kogi State</option>
+                <option value="Kwara">Kwara State</option>
+                <option value="Lagos">Lagos State</option>
+                <option value="Nasarawa">Nasarawa State</option>
+                <option value="Niger">Niger State</option>
+                <option value="Ogun">Ogun State</option>
+                <option value="Ondo">Ondo State</option>
+                <option value="Osun">Osun State</option>
+                <option value="Oyo">Oyo State</option>
+                <option value="Plateau">Plateau State</option>
+                <option value="Rivers">Rivers State</option>
+                <option value="Sokoto">Sokoto State</option>
+                <option value="Taraba">Taraba State</option>
+                <option value="Yobe">Yobe State</option>
+                <option value="Zamfara">Zamfara State</option>
+              </select>
+              <select class="form-select" id="cf-area" required disabled onchange="syncLocationField()">
+                <option value="">— Select Area / District —</option>
+              </select>
+            </div>
+            <!-- Add custom area -->
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
+              <button type="button" id="add-area-btn" onclick="toggleAddAreaRow()" disabled
+                style="background:none;border:none;color:var(--green-primary);cursor:pointer;font-size:0.75rem;font-weight:600;padding:0;display:flex;align-items:center;gap:0.3rem;opacity:0.5;">
+                <i class="fa-solid fa-circle-plus"></i> Add area not in list
+              </button>
+            </div>
+            <div id="add-area-row" style="display:none;margin-bottom:0.625rem;">
+              <div style="display:flex;gap:0.5rem;align-items:center;background:var(--bg-secondary);border:1px solid var(--border);border-radius:10px;padding:0.625rem 0.75rem;">
+                <i class="fa-solid fa-map-pin" style="color:var(--green-primary);flex-shrink:0;"></i>
+                <input type="text" id="cf-new-area" class="form-input" placeholder="Type new area or neighbourhood name…"
+                  style="flex:1;margin:0;padding:0.375rem 0.625rem;font-size:0.875rem;"
+                  onkeydown="if(event.key==='Enter'){event.preventDefault();addNewArea();}">
+                <button type="button" onclick="addNewArea()" class="btn btn-primary btn-sm" style="white-space:nowrap;">
+                  <i class="fa-solid fa-plus"></i> Add
+                </button>
+                <button type="button" onclick="cancelNewArea()" class="btn btn-outline btn-sm" style="white-space:nowrap;">
+                  Cancel
+                </button>
+              </div>
+            </div>
+            <input type="text" class="form-input" id="cf-address" placeholder="Street address, landmark or property name" required oninput="syncLocationField()">
+            <div class="form-hint">e.g. 24 Aminu Kano Crescent &nbsp;·&nbsp; Plot 5 Block B Nicon Town &nbsp;·&nbsp; After Transcorp Hilton</div>
+            <input type="hidden" id="cf-location">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Property Type</label>
+              <select class="form-select" id="cf-type">
+                <option>Detached Duplex</option>
+                <option>Semi-Detached Duplex</option>
+                <option>Terrace House</option>
+                <option>Apartment / Flat</option>
+                <option>Bungalow</option>
+                <option>Semi-Detached Bungalow</option>
+                <option>Mansion</option>
+                <option>Penthouse</option>
+                <option>Studio Apartment</option>
+                <option>Mini Flat</option>
+                <option>Commercial Property</option>
+                <option>Land / Plot</option>
+                <option>Serviced Apartment</option>
+                <option>Town House</option>
+              </select>
+            </div>
+            <div></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Campaign Description</label>
+            <textarea class="form-textarea" id="cf-description" rows="3" placeholder="Describe the property, neighbourhood, and what makes this draw special..."></textarea>
+          </div>
+
+          <!-- Featured + C of O toggles -->
+          <div style="display:flex;gap:2rem;margin-bottom:1.25rem;flex-wrap:wrap;padding:0.875rem 1rem;background:var(--bg-secondary);border-radius:10px;">
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;font-weight:600;">
+              <input type="checkbox" id="cf-featured" style="width:1rem;height:1rem;accent-color:var(--gold);">
+              <i class="fa-solid fa-star" style="color:var(--gold);"></i>
+              Featured Campaign
+              <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(shows ⭐ Featured badge on campaign card)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;font-weight:600;">
+              <input type="checkbox" id="cf-cof" style="width:1rem;height:1rem;accent-color:var(--green-primary);">
+              <i class="fa-solid fa-certificate" style="color:var(--green-primary);"></i>
+              C of O Confirmed
+              <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(certificate of occupancy verified by legal)</span>
+            </label>
+          </div>
+
+          <!-- Section: Pricing & Tickets -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);margin-top:0.5rem;">Pricing & Tickets</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Ticket Price (₦) *</label>
+              <input type="number" class="form-input" id="cf-ticket-price" placeholder="2500" min="500" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Total Tickets *</label>
+              <input type="number" class="form-input" id="cf-total-tickets" placeholder="25000" min="100" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Min. Threshold *</label>
+              <input type="number" class="form-input" id="cf-min-threshold" placeholder="20000">
+              <div class="form-hint">Below this = full refund</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Property Worth (₦)</label>
+              <input type="number" class="form-input" id="cf-worth" placeholder="95000000">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Max Tickets Per Person</label>
+              <input type="number" class="form-input" id="cf-max-per-person" placeholder="100" value="100">
+            </div>
+          </div>
+
+          <!-- Bundle pricing -->
+          <div style="background:var(--bg-secondary);border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+            <div style="font-size:0.8125rem;font-weight:700;margin-bottom:0.875rem;">Bundle Pricing</div>
+            <div class="bundle-price-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.75rem;">
+              <div>
+                <label class="form-label" style="font-size:0.75rem;">1 ticket (₦)</label>
+                <input type="number" class="form-input" id="cf-b1" value="2500">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem;">5 tickets (₦)</label>
+                <input type="number" class="form-input" id="cf-b5" value="10000">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem;">10 tickets (₦)</label>
+                <input type="number" class="form-input" id="cf-b10" value="18000">
+              </div>
+              <div>
+                <label class="form-label" style="font-size:0.75rem;">20 tickets (₦)</label>
+                <input type="number" class="form-input" id="cf-b20" value="32000">
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: Dates -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Dates</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Launch Date *</label>
+              <input type="date" class="form-input" id="cf-launch-date" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Close Date *</label>
+              <input type="date" class="form-input" id="cf-close-date" required>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Draw Date *</label>
+              <input type="date" class="form-input" id="cf-draw-date" required>
+            </div>
+          </div>
+
+          <!-- Section: Property Details -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Property Details</div>
+          <div class="prop-spec-grid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Bedrooms</label>
+              <input type="number" class="form-input" id="cf-beds" placeholder="4" min="0">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Bathrooms</label>
+              <input type="number" class="form-input" id="cf-baths" placeholder="4" min="0">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Toilets</label>
+              <input type="number" class="form-input" id="cf-toilets" placeholder="5" min="0">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Size (sqm)</label>
+              <input type="number" class="form-input" id="cf-size" placeholder="320">
+            </div>
+          </div>
+
+          <!-- Google Maps Embed URL -->
+          <div class="form-group">
+            <label class="form-label">Google Maps Embed URL <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— optional</span></label>
+            <input type="url" class="form-input" id="cf-map-embed" placeholder="https://www.google.com/maps/embed?pb=...">
+            <div class="form-hint">Go to Google Maps → Share → Embed a map → copy the <code>src</code> URL from the iframe snippet</div>
+          </div>
+
+          <!-- Property Features checkbox grid -->
+          <div class="form-group">
+            <label class="form-label">Property Features</label>
+            <div id="cf-features-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:0.5rem 1rem;padding:1rem;background:var(--bg-secondary);border-radius:10px;margin-bottom:0.625rem;">
+              <!-- Populated by JS -->
+            </div>
+            <div style="display:flex;gap:0.5rem;align-items:center;">
+              <input type="text" id="cf-features-custom" class="form-input" placeholder="Add custom feature..." style="flex:1;" onkeydown="if(event.key==='Enter'){event.preventDefault();addCustomFeature();}">
+              <button type="button" onclick="addCustomFeature()" class="btn btn-outline btn-sm"><i class="fa-solid fa-plus"></i> Add</button>
+            </div>
+            <div id="cf-custom-tags" style="display:flex;flex-wrap:wrap;gap:0.375rem;margin-top:0.5rem;"></div>
+            <input type="hidden" id="cf-features">
+          </div>
+
+          <!-- Image uploader -->
+          <div class="form-group">
+            <label class="form-label">Campaign Images <span style="color:var(--text-muted);font-weight:400;">(first image is the hero)</span></label>
+
+            <!-- Tab switcher -->
+            <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:0.875rem;width:fit-content;">
+              <button type="button" id="img-tab-url" onclick="switchImgTab('url')" style="padding:0.5rem 1rem;font-size:0.8125rem;font-weight:700;background:var(--green-primary);color:#fff;border:none;cursor:pointer;transition:all 0.15s;">
+                <i class="fa-solid fa-link"></i> Paste URL
+              </button>
+              <button type="button" id="img-tab-upload" onclick="switchImgTab('upload')" style="padding:0.5rem 1rem;font-size:0.8125rem;font-weight:700;background:#fff;color:var(--text-muted);border:none;cursor:pointer;transition:all 0.15s;">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload from Device
+              </button>
+            </div>
+
+            <!-- URL input panel -->
+            <div id="img-panel-url">
+              <div style="display:flex;gap:0.625rem;margin-bottom:0.625rem;">
+                <input type="url" id="cf-image-url-input" class="form-input" placeholder="https://images.unsplash.com/photo-..." style="flex:1;">
+                <button type="button" onclick="addImageUrl()" class="btn btn-outline" style="white-space:nowrap;"><i class="fa-solid fa-plus"></i> Add</button>
+              </div>
+              <div class="form-hint" style="margin-bottom:0.5rem;">Press Add or hit Enter to add each image. You can add multiple images.</div>
+            </div>
+
+            <!-- Device upload panel -->
+            <div id="img-panel-upload" style="display:none;">
+              <div id="img-dropzone"
+                style="border:2px dashed var(--border);border-radius:10px;padding:1.75rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;"
+                onclick="document.getElementById('cf-image-file').click()"
+                ondragover="handleDragOver(event)"
+                ondragleave="handleDragLeave(event)"
+                ondrop="handleDrop(event)">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size:2rem;color:var(--text-muted);margin-bottom:0.5rem;display:block;"></i>
+                <div style="font-size:0.875rem;font-weight:600;">Click to browse or drag &amp; drop images</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">PNG, JPG, WebP — up to 10MB each · Multiple files supported</div>
+              </div>
+              <input type="file" id="cf-image-file" style="display:none;" accept="image/*" multiple onchange="handleFileSelect(this.files)">
+            </div>
+
+            <!-- Hidden field stores final value -->
+            <input type="hidden" id="cf-images">
+
+            <!-- Preview grid -->
+            <div id="img-preview-grid" style="display:none;margin-top:1rem;display:flex;flex-wrap:wrap;gap:0.625rem;"></div>
+            <div id="img-empty-hint" style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.5rem;">No images added yet. The first image will be used as the hero/cover image.</div>
+          </div>
+
+          <!-- Section: Property Video -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Property Video</div>
+          <div class="form-group">
+            <label class="form-label">Walkthrough / Showcase Video <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— optional</span></label>
+            <div style="display:flex;gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:0.875rem;width:fit-content;">
+              <button type="button" id="vid-tab-url" onclick="switchVidTab('url')" style="padding:0.5rem 1rem;font-size:0.8125rem;font-weight:700;background:var(--green-primary);color:#fff;border:none;cursor:pointer;transition:all 0.15s;">
+                <i class="fa-solid fa-link"></i> Paste URL
+              </button>
+              <button type="button" id="vid-tab-upload" onclick="switchVidTab('upload')" style="padding:0.5rem 1rem;font-size:0.8125rem;font-weight:700;background:#fff;color:var(--text-muted);border:none;cursor:pointer;transition:all 0.15s;">
+                <i class="fa-solid fa-arrow-up-from-bracket"></i> Upload from Device
+              </button>
+            </div>
+            <div id="vid-panel-url">
+              <input type="url" id="cf-video-url" class="form-input" placeholder="https://www.youtube.com/embed/... or direct .mp4 URL" style="margin-bottom:0.375rem;">
+              <div class="form-hint">YouTube/Vimeo embed URL or a direct hosted .mp4 link. <strong>YouTube:</strong> open the video → Share → Embed → copy the <code>src</code> from the iframe.</div>
+            </div>
+            <div id="vid-panel-upload" style="display:none;">
+              <div id="vid-dropzone"
+                style="border:2px dashed var(--border);border-radius:10px;padding:1.75rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;"
+                onclick="document.getElementById('cf-video-file').click()"
+                ondragover="handleVidDragOver(event)"
+                ondragleave="handleVidDragLeave(event)"
+                ondrop="handleVidDrop(event)">
+                <i class="fa-solid fa-film" style="font-size:2rem;color:var(--text-muted);margin-bottom:0.5rem;display:block;"></i>
+                <div style="font-size:0.875rem;font-weight:600;">Click to browse or drag &amp; drop a video file</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">MP4, MOV, WebM — up to 200MB</div>
+              </div>
+              <input type="file" id="cf-video-file" style="display:none;" accept="video/*" onchange="handleVideoSelect(this.files[0])">
+            </div>
+            <div id="vid-preview" style="display:none;margin-top:0.75rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;display:flex;align-items:center;gap:0.75rem;"></div>
+            <input type="hidden" id="cf-video">
+          </div>
+
+          <!-- Section: Property Documents -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Property Documents</div>
+          <div class="form-group">
+            <label class="form-label">Upload Property Documents <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">— optional</span></label>
+            <div class="form-hint" style="margin-bottom:0.75rem;">Accepted documents: Certificate of Occupancy, Survey Plan, Valuation Report, Title Deed, etc. PDF or Word files up to 20MB each.</div>
+            <div id="doc-dropzone"
+              style="border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s,background 0.2s;"
+              onclick="document.getElementById('cf-doc-file').click()"
+              ondragover="handleDocDragOver(event)"
+              ondragleave="handleDocDragLeave(event)"
+              ondrop="handleDocDrop(event)">
+              <i class="fa-solid fa-file-arrow-up" style="font-size:1.75rem;color:var(--text-muted);margin-bottom:0.375rem;display:block;"></i>
+              <div style="font-size:0.875rem;font-weight:600;">Click to browse or drag &amp; drop documents</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">PDF, DOC, DOCX — multiple files supported</div>
+            </div>
+            <input type="file" id="cf-doc-file" style="display:none;" accept=".pdf,.doc,.docx" multiple onchange="handleDocSelect(this.files)">
+            <div id="doc-list" style="margin-top:0.75rem;display:flex;flex-direction:column;gap:0.5rem;"></div>
+            <input type="hidden" id="cf-documents">
+          </div>
+
+          <!-- Section: Regulatory & Legal -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:1rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Regulatory & Legal</div>
+
+          <!-- FCCPC -->
+          <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#1e40af;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-shield-halved"></i> FCCPC Approval</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Approval Reference</label>
+              <input type="text" class="form-input" id="cf-fccpc-ref" placeholder="e.g. FCCPC/SP/2024/001" style="font-family:monospace;">
+              <div class="form-hint">Issued by FCCPC upon campaign approval</div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Approval Date</label>
+              <input type="date" class="form-input" id="cf-fccpc-date">
+            </div>
+          </div>
+
+          <!-- LSLGA — shown only for Lagos campaigns -->
+          <div id="lslga-section" style="display:none;">
+            <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#6d28d9;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-building-columns"></i> LSLGA Licence <span style="font-size:0.625rem;background:#ede9fe;color:#6d28d9;padding:0.15rem 0.4rem;border-radius:4px;font-weight:700;">Lagos campaigns only</span></div>
+            <div class="form-group" style="margin-bottom:1rem;">
+              <label class="form-label">LSLGA Licence Number</label>
+              <input type="text" class="form-input" id="cf-lslga-ref" placeholder="e.g. LSLGA/2024/RP/001" style="font-family:monospace;">
+              <div class="form-hint">Lagos State Lotteries & Gaming Authority licence number</div>
+            </div>
+          </div>
+
+          <!-- NIESV Valuation -->
+          <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#6d28d9;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-file-certificate"></i> NIESV Valuation</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Valuer's Full Name</label>
+              <input type="text" class="form-input" id="cf-valuation-by" placeholder="e.g. Adeyemi Oluwaseun FNIESV">
+              <div class="form-hint">NIESV-certified surveyor who valued the property</div>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">NIESV Registration Number</label>
+              <input type="text" class="form-input" id="cf-niesv-reg" placeholder="e.g. NIESV/LOS/2019/0847" style="font-family:monospace;">
+            </div>
+          </div>
+
+          <!-- Escrow -->
+          <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#92400e;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-vault"></i> Escrow</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:0.75rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Escrow Bank</label>
+              <input type="text" class="form-input" id="cf-escrow-bank" placeholder="e.g. Stanbic IBTC Bank">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Escrow Account Number</label>
+              <input type="text" class="form-input" id="cf-escrow-acc" placeholder="0123456789">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom:1rem;">
+            <label class="form-label">Escrow Account Type</label>
+            <select class="form-select" id="cf-escrow-type">
+              <option value="Dedicated Escrow/Trust Account">Dedicated Escrow / Trust Account</option>
+              <option value="Blocked Account">Blocked Account</option>
+              <option value="Solicitors Client Account">Solicitors Client Account</option>
+            </select>
+          </div>
+
+          <!-- Legal -->
+          <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:#166534;margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-scale-balanced"></i> Legal</div>
+          <div class="form-group" style="margin-bottom:1.25rem;">
+            <label class="form-label">Lawyer / Solicitor</label>
+            <input type="text" class="form-input" id="cf-lawyer" placeholder="e.g. Babatunde Adewale Esq. (SAN)">
+            <div class="form-hint">Name of the independent property lawyer overseeing the campaign</div>
+          </div>
+
+          <!-- Referral -->
+          <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-muted);margin-bottom:0.625rem;display:flex;align-items:center;gap:0.375rem;"><i class="fa-solid fa-share-nodes"></i> Referral Programme</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem;">
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Referral Cash Reward (₦/referral)</label>
+              <input type="number" class="form-input" id="cf-ref-reward" placeholder="300" value="300">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Free Ticket per N referrals</label>
+              <input type="number" class="form-input" id="cf-ref-ticket-n" placeholder="5" value="5">
+            </div>
+          </div>
+
+          <!-- Section: Mandatory Skill Questions -->
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.5rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border-light);">Mandatory Skill Questions</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;line-height:1.6;">
+            <i class="fa-solid fa-circle-info" style="color:var(--info);margin-right:0.375rem;"></i>
+            Participants must answer one of these questions correctly before buying tickets. Add <strong>at least 5 unique questions</strong> per campaign. Each question needs 4 answer options with one marked as correct. Keep questions non-trivial — avoid answers that are obvious from the campaign page.
+          </div>
+          <div id="skill-questions-list" style="display:flex;flex-direction:column;gap:1.25rem;"></div>
+          <div style="display:flex;align-items:center;gap:1rem;margin-top:1rem;">
+            <button type="button" onclick="addSkillQuestion()" class="btn btn-outline btn-sm">
+              <i class="fa-solid fa-plus"></i> Add Question
+            </button>
+            <div id="skill-q-count" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+          </div>
+
+          <div style="display:flex;gap:0.75rem;justify-content:flex-end;margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--border-light);">
+            <button type="button" onclick="hideCampaignForm()" class="btn btn-outline">Cancel</button>
+            <button type="button" onclick="saveDraft()" class="btn btn-outline"><i class="fa-solid fa-floppy-disk"></i> Save Draft</button>
+            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> Publish Campaign</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+// ── Standard property features list ─────────────────────────────────────────
+const STANDARD_FEATURES = [
+  'Swimming Pool', 'BQ (Boys Quarters)', 'Fitted Kitchen', 'Air Conditioning',
+  'Generator / Inverter', 'Solar Power', 'CCTV & Security', 'Smart Home System',
+  'Gym Room', 'Home Cinema', 'Elevator / Lift', 'Parking (2+ Cars)',
+  'Perimeter Fence', 'Rooftop Terrace', 'Water Heater / Boiler',
+  'Prepaid Meter', 'Internet / Fibre Ready', 'Gate House / Security Post'
+];
+
+// ── Nigerian states + areas data (source: nigerian_states_with_cities_2025-04-01.json)
+const NG_LOCATIONS = {
+  'Abuja (FCT)': ['Abaji','Abuja Municipal','Apo District','Asokoro','Bwari','Central Business District','Dakibiyu','Dakwo District','Dei-Dei','Duboyi','Durumi','Dutse-Alhaji','Gaduwa','Galadimawa','Garki 1','Garki 2','Gudu','Guzape District','Gwagwa','Gwagwalada','Gwarinpa','Idu Industrial','Jabi','Jahi','Jikwoyi','Jiwa','Kabusa','Kado','Karmo','Karshi','Karu','Katampe','Kaura','Kpeyegyi','Kubwa','Kuchigoro','Kuje','Kurudu','Kwali','Lokogoma','Lugbe District','Mabushi','Maitama','Mbora','Mpape','Nyanya','Okanje','Orozo','Others','Pyakasa','Sabo Gida','Utako','Wumba','Wuse','Wuse 2','Wuye','Zuba'],
+  'Abia': ['Aba North','Aba South','Arochukwu','Bende','Ikwuano','Isiala Ngwa','Isuikwuato','Obi Ngwa','Ohafia','Osisioma Ngwa','Others','Ugwunagbo','Ukwa','Umuahia','Umu Nneochi'],
+  'Adamawa': ['Demsa','Fufore','Ganye','Girei','Gombi','Guyuk','Hong','Jada','Lamurde','Madagali','Maiha','Mayo-Belwa','Michika','Mubi North','Mubi South','Numan','Others','Shelleng','Song','Toungo','Yola North','Yola South'],
+  'Akwa Ibom': ['Abak','Eastern Obolo','Eket','Esit-Eket','Essien Udim','Etim-Ekpo','Etinan','Ibeno','Ibesikpo Asutan','Ibiono Ibom','Ika','Ikono','Ikot Abasi','Ikot Ekpene','Ini','Itu','Mbo','Mkpat Enin','Nsit Atai','Nsit Ibom','Nsit Ubium','Oron','Others','Uyo'],
+  'Anambra': ['Aghamelu','Aguata','Anambra East','Anambra West','Anaocha','Awka','Ayamelum','Dunukofia','Ekwusigo','Idemili','Ihiala','Njikoka','Nnewi','Ogbaru','Onitsha','Orumba','Others','Oyi'],
+  'Bauchi': ['Alkaleri','Bauchi LGA','Bogoro','Damban','Darazo','Dass','Gamawa','Ganjuwa','Giade','Itas/Gadau',"Jama'are",'Katagum','Kirfi','Misau','Ningi','Others','Shira','Toro','Warji','Zaki'],
+  'Bayelsa': ['Brass','Ekeremor','Kolokuma/Opokuma','Nembe','Ogbia','Others','Sagbama','Southern Ijaw','Yenagoa'],
+  'Benue': ['Ado','Agatu','Apa','Buruku','Gboko','Guma','Gwer','Katsina-Ala','Konshisha','Kwande','Logo','Makurdi','Obi','Ogbadibo','Ohimini','Oju','Okpokwu','Others','Otukpo','Tarka','Ukum','Ushongo','Vandeikya'],
+  'Borno': ['Abadam','Askira/Uba','Bama','Bayo','Biu','Chibok','Damboa','Dikwa','Gubio','Guzamala','Gwoza','Hawul','Jere','Kaga','Kala/Balge','Konduga','Kukawa','Kwaya Kusar','Mafa','Magumeri','Maiduguri','Marte','Mobbar','Monguno','Ngala','Nganzai','Others','Shani'],
+  'Cross River': ['Abi','Akamkpa','Akpabuyo','Bakassi','Bekwara','Biase','Boki','Calabar','Etung','Ikom','Obanliku','Obubra','Obudu','Odukpani','Ogoja','Others','Yakuur','Yala'],
+  'Delta': ['Aniocha North','Aniocha South','Bomadi','Burutu','Ethiope East','Ethiope West','Ika North East','Ika South','Isoko','Ndokwa East','Ndokwa West','Okpe','Oshimili North','Oshimili South','Others','Patani','Sapele','Udu','Ugheli','Ukwuani','Uvwie','Warri'],
+  'Ebonyi': ['Abakaliki','Afikpo North','Afikpo South','Ebonyi','Ezza','Ikwo','Ishielu','Ivo','Izzi','Ohaozara','Ohaukwu','Onicha','Others'],
+  'Edo': ['Akoko-Edo','Auchi','Benin City','Egor','Ekpoma','Esan North East','Fugar','Igueben','Ikpoba-Okha','Irrua','Okada','Orhionmwon','Others','Ovia South','Owan','Ubiaja','Uhunmwonde'],
+  'Ekiti': ['Ado Ekiti','Aiyekire (Gbonyin)','Aramoko','Efon','Emure','Ido-Osi','Ijero','Ikere','Ikole','Ilawe','Ilejemeje','Irepodun/Ifelodun','Ise/Orun','Moba','Omuo','Others','Oye'],
+  'Enugu': ['Aninri','Awgu','Enugu','Ezeagu','Igbo-Etiti','Igbo-Eze North','Igbo Eze South','Isi-Uzo','Nkanu East','Nkanu West','Nsukka','Oji-River','Others','Udenu','Udi','Uzo-Uwani'],
+  'Gombe': ['Akko','Balanga','Billiri','Dukku','Funakaye','Gombe LGA','Kaltungo','Kwami','Nafada','Others','Shomgom','Yamaltu/Deba'],
+  'Imo': ['Aboh-Mbaise','Ahiazu-Mbaise','Ehime-Mbano','Ezinihitte','Ezinihitte Mbaise','Ideato North','Ideato South','Ihitte/Uboma','Ikeduru','Isiala Mbano','Isu','Mbaitoli','Ngor-Okpala','Njaba','Nkwerre','Nwangele','Obowo','Oguta','Ohaji/Egbema','Okigwe','Onuimo','Orlu','Orsu','Oru','Others','Owerri'],
+  'Jigawa': ['Auyo','Babura','Biriniwa','Buji','Dutse-Jigawa','Gagarawa','Garki','Gumel','Guri','Gwaram','Gwiwa','Hadejia','Jahun','Kafin Hausa','Kaugama','Kazaure','Kiri Kasamma','Kiyawa','Maigatari','Malam Madori','Miga','Others','Ringim','Roni','Sule-Tankarkar','Taura','Yankwashi'],
+  'Kaduna': ['Birnin-Gwari','Chikun','Giwa','Igabi','Ikara','Jaba',"Jema'a",'Kachia','Kaduna / Kaduna State','Kagarko','Kajuru','Kaura-Kaduna','Kauru','Kubau','Kudan','Lere','Makarfi','Others','Sanga','Soba','Zango-Kataf','Zaria'],
+  'Kano': ['Ajingi','Albasu','Bagwai','Bebeji','Bichi','Bunkure','Dala','Dambatta','Dawakin Kudu','Dawakin Tofa','Doguwa','Fagge','Gabasawa','Garko','Garum Mallam','Garun Mallam','Gaya','Gezawa','Gwale','Gwarzo','Kabo','Kano Municipal','Karaye','Kibiya','Kiru','Kumbotso','Kunchi','Kura','Madobi','Makoda','Minjibir','Nasarawa-Kano','Others','Rano','Rimin Gado','Rogo','Shanono','Sumaila','Takai','Tarauni','Tofa','Tsanyawa','Tudun Wada','Ungogo','Warawa','Wudil'],
+  'Katsina': ['Bakori','Batagarawa','Batsari','Baure','Bindawa','Charanchi','Dandume','Danja','Dan Musa','Daura','Dutsi','Dutsin-Ma','Faskari','Funtua','Ingawa','Jibia','Kafur','Kaita','Kankara','Kankia','Katsina','Kurfi','Kusada',"Mai'adua",'Malumfashi','Mani','Mashi','Matazu','Musawa','Others','Rimi','Sabuwa','Safana','Sandamu','Zango'],
+  'Kebbi': ['Aleiro','Arewa-Dandi','Argungu','Augie','Bagudo','Birnin Kebbi','Bunza','Dandi','Fakai','Gwandu','Jega','Kalgo','Koko/Besse','Maiyama','Ngaski','Others','Sakaba','Shanga','Suru','Wasagu/Danko','Yauri','Zuru'],
+  'Kogi': ['Adavi','Ajaokuta','Ankpa','Bassa','Dekina','Ibaji','Idah','Igala Mela','Igalamela-Odolu','Ijumu','Kabba/Bunu','Kogi LGA','Koton Karfe','Lokoja','Mopa-Muro','Ofu','Ogori/Magongo','Okehi','Okene','Olamaboro','Omala','Others','Yagba East','Yagba West'],
+  'Kwara': ['Asa','Baruten','Edu','Ekiti-Kwara','Ifelodun-Kwara','Ilorin East','Ilorin South','Ilorin West','Irepodun-Kwara','Isin','Kaiama','Moro','Offa','Oke-Ero','Others','Oyun','Pategi'],
+  'Lagos': ['Abule Egba','Agbara-Igbesan','Agboyi/Ketu','Agege','Ajah','Ajeromi-Ifelodun','Alimosho','Amuwo-Odofin','Apapa','Badagry','Egbe/Idimu','Ejigbo','Eko Atlantic','Epe','Eti-Osa','Gbagada','Ibeju','Ibeju/Lekki','Ifako-Ijaiye','Ifako-Ijaye','Ikeja','Ikorodu','Ikotun/Igando','Ikoyi','Ilashe','Ilupeju','Ipaja','Isolo','Kosofe','Lagos Island','Lagos Island (Eko)','Lagos Mainland','Lekki','Magodo','Maryland','Mushin','Ogba','Ogudu','Ojo','Ojodu','Ojota','Orile','Oshodi','Oshodi-Isolo','Others','Shomolu','Surulere','Tarkwa Bay Island','Victoria Island','Yaba'],
+  'Nasarawa': ['Akwanga','Awe','Doma','Karu-Nasarawa','Keana','Keffi','Kokona','Lafia','Mararaba','Masaka','Nasarawa','Nasarawa-Eggon','Obi-Nasarawa','Others','Toto','Wamba'],
+  'Niger': ['Agaie','Agwara','Bida','Borgu','Bosso','Chanchaga','Edati','Gbako','Gurara','Katcha','Kontagora','Lapai','Lavun','Magama','Mariga','Mashegu','Minna','Mokwa','Muya','Others','Paikoro','Rafi','Rijau','Shiroro','Suleja','Tafa','Wushishi'],
+  'Ogun': ['Abeokuta North','Abeokuta South','Ado-Odo/Ota','Ayetoro','Ewekoro','Ifo','Ijebu','Ijebu East','Ijebu North','Ijebu North East','Ijebu Ode','Ikenne','Ilaro','Imeko Afon','Imeko-Afon','Ipokia','Iseri','Obafemi-Owode','Odeda','Odogbolu','Ogun Waterside','Others','Pakuro','Remo North','Sagamu','Yewa North','Yewa South'],
+  'Ondo': ['Akungba','Akure','Ese-Odo','Idanre','Ifedore','Iju/Itaogbolu','Ikare Akoko','Ilaje','Ile-Oluji-Okeigbo','Irele','Isua','Odigbo','Oka','Okeagbe','Okeigbo','Okitipupa','Ondo','Ose','Others','Owo'],
+  'Osun': ['Aiyedade','Aiyedire','Atakumosa East','Atakumosa West','Boluwaduro','Boripe','Ede','Egbedore','Ife','Ifedayo','Ifelodun-Osun','Ikirun','Ila','Ilesa','Irepodun-Osun','Irewole','Isokan','Iwo','Obokun','Ola-Oluwa','Olorunda-Osun','Oriade','Orolu','Osogbo','Others'],
+  'Oyo': ['Afijio','Akinyele','Atiba','Atisbo','Ayete','Egbeda','Eruwa','Ibadan','Ido','Igbo Ora','Irepo','Iseyin','Itesiwaju','Iwajowa','Kajola','Lagelu','Ogbomosho North','Ogbomosho South','Ogo Oluwa','Olorunsogo','Oluyole','Ona-Ara','Orelope','Ori Ire','Others','Oyo','Saki East','Saki West','Surulere-Oyo'],
+  'Plateau': ['Barkin Ladi','Bassa-Plateau','Bokkos','Jos','Kanam','Kanke','Langtang North','Langtang South','Mangu','Mikang','Others','Pankshin','Quaan Pan','Riyom','Shendam','Wase'],
+  'Rivers': ['Abua/Odual','Ahoada','Akuku Toru','Andoni','Asari-Toru','Bonny','Degema','Eleme','Emohua','Etche','Gokana','Ikwerre','Khana','Obio-Akpor','Ogba/Egbema/Ndoni','Ogu/Bolo','Okrika','Omuma','Others','Oyigbo','Port Harcourt','Tai'],
+  'Sokoto': ['Binji','Bodinga','Dange-Shuni','Gada','Goronyo','Gudu LGA','Gwadabawa','Illela','Isa','Kebbe','Kware','Others','Rabah','Sabon Birni','Shagari','Silame','Sokoto North','Sokoto South','Tambuwal','Tangaza','Tureta','Wamako','Wurno','Yabo'],
+  'Taraba': ['Ardo-Kola','Bali','Donga','Gashaka','Gassol','Ibi','Jalingo','Karim-Lamido','Kurmi','Lau','Others','Sardauna','Takum','Ussa','Wukari','Yorro','Zing'],
+  'Yobe': ['Bade','Bursari','Damaturu','Fika','Fune','Geidam','Gujba','Gulani','Jakusko','Karasuwa','Machina','Nangere','Nguru','Others','Potiskum','Tarmua','Yunusari','Yusufari'],
+  'Zamfara': ['Anka','Bakura','Birnin Magaji','Bukkuyum','Bungudu','Gummi','Gusau','Kaura Namoda','Maradun','Maru','Others','Shinkafi','Talata Mafara','Tsafe','Zurmi']
+};
+
+// ── Location cascade helpers ──────────────────────────────────────────────────
+function onStateChange() {
+  const state = document.getElementById('cf-state').value;
+  const areaEl = document.getElementById('cf-area');
+  areaEl.innerHTML = '<option value="">— Select Area / District —</option>';
+  if (state && NG_LOCATIONS[state]) {
+    NG_LOCATIONS[state].forEach(a => {
+      const o = document.createElement('option');
+      o.value = a; o.textContent = a;
+      areaEl.appendChild(o);
+    });
+    areaEl.disabled = false;
+  } else {
+    areaEl.disabled = true;
+  }
+  // Enable / style the "Add area" button
+  const addBtn = document.getElementById('add-area-btn');
+  addBtn.disabled = !state;
+  addBtn.style.opacity = state ? '1' : '0.5';
+  // Show LSLGA section only for Lagos campaigns
+  const lslgaSection = document.getElementById('lslga-section');
+  if (lslgaSection) lslgaSection.style.display = (state === 'Lagos') ? '' : 'none';
+  // Hide the add-area panel if state changed
+  cancelNewArea();
+  syncLocationField();
+}
+
+// ── Custom area management ────────────────────────────────────────────────────
+function toggleAddAreaRow() {
+  const row = document.getElementById('add-area-row');
+  const visible = row.style.display !== 'none';
+  row.style.display = visible ? 'none' : '';
+  if (!visible) document.getElementById('cf-new-area').focus();
+}
+
+function cancelNewArea() {
+  document.getElementById('add-area-row').style.display = 'none';
+  document.getElementById('cf-new-area').value = '';
+}
+
+function addNewArea() {
+  const input = document.getElementById('cf-new-area');
+  const val = input.value.trim();
+  if (!val) return;
+  const state = document.getElementById('cf-state').value;
+  if (!state) return;
+  const areaEl = document.getElementById('cf-area');
+
+  // Prevent duplicates (case-insensitive)
+  const already = Array.from(areaEl.options).some(o => o.value.toLowerCase() === val.toLowerCase());
+  if (already) {
+    Toast.warning('Already in list', `"${val}" already exists for ${state}.`);
+    return;
+  }
+
+  // Insert into dropdown before "Others" (if present) so list stays tidy
+  const opt = document.createElement('option');
+  opt.value = val;
+  opt.textContent = val;
+  const othersOpt = Array.from(areaEl.options).find(o => o.value === 'Others');
+  if (othersOpt) areaEl.insertBefore(opt, othersOpt);
+  else areaEl.appendChild(opt);
+
+  // Also update the in-memory NG_LOCATIONS so re-selecting the state shows it
+  if (!NG_LOCATIONS[state]) NG_LOCATIONS[state] = [];
+  const idx = NG_LOCATIONS[state].indexOf('Others');
+  if (idx >= 0) NG_LOCATIONS[state].splice(idx, 0, val);
+  else NG_LOCATIONS[state].push(val);
+
+  // Persist to localStorage so it survives page reload
+  saveCustomArea(state, val);
+
+  // Select the new area and sync
+  areaEl.value = val;
+  cancelNewArea();
+  syncLocationField();
+  Toast.success('Area added', `"${val}" added to ${state}.`);
+}
+
+function saveCustomArea(state, area) {
+  const data = JSON.parse(localStorage.getItem('rp_custom_areas') || '{}');
+  if (!data[state]) data[state] = [];
+  if (!data[state].includes(area)) data[state].push(area);
+  localStorage.setItem('rp_custom_areas', JSON.stringify(data));
+}
+
+function loadCustomAreas() {
+  const data = JSON.parse(localStorage.getItem('rp_custom_areas') || '{}');
+  Object.entries(data).forEach(([state, areas]) => {
+    if (!NG_LOCATIONS[state]) return;
+    areas.forEach(area => {
+      if (!NG_LOCATIONS[state].includes(area)) {
+        const idx = NG_LOCATIONS[state].indexOf('Others');
+        if (idx >= 0) NG_LOCATIONS[state].splice(idx, 0, area);
+        else NG_LOCATIONS[state].push(area);
+      }
+    });
+  });
+}
+
+function syncLocationField() {
+  const state = document.getElementById('cf-state').value;
+  const area  = document.getElementById('cf-area').value;
+  const addr  = document.getElementById('cf-address').value.trim();
+  // Format: "Street Address, Area, State"
+  document.getElementById('cf-location').value = [addr, area, state].filter(Boolean).join(', ');
+}
+
+function setLocationFields(state, area, address) {
+  const stateEl = document.getElementById('cf-state');
+  stateEl.value = state;
+  onStateChange();                             // populate area list
+  if (area) document.getElementById('cf-area').value = area;
+  if (address) document.getElementById('cf-address').value = address;
+  syncLocationField();
+}
+
+function parseAndSetLocation(locationStr) {
+  if (!locationStr) return;
+  const parts = locationStr.split(', ');
+  if (parts.length >= 3) {
+    const state   = parts[parts.length - 1];
+    const area    = parts[parts.length - 2];
+    const address = parts.slice(0, parts.length - 2).join(', ');
+    setLocationFields(state, area, address);
+  } else if (parts.length === 2) {
+    const state      = parts[1].trim();
+    const areaOrAddr = parts[0].trim();
+    const areas      = NG_LOCATIONS[state] || [];
+    if (areas.includes(areaOrAddr)) {
+      setLocationFields(state, areaOrAddr, '');
+    } else {
+      setLocationFields(state, '', areaOrAddr);
+    }
+  } else {
+    document.getElementById('cf-address').value = locationStr;
+    syncLocationField();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('campaigns');
+  loadCustomAreas();
+  renderCampaignsTable(MOCK_DATA.campaigns);
+
+  // Build features grid
+  const grid = document.getElementById('cf-features-grid');
+  if (grid) {
+    grid.innerHTML = STANDARD_FEATURES.map(f => `
+      <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.8125rem;">
+        <input type="checkbox" value="${f}" onchange="syncFeaturesField()" style="width:0.9rem;height:0.9rem;accent-color:var(--green-primary);flex-shrink:0;">
+        ${f}
+      </label>`).join('');
+  }
+
+  // Set today as default launch date
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('cf-launch-date').value = today;
+
+  // Skill questions: start with 5 empty slots
+  for (let i = 0; i < 5; i++) addSkillQuestion();
+
+  // Check for params
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('edit')) {
+    const camp = Utils.getCampaign(params.get('edit'));
+    if (camp) populateForm(camp);
+  } else if (params.get('from') === 'calculator') {
+    // Calculator-gated flow: pre-populate locked pricing fields
+    const calcVals = JSON.parse(localStorage.getItem('rp_calc_values') || 'null');
+    if (calcVals) {
+      showCampaignForm();
+      prefillFromCalculator(calcVals);
+      localStorage.removeItem('rp_calc_values');
+    }
+  }
+});
+
+// ── Calculator prefill ───────────────────────────────────────────────────────
+function prefillFromCalculator(v) {
+  // Set field values
+  const priceEl = document.getElementById('cf-ticket-price');
+  const totalEl = document.getElementById('cf-total-tickets');
+  const threshEl = document.getElementById('cf-min-threshold');
+  if (priceEl) { priceEl.value = v.ticketPrice; priceEl.disabled = true; }
+  if (totalEl) { totalEl.value = v.totalTickets; totalEl.disabled = true; }
+  if (threshEl) { threshEl.value = v.minThreshold; threshEl.disabled = true; }
+
+  // Show info banner at top of modal form
+  const form = document.getElementById('campaign-form');
+  if (form) {
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#eff6ff;border:1px solid #3b82f6;border-radius:10px;padding:0.75rem 1rem;margin-bottom:1.25rem;display:flex;align-items:flex-start;gap:0.625rem;';
+    banner.innerHTML = `
+      <i class="fa-solid fa-calculator" style="color:#3b82f6;margin-top:0.1rem;flex-shrink:0;"></i>
+      <div>
+        <div style="font-size:0.875rem;font-weight:700;color:#1d4ed8;">Values Pre-filled from Profit Calculator</div>
+        <div style="font-size:0.8125rem;color:#3b82f6;margin-top:0.2rem;">Ticket price, total cap, and minimum threshold are locked. Projected gross: ${Utils.formatNaira(v.grossRevenue || 0)} · Net profit: ${Utils.formatNaira(v.netProfit || 0)}.</div>
+        <button type="button" onclick="unlockCalcFields(this)" style="font-size:0.75rem;color:#3b82f6;background:none;border:none;cursor:pointer;padding:0;margin-top:0.25rem;text-decoration:underline;">Unlock fields</button>
+      </div>`;
+    form.insertBefore(banner, form.firstChild);
+  }
+}
+
+function unlockCalcFields(btn) {
+  ['cf-ticket-price', 'cf-total-tickets', 'cf-min-threshold'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.disabled = false;
+  });
+  const banner = btn.closest('div[style*="background:#eff6ff"]');
+  if (banner) banner.remove();
+  Toast.info('Fields Unlocked', 'Pricing fields can now be edited manually.');
+}
+
+// ── Table helpers ────────────────────────────────────────────────────────────
+function filterCampaignTable(q) {
+  const rows = document.querySelectorAll('#campaigns-tbody tr');
+  rows.forEach(row => {
+    row.style.display = row.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+function filterByStatus(status) {
+  const rows = document.querySelectorAll('#campaigns-tbody tr');
+  rows.forEach(row => {
+    if (status === 'all') { row.style.display = ''; return; }
+    row.style.display = row.textContent.toLowerCase().includes(status) ? '' : 'none';
+  });
+}
+
+// ── Modal open/close ─────────────────────────────────────────────────────────
+function showCampaignForm(editId) {
+  document.getElementById('campaign-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function hideCampaignForm() {
+  document.getElementById('campaign-modal').style.display = 'none';
+  document.body.style.overflow = '';
+  document.getElementById('campaign-form').reset();
+  // Reset location cascade
+  document.getElementById('cf-area').innerHTML = '<option value="">— Select Area / District —</option>';
+  document.getElementById('cf-area').disabled = true;
+  document.getElementById('cf-location').value = '';
+  // Reset LSLGA section
+  const lslgaSection = document.getElementById('lslga-section');
+  if (lslgaSection) lslgaSection.style.display = 'none';
+  // Reset image state
+  imageEntries = [];
+  renderImagePreviews();
+  // Reset video state
+  videoEntry = null;
+  renderVidPreview();
+  // Reset doc state
+  docEntries = [];
+  renderDocList();
+  // Reset features
+  document.querySelectorAll('#cf-features-grid input').forEach(cb => cb.checked = false);
+  document.getElementById('cf-custom-tags').innerHTML = '';
+  syncFeaturesField();
+  // Reset skill questions
+  skillQuestions = [];
+  renderSkillQuestions();
+  for (let i = 0; i < 5; i++) addSkillQuestion();
+}
+
+function saveDraft() {
+  Toast.success('Draft Saved', 'Campaign saved as draft. You can publish it later.');
+  hideCampaignForm();
+}
+
+function saveCampaign(e) {
+  e.preventDefault();
+  if (skillQuestions.length < 5) {
+    Toast.error('Skill Questions Required', 'Please add at least 5 skill questions before publishing.');
+    return;
+  }
+  if (!getSkillQuestionsValid()) {
+    Toast.error('Incomplete Questions', 'Each question must have question text, all 4 options filled, and a correct answer selected.');
+    return;
+  }
+  const title = document.getElementById('cf-title').value;
+  Toast.success('Campaign Published!', `"${title}" is now live and accepting ticket purchases.`);
+  hideCampaignForm();
+}
+
+function populateForm(camp) {
+  document.getElementById('form-title').textContent = 'Edit Campaign';
+  document.getElementById('cf-title').value = camp.title || '';
+  document.getElementById('cf-status').value = camp.status || 'draft';
+  parseAndSetLocation(camp.location || '');
+  document.getElementById('cf-ticket-price').value = camp.ticketPrice || '';
+  document.getElementById('cf-total-tickets').value = camp.totalTickets || '';
+  document.getElementById('cf-worth').value = camp.worthValue || '';
+  document.getElementById('cf-beds').value = camp.beds || '';
+  document.getElementById('cf-baths').value = camp.baths || '';
+  document.getElementById('cf-description').value = camp.description || '';
+  document.getElementById('cf-featured').checked = !!camp.featured;
+  document.getElementById('cf-cof').checked = !!camp.cOfO;
+  document.getElementById('cf-map-embed').value = camp.mapEmbed || '';
+  // Property type — try to match option text
+  const typeSelect = document.getElementById('cf-type');
+  const matchOpt = Array.from(typeSelect.options).find(o => o.text.toLowerCase().includes((camp.type || '').toLowerCase()));
+  if (matchOpt) typeSelect.value = matchOpt.value;
+  if (camp.bundles) {
+    document.getElementById('cf-b1').value = camp.bundles[0]?.price || camp.bundles[1] || 2500;
+    document.getElementById('cf-b5').value = camp.bundles[1]?.price || camp.bundles[5] || 10000;
+    document.getElementById('cf-b10').value = camp.bundles[2]?.price || camp.bundles[10] || 18000;
+    document.getElementById('cf-b20').value = camp.bundles[3]?.price || camp.bundles[20] || 32000;
+  }
+  // Features
+  if (camp.features && camp.features.length) {
+    camp.features.forEach(f => {
+      const cb = document.querySelector(`#cf-features-grid input[value="${f}"]`);
+      if (cb) {
+        cb.checked = true;
+      } else {
+        // Add as custom tag
+        const container = document.getElementById('cf-custom-tags');
+        const tag = document.createElement('span');
+        tag.className = 'badge badge-gray';
+        tag.style.cssText = 'display:inline-flex;align-items:center;gap:0.3rem;cursor:default;';
+        tag.innerHTML = `${f} <button type="button" onclick="this.parentElement.remove();syncFeaturesField()" style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:inherit;padding:0;">&times;</button>`;
+        container.appendChild(tag);
+      }
+    });
+    syncFeaturesField();
+  }
+  // Regulatory & Legal fields
+  document.getElementById('cf-fccpc-ref').value = camp.fccpcRef || '';
+  document.getElementById('cf-fccpc-date').value = camp.fccpcApprovalDate || '';
+  document.getElementById('cf-lslga-ref').value = camp.lslgaRef || '';
+  document.getElementById('cf-valuation-by').value = camp.valuationBy || '';
+  document.getElementById('cf-niesv-reg').value = camp.nisvRegNo || '';
+  document.getElementById('cf-escrow-bank').value = camp.escrowBank || '';
+  document.getElementById('cf-escrow-acc').value = camp.escrowAccount || '';
+  document.getElementById('cf-escrow-type').value = camp.escrowAccountType || 'Dedicated Escrow/Trust Account';
+  document.getElementById('cf-lawyer').value = camp.lawyer || '';
+  // Show LSLGA section if this is a Lagos campaign
+  const lslgaSection = document.getElementById('lslga-section');
+  if (lslgaSection) lslgaSection.style.display = camp.isLagos ? '' : 'none';
+  // Images
+  if (camp.images && camp.images.length) loadCampaignImages(camp.images);
+  // Skill questions
+  skillQuestions = [];
+  if (camp.skillQuestions && camp.skillQuestions.length) {
+    skillQuestions = camp.skillQuestions.map(q => ({
+      question: q.question || '',
+      options: q.options && q.options.length === 4 ? q.options : ['', '', '', ''],
+      correctIndex: typeof q.correctIndex === 'number' ? q.correctIndex : 0
+    }));
+  } else if (camp.skillQuestion) {
+    // Migrate legacy single question
+    const sq = camp.skillQuestion;
+    skillQuestions = [{
+      question: sq.q || '',
+      options: sq.options && sq.options.length === 4 ? sq.options : ['', '', '', ''],
+      correctIndex: sq.options ? sq.options.indexOf(sq.a) : 0
+    }];
+    // Pad to 5
+    while (skillQuestions.length < 5) skillQuestions.push({ question: '', options: ['', '', '', ''], correctIndex: 0 });
+  } else {
+    for (let i = 0; i < 5; i++) skillQuestions.push({ question: '', options: ['', '', '', ''], correctIndex: 0 });
+  }
+  renderSkillQuestions();
+  showCampaignForm();
+}
+
+// Close modal on backdrop click
+document.getElementById('campaign-modal').addEventListener('click', function(e) {
+  if (e.target === this) hideCampaignForm();
+});
+
+// ── Property Features helpers ────────────────────────────────────────────────
+function addCustomFeature() {
+  const input = document.getElementById('cf-features-custom');
+  const val = input.value.trim();
+  if (!val) return;
+  const container = document.getElementById('cf-custom-tags');
+  const tag = document.createElement('span');
+  tag.className = 'badge badge-gray';
+  tag.style.cssText = 'display:inline-flex;align-items:center;gap:0.3rem;cursor:default;padding:0.25rem 0.625rem;';
+  tag.innerHTML = `${val} <button type="button" onclick="this.parentElement.remove();syncFeaturesField()" style="background:none;border:none;cursor:pointer;font-size:0.75rem;color:inherit;padding:0;margin-left:0.2rem;">&times;</button>`;
+  container.appendChild(tag);
+  input.value = '';
+  syncFeaturesField();
+}
+
+function syncFeaturesField() {
+  const checked = Array.from(document.querySelectorAll('#cf-features-grid input:checked')).map(cb => cb.value);
+  const custom = Array.from(document.querySelectorAll('#cf-custom-tags span')).map(s => {
+    // Remove the × from the button text
+    return s.firstChild ? s.firstChild.textContent.trim() : s.textContent.replace('×', '').trim();
+  });
+  document.getElementById('cf-features').value = [...checked, ...custom].join(',');
+}
+
+// ── Image uploader ────────────────────────────────────────────────────────────
+let imageEntries = [];
+
+document.getElementById('cf-image-url-input').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); addImageUrl(); }
+});
+
+function switchImgTab(tab) {
+  const isUrl = tab === 'url';
+  document.getElementById('img-panel-url').style.display = isUrl ? '' : 'none';
+  document.getElementById('img-panel-upload').style.display = isUrl ? 'none' : '';
+  document.getElementById('img-tab-url').style.background = isUrl ? 'var(--green-primary)' : '#fff';
+  document.getElementById('img-tab-url').style.color = isUrl ? '#fff' : 'var(--text-muted)';
+  document.getElementById('img-tab-upload').style.background = isUrl ? '#fff' : 'var(--green-primary)';
+  document.getElementById('img-tab-upload').style.color = isUrl ? 'var(--text-muted)' : '#fff';
+}
+
+function addImageUrl() {
+  const input = document.getElementById('cf-image-url-input');
+  const val = input.value.trim();
+  if (!val) return;
+  if (!val.startsWith('http://') && !val.startsWith('https://')) {
+    Toast.error('Invalid URL', 'Please enter a valid image URL starting with http:// or https://');
+    return;
+  }
+  imageEntries.push({ src: val, name: val.split('/').pop().split('?')[0] || 'image.jpg', type: 'url' });
+  input.value = '';
+  input.focus();
+  syncImagesField();
+  renderImagePreviews();
+}
+
+function handleFileSelect(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) { Toast.warning('Skipped', `${file.name} is not an image file.`); return; }
+    if (file.size > 10 * 1024 * 1024) { Toast.warning('Too Large', `${file.name} exceeds 10MB limit.`); return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+      imageEntries.push({ src: e.target.result, name: file.name, type: 'file' });
+      syncImagesField();
+      renderImagePreviews();
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+function handleDragOver(e) {
+  e.preventDefault();
+  const dz = document.getElementById('img-dropzone');
+  dz.style.borderColor = 'var(--green-primary)';
+  dz.style.background = 'var(--green-50)';
+}
+
+function handleDragLeave(e) {
+  const dz = document.getElementById('img-dropzone');
+  dz.style.borderColor = 'var(--border)';
+  dz.style.background = '';
+}
+
+function handleDrop(e) {
+  e.preventDefault();
+  handleDragLeave(e);
+  const files = e.dataTransfer.files;
+  if (files && files.length) {
+    handleFileSelect(files);
+  } else {
+    const url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    if (url && url.startsWith('http')) {
+      document.getElementById('cf-image-url-input').value = url;
+      switchImgTab('url');
+      addImageUrl();
+    }
+  }
+}
+
+function removeImage(index) {
+  imageEntries.splice(index, 1);
+  syncImagesField();
+  renderImagePreviews();
+}
+
+function moveImage(index, dir) {
+  const newIndex = index + dir;
+  if (newIndex < 0 || newIndex >= imageEntries.length) return;
+  [imageEntries[index], imageEntries[newIndex]] = [imageEntries[newIndex], imageEntries[index]];
+  syncImagesField();
+  renderImagePreviews();
+}
+
+function syncImagesField() {
+  document.getElementById('cf-images').value = imageEntries.map(e => e.src).join(',');
+}
+
+function renderImagePreviews() {
+  const grid = document.getElementById('img-preview-grid');
+  const hint = document.getElementById('img-empty-hint');
+  if (!grid) return;
+  if (imageEntries.length === 0) {
+    grid.style.display = 'none';
+    hint.style.display = '';
+    return;
+  }
+  hint.style.display = 'none';
+  grid.style.display = 'flex';
+  grid.innerHTML = imageEntries.map((img, i) => `
+    <div style="position:relative;width:110px;flex-shrink:0;">
+      <div style="position:relative;width:110px;height:80px;border-radius:8px;overflow:hidden;border:2px solid ${i === 0 ? 'var(--green-primary)' : 'var(--border)'};">
+        <img src="${img.src}" alt="${img.name}"
+          style="width:100%;height:100%;object-fit:cover;"
+          onerror="this.parentElement.parentElement.querySelector('.img-err').style.display='flex';this.style.display='none';" loading="lazy">
+        <div class="img-err" style="display:none;position:absolute;inset:0;background:#f1f5f9;align-items:center;justify-content:center;flex-direction:column;gap:0.25rem;">
+          <i class="fa-solid fa-image-slash" style="color:var(--border);font-size:1.25rem;"></i>
+          <span style="font-size:0.625rem;color:var(--text-muted);">Load failed</span>
+        </div>
+        ${i === 0 ? '<div style="position:absolute;top:4px;left:4px;background:var(--green-primary);color:#fff;font-size:0.625rem;font-weight:800;padding:2px 6px;border-radius:4px;text-transform:uppercase;">Hero</div>' : ''}
+        <div style="position:absolute;top:4px;right:4px;display:flex;gap:3px;">
+          ${i > 0 ? `<button type="button" onclick="moveImage(${i},-1)" title="Move left" style="width:22px;height:22px;border-radius:4px;background:rgba(0,0,0,0.6);color:#fff;border:none;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-chevron-left"></i></button>` : ''}
+          ${i < imageEntries.length - 1 ? `<button type="button" onclick="moveImage(${i},1)" title="Move right" style="width:22px;height:22px;border-radius:4px;background:rgba(0,0,0,0.6);color:#fff;border:none;cursor:pointer;font-size:0.75rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-chevron-right"></i></button>` : ''}
+        </div>
+      </div>
+      <button type="button" onclick="removeImage(${i})" title="Remove" style="position:absolute;top:-7px;right:-7px;width:20px;height:20px;border-radius:50%;background:#ef4444;color:#fff;border:none;cursor:pointer;font-size:0.7rem;display:flex;align-items:center;justify-content:center;"><i class="fa-solid fa-times"></i></button>
+      <div style="font-size:0.625rem;color:var(--text-muted);margin-top:0.3rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px;" title="${img.name}">
+        <i class="fa-solid fa-${img.type === 'file' ? 'file-image' : 'link'}" style="font-size:0.6rem;"></i> ${img.name}
+      </div>
+    </div>`).join('');
+}
+
+function loadCampaignImages(images) {
+  imageEntries = images.map(src => ({ src, name: src.split('/').pop().split('?')[0] || 'image', type: 'url' }));
+  syncImagesField();
+  renderImagePreviews();
+}
+
+// ── Video uploader ────────────────────────────────────────────────────────────
+let videoEntry = null;
+
+function switchVidTab(tab) {
+  const isUrl = tab === 'url';
+  document.getElementById('vid-panel-url').style.display = isUrl ? '' : 'none';
+  document.getElementById('vid-panel-upload').style.display = isUrl ? 'none' : '';
+  document.getElementById('vid-tab-url').style.background = isUrl ? 'var(--green-primary)' : '#fff';
+  document.getElementById('vid-tab-url').style.color = isUrl ? '#fff' : 'var(--text-muted)';
+  document.getElementById('vid-tab-upload').style.background = isUrl ? '#fff' : 'var(--green-primary)';
+  document.getElementById('vid-tab-upload').style.color = isUrl ? 'var(--text-muted)' : '#fff';
+}
+
+function handleVidDragOver(e) {
+  e.preventDefault();
+  const dz = document.getElementById('vid-dropzone');
+  dz.style.borderColor = 'var(--green-primary)';
+  dz.style.background = 'var(--green-50)';
+}
+
+function handleVidDragLeave(e) {
+  const dz = document.getElementById('vid-dropzone');
+  dz.style.borderColor = 'var(--border)';
+  dz.style.background = '';
+}
+
+function handleVidDrop(e) {
+  e.preventDefault();
+  handleVidDragLeave(e);
+  if (e.dataTransfer.files && e.dataTransfer.files.length) {
+    handleVideoSelect(e.dataTransfer.files[0]);
+  }
+}
+
+function handleVideoSelect(file) {
+  if (!file) return;
+  if (!file.type.startsWith('video/')) { Toast.warning('Invalid File', `${file.name} is not a video file.`); return; }
+  if (file.size > 200 * 1024 * 1024) { Toast.warning('Too Large', `${file.name} exceeds 200MB limit.`); return; }
+  videoEntry = { name: file.name, size: file.size, type: 'file', src: URL.createObjectURL(file) };
+  document.getElementById('cf-video').value = file.name;
+  renderVidPreview();
+  Toast.success('Video Ready', `${file.name} (${(file.size / 1024 / 1024).toFixed(1)} MB) added.`);
+}
+
+function renderVidPreview() {
+  const el = document.getElementById('vid-preview');
+  if (!el) return;
+  const urlVal = document.getElementById('cf-video-url').value.trim();
+  if (videoEntry) {
+    el.style.display = 'flex';
+    el.innerHTML = `
+      <i class="fa-solid fa-film" style="font-size:1.5rem;color:var(--green-primary);flex-shrink:0;"></i>
+      <div style="flex:1;min-width:0;">
+        <div style="font-weight:600;font-size:0.875rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${videoEntry.name}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${(videoEntry.size / 1024 / 1024).toFixed(1)} MB · ready to upload</div>
+      </div>
+      <button type="button" onclick="videoEntry=null;document.getElementById('cf-video').value='';renderVidPreview();" style="background:none;border:none;color:#ef4444;cursor:pointer;"><i class="fa-solid fa-times"></i></button>`;
+  } else if (urlVal) {
+    el.style.display = 'flex';
+    el.innerHTML = `
+      <i class="fa-brands fa-youtube" style="font-size:1.5rem;color:#ef4444;flex-shrink:0;"></i>
+      <div style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:0.8125rem;">${urlVal}</div>`;
+  } else {
+    el.style.display = 'none';
+    el.innerHTML = '';
+  }
+}
+
+// Sync vid preview when URL is typed
+document.getElementById('cf-video-url').addEventListener('input', renderVidPreview);
+
+// ── Document uploader ─────────────────────────────────────────────────────────
+let docEntries = [];
+const DOC_TYPES = ['C of O', 'Survey Plan', 'Valuation Report', 'Title Deed', 'Deed of Assignment', 'Building Plan', 'Other'];
+
+function handleDocDragOver(e) {
+  e.preventDefault();
+  const dz = document.getElementById('doc-dropzone');
+  dz.style.borderColor = 'var(--green-primary)';
+  dz.style.background = 'var(--green-50)';
+}
+
+function handleDocDragLeave(e) {
+  const dz = document.getElementById('doc-dropzone');
+  dz.style.borderColor = 'var(--border)';
+  dz.style.background = '';
+}
+
+function handleDocDrop(e) {
+  e.preventDefault();
+  handleDocDragLeave(e);
+  if (e.dataTransfer.files && e.dataTransfer.files.length) handleDocSelect(e.dataTransfer.files);
+}
+
+function handleDocSelect(files) {
+  Array.from(files).forEach(file => {
+    const allowed = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
+      Toast.warning('Skipped', `${file.name} — only PDF, DOC, or DOCX files are accepted.`);
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) { Toast.warning('Too Large', `${file.name} exceeds 20MB limit.`); return; }
+    docEntries.push({ name: file.name, size: file.size, docType: 'Other' });
+    syncDocsField();
+    renderDocList();
+  });
+}
+
+function removeDoc(index) {
+  docEntries.splice(index, 1);
+  syncDocsField();
+  renderDocList();
+}
+
+function setDocType(index, type) {
+  docEntries[index].docType = type;
+  syncDocsField();
+}
+
+function syncDocsField() {
+  document.getElementById('cf-documents').value = docEntries.map(d => `${d.docType}:${d.name}`).join('|');
+}
+
+function renderDocList() {
+  const list = document.getElementById('doc-list');
+  if (!list) return;
+  if (docEntries.length === 0) { list.innerHTML = ''; return; }
+  list.innerHTML = docEntries.map((doc, i) => `
+    <div style="display:flex;align-items:center;gap:0.75rem;padding:0.625rem 0.75rem;background:var(--bg-secondary);border-radius:8px;">
+      <i class="fa-solid fa-file-pdf" style="color:#ef4444;font-size:1.125rem;flex-shrink:0;"></i>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:0.875rem;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${doc.name}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${(doc.size / 1024).toFixed(0)} KB</div>
+      </div>
+      <select onchange="setDocType(${i},this.value)" class="form-select" style="width:160px;font-size:0.8125rem;padding:0.3rem 0.5rem;">
+        ${DOC_TYPES.map(t => `<option value="${t}" ${t === doc.docType ? 'selected' : ''}>${t}</option>`).join('')}
+      </select>
+      <button type="button" onclick="removeDoc(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;" title="Remove"><i class="fa-solid fa-trash"></i></button>
+    </div>`).join('');
+}
+
+// ── Skill Questions ───────────────────────────────────────────────────────────
+let skillQuestions = [];
+
+function addSkillQuestion() {
+  skillQuestions.push({ question: '', options: ['', '', '', ''], correctIndex: 0 });
+  renderSkillQuestions();
+}
+
+function removeSkillQuestion(i) {
+  if (skillQuestions.length <= 1) { Toast.warning('Minimum 1', 'You need at least one question.'); return; }
+  skillQuestions.splice(i, 1);
+  renderSkillQuestions();
+}
+
+function updateSkillQ(i, field, val) {
+  if (field === 'correctIndex') {
+    skillQuestions[i].correctIndex = parseInt(val, 10);
+  } else if (field.startsWith('option')) {
+    const optIdx = parseInt(field.replace('option', ''), 10);
+    skillQuestions[i].options[optIdx] = val;
+  } else {
+    skillQuestions[i][field] = val;
+  }
+}
+
+function renderSkillQuestions() {
+  const list = document.getElementById('skill-questions-list');
+  const counter = document.getElementById('skill-q-count');
+  if (!list) return;
+
+  const optLabels = ['A', 'B', 'C', 'D'];
+
+  list.innerHTML = skillQuestions.map((q, i) => `
+    <div style="background:var(--bg-secondary);border-radius:10px;padding:1rem;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.875rem;">
+        <span style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);">Question ${i + 1}</span>
+        <button type="button" onclick="removeSkillQuestion(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;padding:0.25rem;" title="Remove question"><i class="fa-solid fa-trash-can"></i></button>
+      </div>
+      <input type="text" placeholder="Enter your question here..." class="form-input" style="margin-bottom:0.875rem;"
+        value="${q.question.replace(/"/g, '&quot;')}"
+        oninput="updateSkillQ(${i},'question',this.value)">
+      <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">Answer Options — select the correct one</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;">
+        ${q.options.map((opt, j) => `
+          <label style="display:flex;align-items:center;gap:0.5rem;background:#fff;border:1.5px solid ${q.correctIndex === j ? 'var(--green-primary)' : 'var(--border)'};border-radius:8px;padding:0.375rem 0.625rem;cursor:pointer;">
+            <input type="radio" name="correct-${i}" value="${j}" ${q.correctIndex === j ? 'checked' : ''}
+              onchange="updateSkillQ(${i},'correctIndex',${j});renderSkillQuestions();"
+              style="accent-color:var(--green-primary);flex-shrink:0;">
+            <span style="font-size:0.75rem;font-weight:800;color:var(--text-muted);flex-shrink:0;">${optLabels[j]}</span>
+            <input type="text" placeholder="Option ${optLabels[j]}..." class="form-input"
+              style="border:none;background:transparent;padding:0;font-size:0.875rem;flex:1;min-width:0;outline:none;"
+              value="${opt.replace(/"/g, '&quot;')}"
+              oninput="updateSkillQ(${i},'option${j}',this.value)">
+          </label>`).join('')}
+      </div>
+    </div>`).join('');
+
+  const count = skillQuestions.length;
+  const enough = count >= 5;
+  if (counter) {
+    counter.textContent = `${count} question${count !== 1 ? 's' : ''} added${enough ? ' ✓' : ' — need at least 5'}`;
+    counter.style.color = enough ? 'var(--green-primary)' : '#f59e0b';
+  }
+}
+
+function getSkillQuestionsValid() {
+  return skillQuestions.every(q =>
+    q.question.trim() !== '' &&
+    q.options.every(o => o.trim() !== '') &&
+    typeof q.correctIndex === 'number' && q.correctIndex >= 0 && q.correctIndex <= 3
+  );
+}
+</script>
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item active"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body>
+</html>

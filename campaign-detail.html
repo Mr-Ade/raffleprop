@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campaign Detail | RaffleProp</title>
+  <meta name="description" content="Buy tickets for this property raffle campaign. Secure payment, transparent draw, full refund guarantee.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <style>
+    .detail-layout { display: grid; grid-template-columns: 1fr 400px; gap: 2rem; align-items: start; }
+    /* Prevent the fixed 400px right column from overflowing narrow viewports */
+    .detail-layout > * { min-width: 0; }
+    @media(max-width:1024px){ .detail-layout { grid-template-columns: 1fr; } }
+    .sticky-widget { position: sticky; top: 85px; }
+    /* On mobile/tablet the widget stacks below — kill sticky positioning */
+    @media(max-width:1024px){ .sticky-widget { position: static !important; width: 100%; max-width: 100%; } }
+    /* Always 2-column grid inside the 400px widget — 4-col is too cramped */
+    #bundle-grid { grid-template-columns: repeat(2, 1fr) !important; }
+    /* Give breathing room for the "BEST VALUE" badge that overflows upward */
+    #bundle-grid { padding-top: 0.75rem; }
+    .feature-tag { display:inline-flex;align-items:center;gap:0.375rem;background:var(--green-50);color:var(--green-primary);font-size:0.8125rem;font-weight:600;padding:0.3rem 0.75rem;border-radius:100px;border:1px solid var(--green-100); }
+    .step-indicator { display:flex;align-items:center;margin-bottom:1.5rem;gap:0;overflow:hidden; }
+    /* Mobile scroll-to-purchase CTA — shown below hero on small screens */
+    #mobile-buy-cta { display:none; }
+    /* Pay tabs — allow wrapping on very narrow screens */
+    .pay-tabs { flex-wrap: wrap; }
+    @media(max-width:600px){
+      /* Campaign title hero — smaller on phone */
+      #campaign-title-hero { font-size: 1.375rem !important; }
+      /* Property specs 2-col → 1-col on small phones */
+      .spec-details-grid { grid-template-columns: 1fr !important; }
+      .spec-details-grid > div { border-right: none !important; }
+    }
+    @media(max-width:480px){
+      /* Live stats 3-col → reduce font so numbers don't truncate */
+      #live-sold, #live-remaining, #live-pct-text { font-size: 1.125rem; }
+      /* Bundle grid → single column on very small phones */
+      #bundle-grid { grid-template-columns: 1fr !important; }
+      /* Spec features 2-col → single column */
+      #spec-features { grid-template-columns: 1fr !important; }
+      /* Section padding tighter */
+      .detail-layout { gap: 1rem; }
+      #mobile-buy-cta { display:block; margin:0 0 1.5rem; }
+    }
+    @media(max-width:640px){
+      /* Section — reduce excess bottom padding on phones */
+      .detail-section { padding: 1rem 0 2rem !important; }
+      /* Breadcrumb title — truncate long names instead of overflowing */
+      .breadcrumb-campaign-title { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+      /* Countdown hero — smaller numbers so all 4 units fit in one row */
+      .countdown-unit.hero .value { font-size: 1.5rem !important; }
+      /* Spec rows (Legal & Trust) — key stays fixed, value right-aligns and text-wraps */
+      .spec-row { align-items: flex-start; gap: 0.5rem; }
+      .spec-key { flex-shrink: 0; max-width: 48%; }
+      .spec-val { flex: 1; text-align: right; word-break: break-word; min-width: 0; }
+      /* Pay tabs — force 2×2 grid (4 tabs → 2 rows of 2) */
+      .pay-tab { flex: 0 0 50%; box-sizing: border-box; font-size: 0.75rem; padding: 0.625rem 0.25rem; }
+      .pay-tab:nth-child(2), .pay-tab:nth-child(4) { border-right: none !important; }
+      .pay-tab:nth-child(1), .pay-tab:nth-child(2) { border-bottom: 1px solid var(--border); }
+      /* Purchase step inner padding tighter on phones */
+      .purchase-step { padding: 1rem !important; }
+    }
+    @media(max-width:400px){
+      /* Live stats — very small phones, prevent number overflow */
+      #live-sold, #live-remaining, #live-pct-text { font-size: 0.9375rem !important; }
+    }
+  </style>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+<main id="main-content">
+
+<div class="page-top" style="padding-top:65px;"></div>
+
+<!-- Breadcrumb -->
+<div style="background:#fff;border-bottom:1px solid var(--border);padding:0.75rem 0;">
+  <div class="container">
+    <div style="font-size:0.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:0.375rem;">
+      <a href="index.html" style="color:var(--text-muted);">Home</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:0.6rem;"></i>
+      <a href="campaigns.html" style="color:var(--text-muted);">Campaigns</a>
+      <i class="fa-solid fa-chevron-right" style="font-size:0.6rem;"></i>
+      <span id="campaign-title" class="breadcrumb-campaign-title" style="color:var(--text-primary);font-weight:500;">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<div id="status-banner" style="padding:0.75rem 1.5rem;"></div>
+
+<!-- Compliance Banners -->
+<div class="container" style="margin-top:0.75rem;margin-bottom:0;">
+  <div id="compliance-banners" style="display:flex;flex-direction:column;gap:0.625rem;"></div>
+</div>
+
+<!-- Mobile Buy CTA (visible only on phones ≤480px, links to purchase widget below) -->
+<div id="mobile-buy-cta">
+  <div class="container">
+    <a href="#purchase-widget" class="btn btn-gold btn-full" style="display:flex;align-items:center;justify-content:center;gap:0.5rem;">
+      <i class="fa-solid fa-ticket"></i> Buy Tickets — From ₦2,500
+    </a>
+  </div>
+</div>
+
+<!-- Main Detail Layout -->
+<section class="detail-section" style="padding:2rem 0 4rem;overflow-x:hidden;">
+  <div class="container">
+    <div class="detail-layout">
+
+      <!-- LEFT: Property Info -->
+      <div>
+        <!-- Gallery -->
+        <div style="margin-bottom:1.5rem;">
+          <img id="gallery-main" class="gallery-main" src="" alt="Property" loading="lazy">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.625rem;">
+            <div id="gallery-thumbs" class="gallery-thumbs"></div>
+            <div style="display:flex;gap:0.5rem;flex-shrink:0;">
+              <button onclick="prevImage()" aria-label="Previous photo" class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i></button>
+              <button onclick="nextImage()" aria-label="Next photo" class="btn btn-sm" style="background:var(--bg);border:1px solid var(--border);"><i class="fa-solid fa-chevron-right" aria-hidden="true"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Valuation Badge -->
+        <div style="background:linear-gradient(135deg,#0D5E30,#15803d);border-radius:12px;padding:1rem 1.25rem;color:#fff;margin-bottom:1.5rem;display:flex;align-items:center;gap:0.875rem;">
+          <i class="fa-solid fa-certificate" style="font-size:2rem;opacity:0.8;"></i>
+          <div>
+            <div style="font-size:0.75rem;opacity:0.7;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;">Independent NIESV Valuation</div>
+            <div id="valuation-badge-text" style="font-size:0.9375rem;font-weight:600;margin-top:0.25rem;"></div>
+            <button onclick="downloadDoc('Valuation Certificate')" style="font-size:0.75rem;color:var(--gold-light);margin-top:0.375rem;background:none;border:none;cursor:pointer;padding:0;"><i class="fa-solid fa-download"></i> Download Certificate PDF</button>
+          </div>
+        </div>
+
+        <!-- Title & Location -->
+        <div id="campaign-subtitle" style="font-size:0.875rem;color:var(--text-muted);font-weight:500;margin-bottom:0.375rem;"></div>
+        <h1 id="campaign-title-hero" style="font-size:1.875rem;font-weight:900;letter-spacing:-0.02em;line-height:1.2;margin-bottom:0.375rem;"></h1>
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin-bottom:1.25rem;">
+          <div style="display:flex;align-items:center;gap:0.375rem;font-size:0.9rem;color:var(--text-muted);"><i class="fa-solid fa-location-dot" style="color:var(--green-primary);"></i><span id="campaign-location-text"></span></div>
+          <div style="font-size:1.25rem;font-weight:800;color:var(--green-primary);" id="campaign-worth-text"></div>
+          <span class="badge badge-green"><i class="fa-solid fa-check"></i> C of O Confirmed</span>
+        </div>
+
+        <!-- Description -->
+        <p id="campaign-description" style="font-size:0.9375rem;color:var(--text-secondary);line-height:1.75;margin-bottom:1.75rem;"></p>
+
+        <!-- Live Stats -->
+        <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1.75rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+            <div class="live-indicator"><span class="live-dot"></span> LIVE TICKET COUNTER</div>
+            <div style="font-size:0.8125rem;color:var(--text-muted);">Updates in real time</div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1rem;text-align:center;">
+            <div style="padding:0.75rem;background:var(--bg);border-radius:8px;">
+              <div style="font-size:1.375rem;font-weight:900;color:var(--green-primary);" id="live-sold">—</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Tickets Sold</div>
+            </div>
+            <div style="padding:0.75rem;background:var(--bg);border-radius:8px;">
+              <div style="font-size:1.375rem;font-weight:900;color:var(--text-primary);" id="live-remaining">—</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Remaining</div>
+            </div>
+            <div style="padding:0.75rem;background:var(--bg);border-radius:8px;">
+              <div style="font-size:1.375rem;font-weight:900;color:var(--gold);" id="live-pct-text">—</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Sold</div>
+            </div>
+          </div>
+          <div class="progress-wrap" style="height:12px;">
+            <div class="progress-fill" id="live-progress-fill" style="width:0%;height:12px;"></div>
+          </div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.5rem;display:flex;justify-content:space-between;">
+            <span>0 tickets</span><span id="live-total">—</span>
+          </div>
+        </div>
+
+        <!-- Countdown -->
+        <div style="background:linear-gradient(135deg,#1a2332,#0f1f14);border-radius:14px;padding:1.5rem;margin-bottom:1.75rem;color:#fff;">
+          <div style="font-size:0.8125rem;opacity:0.6;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:1rem;">⏰ Campaign Closes In</div>
+          <div class="countdown-row" id="detail-countdown">
+            <div class="countdown-unit hero"><span class="c-val value">00</span><span class="label">Days</span></div>
+            <div class="countdown-unit hero"><span class="c-val value">00</span><span class="label">Hours</span></div>
+            <div class="countdown-unit hero"><span class="c-val value">00</span><span class="label">Minutes</span></div>
+            <div class="countdown-unit hero"><span class="c-val value">00</span><span class="label">Seconds</span></div>
+          </div>
+        </div>
+
+        <!-- Property Specs -->
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-solid fa-house" style="color:var(--green-primary);margin-right:0.5rem;"></i>Property Details</h3>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div class="spec-details-grid" style="display:grid;grid-template-columns:1fr 1fr;">
+              <div style="padding:1.25rem;border-right:1px solid var(--border-light);border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Address</div>
+                <div id="spec-address" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Property Type</div>
+                <div id="spec-type" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-right:1px solid var(--border-light);border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Bedrooms</div>
+                <div id="spec-beds" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Bathrooms</div>
+                <div id="spec-baths" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-right:1px solid var(--border-light);border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Building Area</div>
+                <div id="spec-sqm" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-bottom:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Land Area</div>
+                <div id="spec-land" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;border-right:1px solid var(--border-light);">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Title</div>
+                <div id="spec-cof" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+              <div style="padding:1.25rem;">
+                <div style="font-size:0.75rem;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:0.06em;">Parking</div>
+                <div id="spec-parking" style="font-size:0.9rem;font-weight:600;margin-top:0.25rem;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Features -->
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-solid fa-star" style="color:var(--gold);margin-right:0.5rem;"></i>Property Features</h3>
+          </div>
+          <div class="card-body">
+            <ul id="spec-features" style="list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:0;"></ul>
+          </div>
+        </div>
+
+        <!-- Legal & Trust -->
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-solid fa-shield-halved" style="color:var(--green-primary);margin-right:0.5rem;"></i>Legal & Trust Information</h3>
+          </div>
+          <div class="card-body">
+            <div class="spec-row"><span class="spec-key"><i class="fa-solid fa-scale-balanced" style="margin-right:0.375rem;color:var(--green-primary);"></i>Property Lawyer</span><span class="spec-val" id="spec-lawyer"></span></div>
+            <div class="spec-row"><span class="spec-key"><i class="fa-solid fa-certificate" style="margin-right:0.375rem;color:var(--gold);"></i>Independent Valuer</span><span class="spec-val" id="spec-valuation"></span></div>
+            <div class="spec-row"><span class="spec-key"><i class="fa-solid fa-building-columns" style="margin-right:0.375rem;color:var(--info);"></i>Escrow Bank</span><span class="spec-val" id="spec-escrow"></span></div>
+            <div class="spec-row"><span class="spec-key"><i class="fa-solid fa-building" style="margin-right:0.375rem;color:var(--text-muted);"></i>CAC Registration</span><span class="spec-val">RC-1234567</span></div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-regular fa-folder-open" style="color:var(--green-primary);margin-right:0.5rem;"></i>Property Documents</h3>
+          </div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.625rem;">
+            <button onclick="downloadDoc('Certificate of Occupancy (C of O)')" style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--green-50)'" onmouseout="this.style.background='#fff'" onfocus="this.style.background='var(--green-50)'" onblur="this.style.background='#fff'">
+              <span style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;font-weight:600;"><i class="fa-regular fa-file-pdf" style="color:#dc2626;font-size:1.25rem;"></i>Certificate of Occupancy (C of O)</span>
+              <i class="fa-solid fa-download" style="color:var(--green-primary);"></i>
+            </button>
+            <button onclick="downloadDoc('NIESV Valuation Report')" style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--green-50)'" onmouseout="this.style.background='#fff'" onfocus="this.style.background='var(--green-50)'" onblur="this.style.background='#fff'">
+              <span style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;font-weight:600;"><i class="fa-regular fa-file-pdf" style="color:#dc2626;font-size:1.25rem;"></i>NIESV Valuation Report</span>
+              <i class="fa-solid fa-download" style="color:var(--green-primary);"></i>
+            </button>
+            <button onclick="downloadDoc('Survey Plan')" style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--green-50)'" onmouseout="this.style.background='#fff'" onfocus="this.style.background='var(--green-50)'" onblur="this.style.background='#fff'">
+              <span style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;font-weight:600;"><i class="fa-regular fa-file-pdf" style="color:#dc2626;font-size:1.25rem;"></i>Survey Plan</span>
+              <i class="fa-solid fa-download" style="color:var(--green-primary);"></i>
+            </button>
+            <button onclick="downloadDoc('Property Information Pack')" style="display:flex;align-items:center;justify-content:space-between;padding:0.875rem 1rem;border:1px solid var(--border);border-radius:8px;background:#fff;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='var(--green-50)'" onmouseout="this.style.background='#fff'" onfocus="this.style.background='var(--green-50)'" onblur="this.style.background='#fff'">
+              <span style="display:flex;align-items:center;gap:0.625rem;font-size:0.875rem;font-weight:600;"><i class="fa-regular fa-file-pdf" style="color:#dc2626;font-size:1.25rem;"></i>Full Property Information Pack</span>
+              <i class="fa-solid fa-download" style="color:var(--green-primary);"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Map -->
+        <div class="card" style="margin-bottom:1.75rem;">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-solid fa-map-location-dot" style="color:var(--green-primary);margin-right:0.5rem;"></i>Location</h3>
+          </div>
+          <div class="card-body" style="padding:0;">
+            <div style="height:250px;background:linear-gradient(135deg,#e5e7eb,#f3f4f6);border-radius:0 0 14px 14px;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:0.75rem;color:var(--text-muted);">
+              <i class="fa-solid fa-map-location-dot" style="font-size:2.5rem;color:var(--green-primary);"></i>
+              <span style="font-size:0.875rem;font-weight:500;" id="spec-address-map">Loading map...</span>
+              <a href="https://maps.google.com" target="_blank" class="btn btn-outline btn-sm"><i class="fa-solid fa-external-link-alt"></i> Open in Google Maps</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Share Section -->
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size:1.0625rem;font-weight:700;"><i class="fa-solid fa-share-nodes" style="color:var(--green-primary);margin-right:0.5rem;"></i>Share This Campaign</h3>
+          </div>
+          <div class="card-body">
+            <p style="font-size:0.875rem;color:var(--text-muted);margin-bottom:1rem;">Share with friends and earn rewards! Get 1 free ticket for every 5 paid referrals.</p>
+            <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+              <button id="share-whatsapp" class="btn btn-sm" style="background:#25D366;color:#fff;"><i class="fab fa-whatsapp"></i> WhatsApp</button>
+              <button id="share-twitter" class="btn btn-sm" style="background:#000;color:#fff;"><i class="fab fa-x-twitter"></i> Twitter/X</button>
+              <button id="share-facebook" class="btn btn-sm" style="background:#1877F2;color:#fff;"><i class="fab fa-facebook-f"></i> Facebook</button>
+              <button id="share-copy" class="btn btn-outline btn-sm"><i class="fa-solid fa-link"></i> Copy Link</button>
+            </div>
+            <!-- Referral prompt for logged-in users -->
+            <div id="referral-share-prompt" style="display:none;margin-top:1.25rem;padding:1rem;background:var(--green-50);border:1px solid var(--green-100);border-radius:10px;">
+              <div style="font-size:0.875rem;font-weight:600;color:var(--green-primary);margin-bottom:0.375rem;"><i class="fa-solid fa-gift"></i> Your Referral Code</div>
+              <div class="referral-link-box" style="margin-top:0.5rem;">
+                <span class="referral-code" id="referral-code-display"></span>
+                <button onclick="copyLink(window.location.href+'?ref='+document.getElementById('referral-code-display').textContent)" class="btn btn-primary btn-sm">Copy Link</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Purchase Widget -->
+      <div class="sticky-widget" id="purchase-widget">
+        <div class="card" style="overflow:visible;">
+          <div style="background:linear-gradient(135deg,var(--green-primary),var(--green-light));padding:1.25rem;border-radius:var(--radius-lg) var(--radius-lg) 0 0;">
+            <div style="font-size:0.8125rem;color:rgba(255,255,255,0.7);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;">Enter This Draw</div>
+            <div style="font-size:1.5rem;font-weight:900;color:#fff;margin-top:0.25rem;">From ₦2,500</div>
+          </div>
+
+          <!-- Step Indicator (5 steps) -->
+          <div style="padding:1.25rem 1.25rem 0;">
+            <div class="purchase-steps-indicator">
+              <div class="p-step-dot active" title="Skill Question">1</div>
+              <div class="p-step-line"></div>
+              <div class="p-step-dot" title="Select Bundle">2</div>
+              <div class="p-step-line"></div>
+              <div class="p-step-dot" title="Your Details">3</div>
+              <div class="p-step-line"></div>
+              <div class="p-step-dot" title="Payment">4</div>
+              <div class="p-step-line"></div>
+              <div class="p-step-dot" title="Confirm">5</div>
+            </div>
+          </div>
+
+          <!-- STEP 1: Skill Question (required first — FCCPA 2018 promotional competition entry) -->
+          <div class="purchase-step" id="step-1" style="padding:1.25rem;">
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.25rem;">Skill Question</h3>
+            <p style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1rem;">To enter this competition, answer the following question. Only one answer is correct. This is a genuine eligibility condition required under the Federal Competition &amp; Consumer Protection Act 2018.</p>
+            <div style="padding:1rem;background:var(--bg);border-radius:10px;margin-bottom:1.25rem;">
+              <p style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.625rem;">Question:</p>
+              <p style="font-size:0.9375rem;font-weight:600;margin-bottom:1rem;line-height:1.5;" id="skill-question-text">Loading...</p>
+              <p style="font-size:0.8125rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">Select your answer:</p>
+              <div id="skill-options"></div>
+            </div>
+            <button onclick="pwStep1Next()" class="btn btn-primary btn-full">
+              Submit Answer <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- STEP 2: Bundle Selection -->
+          <div class="purchase-step" id="step-2" style="display:none;padding:1.25rem;">
+            <button onclick="showStep(1)" style="font-size:0.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:0.375rem;margin-bottom:1rem;background:none;border:none;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.25rem;">Select Ticket Bundle</h3>
+            <!-- Winning odds — FCCPA 2018 §115 mandatory disclosure -->
+            <div style="background:#fefce8;border:1px solid var(--gold,#C8922A);border-radius:8px;padding:0.625rem 0.875rem;margin-bottom:1rem;font-size:0.8125rem;color:#92400e;">
+              <i class="fa-solid fa-dice" style="margin-right:0.375rem;"></i>
+              <strong>Current odds of winning: 1 in <span id="winning-odds">—</span>.</strong> This changes as tickets are sold.
+            </div>
+            <div class="bundle-grid" id="bundle-grid"></div>
+            <div style="margin-top:1.25rem;padding:0.875rem;background:var(--bg);border-radius:10px;font-size:0.875rem;">
+              <div style="display:flex;justify-content:space-between;"><span>Selected:</span><strong id="order-qty">—</strong></div>
+              <div style="display:flex;justify-content:space-between;margin-top:0.375rem;"><span>Unit price:</span><strong id="order-unit-price" style="color:var(--text-secondary);">—</strong></div>
+              <div style="display:flex;justify-content:space-between;margin-top:0.375rem;padding-top:0.375rem;border-top:1px solid var(--border-light);"><span style="font-weight:700;">Total (NGN):</span><strong id="order-price" style="color:var(--green-primary);">—</strong></div>
+              <div id="order-saving" style="margin-top:0.375rem;text-align:right;"></div>
+            </div>
+            <button onclick="pwStep2Next()" class="btn btn-primary btn-full" style="margin-top:1rem;">
+              Continue <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <div class="escrow-notice" style="margin-top:0.875rem;">
+              <i class="fa-solid fa-shield-halved"></i>
+              <p>All prices in NGN. Funds held in escrow at <strong id="escrow-bank-text"></strong> until draw.</p>
+            </div>
+          </div>
+
+          <!-- STEP 3: Your Details -->
+          <div class="purchase-step" id="step-3" style="display:none;padding:1.25rem;">
+            <button onclick="showStep(2)" style="font-size:0.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:0.375rem;margin-bottom:1rem;background:none;border:none;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Your Details</h3>
+            <div class="form-group">
+              <label class="form-label" for="buyer-name">Full Name <span class="required">*</span></label>
+              <input type="text" id="buyer-name" class="form-input" placeholder="Adaeze Okonkwo">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="buyer-email">Email Address <span class="required">*</span></label>
+              <input type="email" id="buyer-email" class="form-input" placeholder="adaeze@example.com">
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label" for="buyer-phone">Phone Number <span class="required">*</span></label>
+              <input type="tel" id="buyer-phone" class="form-input" placeholder="080 1234 5678">
+            </div>
+            <button onclick="pwStep3Next()" class="btn btn-primary btn-full" style="margin-top:1.25rem;">
+              Continue to Payment <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- STEP 4: Payment Method -->
+          <div class="purchase-step" id="step-4" style="display:none;padding:1.25rem;">
+            <button onclick="showStep(3)" style="font-size:0.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:0.375rem;margin-bottom:1rem;background:none;border:none;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Choose Payment Method</h3>
+            <div class="pay-tabs" style="margin-bottom:1.25rem;">
+              <div class="pay-tab active" data-method="paystack">Card (Paystack)</div>
+              <div class="pay-tab" data-method="flutterwave">Card (Flutterwave)</div>
+              <div class="pay-tab" data-method="bank">Bank Transfer</div>
+              <div class="pay-tab" data-method="ussd">USSD</div>
+            </div>
+            <div id="pay-paystack" class="pay-content" style="background:var(--bg);border-radius:10px;padding:1rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                <div style="background:#00C3F7;color:#fff;padding:0.25rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:700;">PAYSTACK</div>
+                <span style="font-size:0.8125rem;color:var(--text-muted);">Visa · Mastercard · Verve</span>
+              </div>
+              <p style="font-size:0.8125rem;color:var(--text-secondary);">You will be securely redirected to Paystack's checkout. All prices shown in NGN. Cards, bank transfers, and USSD supported.</p>
+            </div>
+            <div id="pay-flutterwave" class="pay-content" style="display:none;background:var(--bg);border-radius:10px;padding:1rem;">
+              <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:0.75rem;">
+                <div style="background:#F5A623;color:#fff;padding:0.25rem 0.625rem;border-radius:4px;font-size:0.75rem;font-weight:700;">FLUTTERWAVE</div>
+                <span style="font-size:0.8125rem;color:var(--text-muted);">International cards accepted</span>
+              </div>
+              <p style="font-size:0.8125rem;color:var(--text-secondary);">Ideal for diaspora payments. Accepts Visa/Mastercard from UK, USA, Canada, and 150+ countries. All amounts charged in NGN.</p>
+            </div>
+            <div id="pay-bank" class="pay-content" style="display:none;background:var(--bg);border-radius:10px;padding:1rem;">
+              <div style="font-size:0.8125rem;font-weight:700;color:var(--text-primary);margin-bottom:0.75rem;"><i class="fa-solid fa-building-columns" style="color:var(--green-primary);margin-right:0.375rem;"></i>Bank Transfer Details</div>
+              <div style="font-size:0.875rem;color:var(--text-secondary);">
+                <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Bank</span><strong>GTBank Plc</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Account Name</span><strong>RaffleProp Ltd</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Account No.</span><strong>0123456789</strong></div>
+                <div style="display:flex;justify-content:space-between;padding:0.375rem 0;"><span>Reference</span><strong id="bank-ref">RPL-LOADING</strong></div>
+              </div>
+              <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--warning);background:#fffbeb;border:1px solid #fde68a;padding:0.5rem;border-radius:6px;"><i class="fa-solid fa-triangle-exclamation"></i> Always include your unique reference number. Omitting it delays ticket confirmation.</div>
+            </div>
+            <div id="pay-ussd" class="pay-content" style="display:none;background:var(--bg);border-radius:10px;padding:1rem;">
+              <div style="font-size:0.8125rem;font-weight:700;color:var(--text-primary);margin-bottom:0.75rem;"><i class="fa-solid fa-mobile-screen-button" style="color:var(--green-primary);margin-right:0.375rem;"></i>USSD Payment</div>
+              <p style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.75rem;">Dial the code for your bank, select "Pay Bills", then enter the RaffleProp merchant code and your unique reference number.</p>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;font-size:0.8125rem;">
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">GTBank</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*737#</div></div>
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">Zenith Bank</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*966#</div></div>
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">First Bank</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*894#</div></div>
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">Access Bank</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*901#</div></div>
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">UBA</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*919#</div></div>
+                <div style="background:#fff;border:1px solid var(--border-light);border-radius:6px;padding:0.5rem;text-align:center;"><div style="font-weight:700;">Sterling Bank</div><div style="font-family:monospace;color:var(--green-primary);font-weight:800;">*822#</div></div>
+              </div>
+              <div style="margin-top:0.75rem;font-size:0.75rem;color:var(--text-muted);background:var(--bg-secondary);padding:0.5rem 0.75rem;border-radius:6px;">Reference: <strong id="ussd-ref" style="font-family:monospace;">RPL-LOADING</strong></div>
+            </div>
+            <button onclick="pwStep4Next()" class="btn btn-primary btn-full" style="margin-top:1.25rem;">
+              Review Order <i class="fa-solid fa-arrow-right"></i>
+            </button>
+          </div>
+
+          <!-- STEP 5: Review & Confirm -->
+          <div class="purchase-step" id="step-5" style="display:none;padding:1.25rem;">
+            <button onclick="showStep(4)" style="font-size:0.8125rem;color:var(--text-muted);display:flex;align-items:center;gap:0.375rem;margin-bottom:1rem;background:none;border:none;cursor:pointer;"><i class="fa-solid fa-arrow-left"></i> Back</button>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:1rem;">Order Review</h3>
+            <div style="background:var(--bg);border-radius:10px;padding:1rem;margin-bottom:1rem;font-size:0.875rem;">
+              <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Campaign</span><strong id="review-campaign" style="max-width:140px;text-align:right;"></strong></div>
+              <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Tickets</span><strong id="review-tickets"></strong></div>
+              <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Payment via</span><strong id="review-method"></strong></div>
+              <div style="display:flex;justify-content:space-between;padding:0.375rem 0;border-bottom:1px solid var(--border-light);"><span>Buyer</span><strong id="review-name"></strong></div>
+              <div style="display:flex;justify-content:space-between;padding:0.5rem 0 0;font-size:1rem;"><span style="font-weight:700;">TOTAL</span><strong id="review-price" style="color:var(--green-primary);font-size:1.125rem;"></strong></div>
+            </div>
+            <div class="escrow-notice" style="margin-bottom:1rem;">
+              <i class="fa-solid fa-shield-halved"></i>
+              <p>All funds held in escrow at <strong id="escrow-bank-text-2"></strong> until draw completion. Full refund if minimum not reached.</p>
+            </div>
+            <!-- Pre-payment confirmation notice — FCCPA 2018 §118 -->
+            <div style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:0.75rem 0.875rem;margin-bottom:1rem;font-size:0.8125rem;color:#1e40af;line-height:1.6;">
+              <i class="fa-solid fa-envelope" style="margin-right:0.375rem;"></i>
+              On payment, you will receive a confirmation email and WhatsApp message containing your ticket number(s), company details, transaction reference, and all information required by law.
+            </div>
+
+            <!-- Inline T&C text — scrollable, readable — FCCPA 2018 §128 -->
+            <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.5rem;">Terms &amp; Conditions — Please read before accepting:</div>
+            <div id="tc-scroll-box" style="height:140px;overflow-y:scroll;border:1px solid var(--border);border-radius:8px;padding:0.875rem;font-size:0.78125rem;color:var(--text-secondary);line-height:1.65;margin-bottom:0.875rem;background:var(--bg);">
+              <strong>1. Nature of Competition.</strong> This is a promotional competition governed by the Federal Competition &amp; Consumer Protection Act 2018 (FCCPA). It is not a lottery. Entry requires correctly answering a skill question. Purchase of a ticket alone does not guarantee entry — the skill question must be answered correctly.<br><br>
+              <strong>2. FCCPC Approval.</strong> This campaign has been approved by the Federal Competition and Consumer Protection Commission. The approval reference is stated in the compliance notice above. RaffleProp is bound by the conditions of that approval.<br><br>
+              <strong>3. Ticket Price &amp; NGN Currency.</strong> All prices are displayed and charged in Nigerian Naira (NGN). The price displayed at time of purchase is final. Bundle discounts are automatically applied.<br><br>
+              <strong>4. Escrow Protection.</strong> All ticket proceeds are held in a dedicated escrow account with the named bank until draw completion and winner verification. In the event the minimum ticket threshold is not reached, all participants are entitled to a full refund under FCCPA 2018 §123.<br><br>
+              <strong>5. Draw.</strong> The draw will be conducted on the stated draw date by verifiable random selection. FCCPC monitors will be present or notified in accordance with FCCPA 2018 §124. The draw will be live-streamed and the result recorded.<br><br>
+              <strong>6. Winner Obligations.</strong> The winner must complete KYC verification (BVN, NIN, photo ID) within 14 days of notification. The property is transferred by legal title within 90 days of winner verification. The winner is responsible for all applicable property transfer taxes.<br><br>
+              <strong>7. Transaction Records.</strong> A permanent transaction record containing all fields required by FCCPA 2018 §118 will be issued to each ticket purchaser immediately after payment confirmation.<br><br>
+              <strong>8. Data Protection.</strong> Your personal data is processed in accordance with the Nigeria Data Protection Regulation 2019 (NDPR). You may withdraw consent, request data export, or request deletion at any time via your account settings.<br><br>
+              <strong>9. Governing Law.</strong> These terms are governed by the laws of the Federal Republic of Nigeria. Any dispute is subject to the jurisdiction of Nigerian courts. Complaints may also be lodged with the FCCPC directly.<br><br>
+              <strong>10. Contact.</strong> RaffleProp Ltd, RC-1234567, [Registered Address]. Customer care: support@raffleprop.ng | +234 800 RAFFLE.
+            </div>
+
+            <!-- FCCPC compliance statement — must appear immediately above pay button -->
+            <div style="font-size:0.8125rem;color:#166534;margin-bottom:0.875rem;padding:0.625rem 0.875rem;background:var(--green-50,#f0fdf4);border-radius:8px;border:1px solid var(--green-100,#dcfce7);line-height:1.6;">
+              <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);margin-right:0.375rem;"></i>
+              This transaction is governed by the Federal Competition &amp; Consumer Protection Act 2018. FCCPC Approval Reference: <span id="pay-fccpc-ref" style="font-family:monospace;font-weight:800;"></span>
+            </div>
+            <label class="checkbox-wrap" style="margin-bottom:1.25rem;">
+              <input type="checkbox" id="terms-checkbox">
+              <span class="checkbox-label">I have read and understood the Terms &amp; Conditions for this competition. I confirm my entry is based on correctly answering the skill question above.</span>
+            </label>
+            <button onclick="confirmPayment()" id="confirm-pay-btn" class="btn btn-gold btn-full btn-lg" disabled>
+              <i class="fa-solid fa-lock"></i> Confirm &amp; Pay
+            </button>
+          </div>
+
+          <!-- STEP 6: Processing -->
+          <div class="purchase-step" id="step-6" style="display:none;padding:2.5rem 1.25rem;text-align:center;">
+            <div class="spinner" style="margin:0 auto 1.5rem;"></div>
+            <h3 style="font-size:1rem;font-weight:700;margin-bottom:0.5rem;">Processing Payment</h3>
+            <p id="payment-progress-text" style="font-size:0.875rem;color:var(--text-muted);">Connecting to payment gateway...</p>
+          </div>
+
+          <!-- STEP 7: Success + §118 Receipt Summary -->
+          <div class="purchase-step" id="step-7" style="display:none;padding:1.25rem;">
+            <div style="text-align:center;margin-bottom:1.25rem;">
+              <div style="width:56px;height:56px;background:#dcfce7;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 0.75rem;animation:successPop 0.5s ease;">
+                <i class="fa-solid fa-check" style="color:var(--success);font-size:1.5rem;"></i>
+              </div>
+              <h3 style="font-size:1.125rem;font-weight:800;color:var(--success);">Purchase Confirmed!</h3>
+              <p style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;" id="success-campaign"></p>
+            </div>
+            <!-- Ticket numbers -->
+            <div style="margin-bottom:1rem;">
+              <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:0.5rem;">Your Ticket Numbers</div>
+              <div id="success-tickets" style="display:flex;flex-direction:column;gap:0.375rem;"></div>
+            </div>
+            <!-- §118 Transaction Record -->
+            <div style="border:1px solid var(--green-primary);border-radius:10px;overflow:hidden;margin-bottom:1rem;">
+              <div style="background:var(--green-primary);color:#fff;padding:0.625rem 0.875rem;font-size:0.75rem;font-weight:700;display:flex;align-items:center;gap:0.5rem;">
+                <i class="fa-solid fa-receipt"></i> FCCPA §118 Transaction Record
+              </div>
+              <div style="padding:0.75rem;font-size:0.78125rem;display:flex;flex-direction:column;gap:0.375rem;" id="success-receipt-fields"></div>
+            </div>
+            <div style="padding:0.75rem;background:var(--green-50);border-radius:8px;font-size:0.8125rem;color:#166534;margin-bottom:1rem;">
+              <i class="fa-solid fa-envelope" style="margin-right:0.375rem;"></i> Full confirmation sent via email &amp; WhatsApp to <strong id="success-name"></strong>.<br>
+              <span style="margin-top:0.25rem;display:block;"><i class="fa-solid fa-ticket" style="margin-right:0.375rem;"></i> <a href="my-tickets.html" style="color:var(--green-primary);font-weight:700;">View tickets in My Tickets</a></span>
+            </div>
+            <button onclick="resetPurchase()" class="btn btn-outline btn-full">Buy More Tickets</button>
+          </div>
+        </div>
+
+        <!-- Trust points below widget -->
+        <div style="margin-top:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+          <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.8125rem;color:var(--text-muted);">
+            <i class="fa-solid fa-lock" style="color:var(--green-primary);"></i> 256-bit SSL encrypted payment
+          </div>
+          <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.8125rem;color:var(--text-muted);">
+            <i class="fa-solid fa-rotate-left" style="color:var(--green-primary);"></i> Full refund if minimum not reached
+          </div>
+          <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.8125rem;color:var(--text-muted);">
+            <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);"></i> Escrow protected funds
+          </div>
+          <div style="display:flex;align-items:center;gap:0.625rem;font-size:0.8125rem;color:var(--text-muted);">
+            <i class="fa-solid fa-video" style="color:var(--green-primary);"></i> Live-streamed verified draw
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+</main>
+<div id="footer-placeholder"></div>
+
+<script defer src="js/main.js"></script>
+<script defer src="js/campaign.js"></script>
+<script>
+// Set bank transfer + USSD reference (compliance banners are rendered in campaign.js after campaign data loads)
+document.addEventListener('DOMContentLoaded', () => {
+  const ref = 'RPL-' + Math.random().toString(36).substr(2, 8).toUpperCase();
+  ['bank-ref', 'ussd-ref'].forEach(id => { const el = document.getElementById(id); if (el) el.textContent = ref; });
+});
+</script>
+</body>
+</html>

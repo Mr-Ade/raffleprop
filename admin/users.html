@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Management | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+        <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">User Management</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Manage registered users, KYC verification, and account flags</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button onclick="exportUsers()" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export CSV</button>
+      <button onclick="Toast.info('Import','Bulk import via CSV available in the production platform.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-upload"></i> Import</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);">8,432</div>
+        <div class="stat-label">Total Users</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--gold);">234</div>
+        <div class="stat-label">New Today</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);">1,204</div>
+        <div class="stat-label">KYC Verified</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--warning);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--warning);">87</div>
+        <div class="stat-label">KYC Pending</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--error);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--error);">12</div>
+        <div class="stat-label">Flagged</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid #8b5cf6;">
+        <div style="font-size:1.75rem;font-weight:900;color:#8b5cf6;" id="stat-ndpr-count">3</div>
+        <div class="stat-label">NDPR Deletion Requests</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);">5,814</div>
+        <div class="stat-label">Marketing Opt-in</div>
+      </div>
+    </div>
+
+    <!-- Filters and search -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <h3 style="font-size:1rem;font-weight:700;">All Users</h3>
+        <div style="font-size:0.8125rem;color:var(--text-muted);" id="users-count">Showing 8,432 users</div>
+      </div>
+      <div class="filter-row" style="padding:1rem 1.25rem;border-bottom:1px solid var(--border-light);display:flex;gap:0.75rem;flex-wrap:wrap;">
+        <input type="text" id="user-search" aria-label="Search users by name, email, or phone" placeholder="Search name, email, or phone..." class="form-input" style="flex:1;min-width:200px;" oninput="filterUsers()">
+        <select class="form-select" style="width:150px;" id="kyc-filter" onchange="filterUsers()">
+          <option value="all">All KYC Status</option>
+          <option value="verified">Verified</option>
+          <option value="pending">Pending</option>
+          <option value="none">Not submitted</option>
+        </select>
+        <select class="form-select" style="width:140px;" id="status-filter" onchange="filterUsers()">
+          <option value="all">All Status</option>
+          <option value="active">Active</option>
+          <option value="flagged">Flagged</option>
+          <option value="banned">Banned</option>
+        </select>
+        <select class="form-select" style="width:160px;" id="consent-filter" onchange="filterUsers()">
+          <option value="all">All Consent</option>
+          <option value="yes">Marketing Opt-in</option>
+          <option value="no">Opted Out</option>
+        </select>
+        <select class="form-select" style="width:140px;" id="sort-filter" onchange="filterUsers()">
+          <option value="newest">Newest First</option>
+          <option value="most-tickets">Most Tickets</option>
+          <option value="most-spent">Most Spent</option>
+          <option value="referrals">Most Referrals</option>
+        </select>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+              <th>User</th>
+              <th>Phone</th>
+              <th>Joined</th>
+              <th>Tickets</th>
+              <th>Spent</th>
+              <th>Referrals</th>
+              <th>KYC</th>
+              <th>Marketing</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);flex-wrap:wrap;gap:0.75rem;">
+        <div style="font-size:0.8125rem;color:var(--text-muted);" id="users-footer-count">Showing 20 of 8,432 users</div>
+        <div style="display:flex;gap:0.375rem;">
+          <button class="btn btn-outline btn-sm" disabled><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="btn btn-outline btn-sm" style="background:var(--green-primary);color:#fff;border-color:var(--green-primary);">1</button>
+          <button class="btn btn-outline btn-sm">2</button>
+          <button class="btn btn-outline btn-sm">3</button>
+          <span style="align-self:center;font-size:0.8125rem;color:var(--text-muted);">...</span>
+          <button class="btn btn-outline btn-sm">422</button>
+          <button class="btn btn-outline btn-sm"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bulk actions -->
+    <div class="card" id="bulk-actions-card" style="display:none;margin-bottom:2rem;background:#fffbeb;border-color:#fde68a;">
+      <div class="card-body" style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        <span style="font-size:0.875rem;font-weight:700;" id="bulk-count">0 selected</span>
+        <button onclick="bulkAction('email')" class="btn btn-outline btn-sm"><i class="fa-solid fa-envelope"></i> Send Email</button>
+        <button onclick="bulkAction('export')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export Selected</button>
+        <button onclick="bulkAction('flag')" class="btn btn-sm" style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;"><i class="fa-solid fa-flag"></i> Flag Selected</button>
+        <button onclick="bulkAction('ban')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-ban"></i> Ban Selected</button>
+      </div>
+    </div>
+
+    <!-- KYC Pending queue -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-id-card" style="color:var(--gold);margin-right:0.5rem;"></i>KYC Approval Queue</h3>
+        <span class="badge badge-gold">87 pending</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Submission Date</th>
+              <th>ID Type</th>
+              <th>BVN</th>
+              <th>NIN</th>
+              <th>Documents</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="kyc-queue-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- NDPR Deletion Requests -->
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;">
+        <div>
+          <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-user-slash" style="color:#8b5cf6;margin-right:0.5rem;"></i>NDPR Deletion Requests</h3>
+          <p style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Requests must be actioned within <strong>30 days</strong> per NDPR 2019. Legal holds prevent deletion of financial/compliance records.</p>
+        </div>
+        <span class="badge" style="background:#f3e8ff;color:#6d28d9;border:1px solid #c4b5fd;" id="ndpr-pending-badge">3 open</span>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive">
+          <thead>
+            <tr>
+              <th>Request ID</th>
+              <th>User</th>
+              <th>Request Date</th>
+              <th>30-day Deadline</th>
+              <th>Days Remaining</th>
+              <th>Reason</th>
+              <th>Open Tickets</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ndpr-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:1rem 1.25rem;background:#faf5ff;border-top:1px solid #e9d5ff;border-radius:0 0 12px 12px;">
+        <p style="font-size:0.75rem;color:#6d28d9;margin:0;"><i class="fa-solid fa-circle-info" style="margin-right:0.375rem;"></i>
+          <strong>Legal holds:</strong> Transaction records, T&amp;C logs, and KYC data cannot be deleted while required by FCCPA 2018 §122 (transaction record retention) or SCUML AML/CFT obligations. Only marketing preferences and technical data are fully deletable on request. Users are notified of any partial deletion and their right to lodge a complaint with the NDPC.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- User Detail Modal -->
+<div id="user-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);overflow-y:auto;">
+  <div style="max-width:620px;margin:2rem auto;padding:1rem;">
+    <div class="card" style="border-radius:16px;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1.125rem;font-weight:800;">User Details</h3>
+        <button onclick="closeUserModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);">&times;</button>
+      </div>
+      <div class="card-body" id="user-modal-body" style="padding:1.5rem;"></div>
+    </div>
+  </div>
+</div>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const MOCK_USERS_FULL = [
+  { id:'U001', name:'Adaeze Okonkwo', email:'adaeze@gmail.com', phone:'08012345678', joined:'2025-01-15', tickets:45, spent:81000, referrals:12, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U002', name:'Emeka Chukwu', email:'emeka.c@yahoo.com', phone:'07034567890', joined:'2025-02-03', tickets:20, spent:36000, referrals:6, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U003', name:'Blessing Adeyemi', email:'blessy@hotmail.com', phone:'09011223344', joined:'2025-02-14', tickets:10, spent:18000, referrals:3, kyc:'pending', status:'active', country:'NG', marketingConsent:false },
+  { id:'U004', name:'Tunde Fashola', email:'tunde.f@gmail.com', phone:'08155667788', joined:'2025-02-28', tickets:35, spent:63000, referrals:8, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U005', name:'Chidinma Eze', email:'chi.eze@outlook.com', phone:'07099887766', joined:'2025-03-05', tickets:5, spent:10000, referrals:1, kyc:'none', status:'active', country:'NG', marketingConsent:true },
+  { id:'U006', name:'Dr. Yemi Adebayo', email:'yemi.dr@gmail.com', phone:'08033445566', joined:'2025-03-10', tickets:100, spent:160000, referrals:42, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U007', name:'Ngozi Ibe', email:'ngozi.i@gmail.com', phone:'09022334455', joined:'2025-03-15', tickets:15, spent:27000, referrals:5, kyc:'pending', status:'active', country:'NG', marketingConsent:false },
+  { id:'U008', name:'Oluwaseun Balogun', email:'seun.b@yahoo.com', phone:'08066778899', joined:'2025-03-20', tickets:0, spent:0, referrals:0, kyc:'none', status:'flagged', country:'NG', marketingConsent:false },
+  { id:'U009', name:'Fatima Musa', email:'fatima.m@gmail.com', phone:'07011223344', joined:'2025-03-22', tickets:8, spent:14400, referrals:2, kyc:'none', status:'active', country:'NG', marketingConsent:true },
+  { id:'U010', name:'Babatunde Okafor', email:'baba.ok@gmail.com', phone:'08177889900', joined:'2025-03-25', tickets:25, spent:45000, referrals:9, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U011', name:'Ifeoma Nwosu', email:'ifeo.n@gmail.com', phone:'09055443322', joined:'2025-03-28', tickets:12, spent:21600, referrals:4, kyc:'pending', status:'active', country:'NG', marketingConsent:true },
+  { id:'U012', name:'Chukwuemeka Obi', email:'emeks.obi@gmail.com', phone:'08022334455', joined:'2025-04-01', tickets:50, spent:80000, referrals:37, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U013', name:'Aisha Muhammad', email:'aisha.m@gmail.com', phone:'07099001122', joined:'2025-04-02', tickets:20, spent:36000, referrals:29, kyc:'verified', status:'active', country:'NG', marketingConsent:false },
+  { id:'U014', name:'Olusegun Bankole', email:'segun.b@outlook.com', phone:'08155443322', joined:'2025-04-03', tickets:18, spent:32400, referrals:21, kyc:'pending', status:'active', country:'NG', marketingConsent:true },
+  { id:'U015', name:'Kelechi Orji', email:'kelechi.o@gmail.com', phone:'09033221100', joined:'2025-04-04', tickets:3, spent:5400, referrals:0, kyc:'none', status:'active', country:'NG', marketingConsent:true },
+  { id:'U016', name:'Perpetua Nwosu', email:'perp.n@yahoo.com', phone:'08088776655', joined:'2025-04-05', tickets:7, spent:12600, referrals:1, kyc:'none', status:'active', country:'NG', marketingConsent:false },
+  { id:'U017', name:'Musa Ibrahim', email:'musa.i@gmail.com', phone:'07055443322', joined:'2025-04-06', tickets:30, spent:54000, referrals:15, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+  { id:'U018', name:'Stella Okonkwo', email:'stella.ok@gmail.com', phone:'08011001100', joined:'2025-04-07', tickets:0, spent:0, referrals:0, kyc:'none', status:'banned', country:'NG', marketingConsent:false },
+  { id:'U019', name:'Obinna Chibuike', email:'obinna.c@gmail.com', phone:'09077665544', joined:'2025-04-08', tickets:22, spent:39600, referrals:7, kyc:'pending', status:'active', country:'NG', marketingConsent:true },
+  { id:'U020', name:'Funmilayo Sule', email:'funmi.s@gmail.com', phone:'08066554433', joined:'2025-04-09', tickets:40, spent:64000, referrals:42, kyc:'verified', status:'active', country:'NG', marketingConsent:true },
+];
+
+const NDPR_DELETIONS = [
+  { id:'DRR-2025-001', userId:'U003', name:'Blessing Adeyemi', email:'blessy@hotmail.com', requestDate:'2025-03-15', deadline:'2025-04-14', reason:'No longer wish to use the platform', status:'pending', hasOpenTickets:false },
+  { id:'DRR-2025-002', userId:'U007', name:'Ngozi Ibe', email:'ngozi.i@gmail.com', requestDate:'2025-03-22', deadline:'2025-04-21', reason:'Privacy concerns', status:'pending', hasOpenTickets:true },
+  { id:'DRR-2025-003', userId:'U016', name:'Perpetua Nwosu', email:'perp.n@yahoo.com', requestDate:'2025-04-01', deadline:'2025-05-01', reason:'Requested data export and deletion', status:'in-review', hasOpenTickets:false },
+  { id:'DRR-2025-004', userId:'U018', name:'Stella Okonkwo', email:'stella.ok@gmail.com', requestDate:'2025-03-05', deadline:'2025-04-04', reason:'Account banned — requested deletion', status:'completed', hasOpenTickets:false },
+];
+
+const KYC_QUEUE = [
+  { id:'U003', name:'Blessing Adeyemi', date:'2025-04-05', idType:"Driver's Licence", hasBvn:true, hasNin:false, docUrl:'#' },
+  { id:'U007', name:'Ngozi Ibe', date:'2025-04-06', idType:'National ID Card', hasBvn:true, hasNin:true, docUrl:'#' },
+  { id:'U011', name:'Ifeoma Nwosu', date:'2025-04-07', idType:"Voter's Card (PVC)", hasBvn:false, hasNin:false, docUrl:'#' },
+  { id:'U014', name:'Olusegun Bankole', date:'2025-04-08', idType:'International Passport', hasBvn:true, hasNin:true, docUrl:'#' },
+  { id:'U019', name:'Obinna Chibuike', date:'2025-04-09', idType:'National ID Card', hasBvn:true, hasNin:false, docUrl:'#' },
+];
+
+let filteredUsers = [...MOCK_USERS_FULL];
+let selectedUsers = new Set();
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('users');
+  renderUsersTable();
+  renderKYCQueue();
+  renderNDPRDeletions();
+});
+
+function renderUsersTable() {
+  const tbody = document.getElementById('users-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = filteredUsers.map(u => {
+    const kycBadge = u.kyc === 'verified'
+      ? '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Verified</span>'
+      : u.kyc === 'pending'
+      ? '<span class="badge badge-gold"><i class="fa-solid fa-clock"></i> Pending</span>'
+      : '<span class="badge badge-gray">None</span>';
+
+    const statusBadge = u.status === 'active'
+      ? '<span class="badge badge-green">Active</span>'
+      : u.status === 'flagged'
+      ? '<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;"><i class="fa-solid fa-flag"></i> Flagged</span>'
+      : '<span class="badge" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;"><i class="fa-solid fa-ban"></i> Banned</span>';
+
+    const initials = u.name.split(' ').map(n => n[0]).join('').slice(0,2);
+
+    return `<tr>
+      <td data-label=""><input type="checkbox" value="${u.id}" onchange="toggleSelect(this)"></td>
+      <td data-label="User">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--green-primary),var(--green-light));color:#fff;font-size:0.8125rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${initials}</div>
+          <div>
+            <div style="font-weight:600;font-size:0.875rem;">${u.name}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted);">${u.email}</div>
+          </div>
+        </div>
+      </td>
+      <td data-label="Phone" style="font-size:0.8125rem;">${u.phone}</td>
+      <td data-label="Joined" style="font-size:0.8125rem;color:var(--text-muted);">${new Date(u.joined).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="Tickets"><strong>${u.tickets}</strong></td>
+      <td data-label="Spent" style="font-weight:600;color:var(--green-primary);">${Utils.formatNaira(u.spent)}</td>
+      <td data-label="Referrals">${u.referrals}</td>
+      <td data-label="KYC">${kycBadge}</td>
+      <td data-label="Marketing">${u.marketingConsent
+        ? '<span class="badge badge-green" title="Opted in to marketing communications"><i class="fa-solid fa-check"></i> Opt-in</span>'
+        : '<span class="badge badge-gray" title="Opted out — do not send marketing"><i class="fa-solid fa-ban"></i> Opted out</span>'}</td>
+      <td data-label="Status">${statusBadge}</td>
+      <td data-label="Actions">
+        <div style="display:flex;gap:0.375rem;">
+          <button onclick="viewUserDetail('${u.id}')" class="btn btn-outline btn-sm" title="View Details"><i class="fa-solid fa-eye"></i></button>
+          ${u.kyc === 'pending' ? `<button onclick="approveKYC('${u.id}')" class="btn btn-sm" style="background:#f0fdf4;border:1px solid #86efac;color:#166534;" title="Approve KYC"><i class="fa-solid fa-id-card"></i></button>` : ''}
+          ${u.status === 'active' ? `<button onclick="flagUserAction('${u.id}')" class="btn btn-sm" style="background:#fef3c7;border:1px solid #fcd34d;color:#92400e;" title="Flag User"><i class="fa-solid fa-flag"></i></button>` : ''}
+          ${u.status !== 'banned' ? `<button onclick="banUser('${u.id}')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;" title="Ban User"><i class="fa-solid fa-ban"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderKYCQueue() {
+  const tbody = document.getElementById('kyc-queue-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = KYC_QUEUE.map(k => `
+    <tr>
+      <td data-label="User"><div style="font-weight:600;">${k.name}</div><div style="font-size:0.75rem;color:var(--text-muted);">${k.id}</div></td>
+      <td data-label="Submission Date" style="font-size:0.8125rem;">${k.date}</td>
+      <td data-label="ID Type" style="font-size:0.8125rem;">${k.idType}</td>
+      <td data-label="BVN">${k.hasBvn ? '<span class="badge badge-green">Provided</span>' : '<span class="badge badge-gray">Missing</span>'}</td>
+      <td data-label="NIN">${k.hasNin ? '<span class="badge badge-green">Provided</span>' : '<span class="badge badge-gray">Missing</span>'}</td>
+      <td data-label="Documents"><button onclick="Toast.info('Document','Opening uploaded ID document...')" class="btn btn-outline btn-sm"><i class="fa-solid fa-file-image"></i> View Doc</button></td>
+      <td data-label="Actions">
+        <div style="display:flex;gap:0.375rem;">
+          <button onclick="approveKYCQueue('${k.id}','${k.name}')" class="btn btn-sm" style="background:#f0fdf4;border:1px solid #86efac;color:#166534;"><i class="fa-solid fa-check"></i> Approve</button>
+          <button onclick="rejectKYCQueue('${k.id}','${k.name}')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-times"></i> Reject</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterUsers() {
+  const q = document.getElementById('user-search').value.toLowerCase();
+  const kyc = document.getElementById('kyc-filter').value;
+  const status = document.getElementById('status-filter').value;
+  const consent = document.getElementById('consent-filter').value;
+  const sort = document.getElementById('sort-filter').value;
+
+  filteredUsers = MOCK_USERS_FULL.filter(u => {
+    const matchQ = !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.phone.includes(q);
+    const matchKyc = kyc === 'all' || u.kyc === kyc;
+    const matchStatus = status === 'all' || u.status === status;
+    const matchConsent = consent === 'all' || (consent === 'yes' ? u.marketingConsent : !u.marketingConsent);
+    return matchQ && matchKyc && matchStatus && matchConsent;
+  });
+
+  if (sort === 'most-tickets') filteredUsers.sort((a,b) => b.tickets - a.tickets);
+  else if (sort === 'most-spent') filteredUsers.sort((a,b) => b.spent - a.spent);
+  else if (sort === 'referrals') filteredUsers.sort((a,b) => b.referrals - a.referrals);
+  else filteredUsers.sort((a,b) => new Date(b.joined) - new Date(a.joined));
+
+  document.getElementById('users-count').textContent = `Showing ${filteredUsers.length} users`;
+  document.getElementById('users-footer-count').textContent = `Showing ${Math.min(20, filteredUsers.length)} of ${filteredUsers.length} users`;
+  renderUsersTable();
+}
+
+function toggleSelect(checkbox) {
+  if (checkbox.checked) selectedUsers.add(checkbox.value);
+  else selectedUsers.delete(checkbox.value);
+  updateBulkActions();
+}
+
+function toggleSelectAll(checkbox) {
+  document.querySelectorAll('#users-tbody input[type=checkbox]').forEach(cb => {
+    cb.checked = checkbox.checked;
+    if (checkbox.checked) selectedUsers.add(cb.value);
+    else selectedUsers.delete(cb.value);
+  });
+  updateBulkActions();
+}
+
+function updateBulkActions() {
+  const card = document.getElementById('bulk-actions-card');
+  const count = document.getElementById('bulk-count');
+  if (selectedUsers.size > 0) {
+    card.style.display = 'block';
+    count.textContent = `${selectedUsers.size} selected`;
+  } else {
+    card.style.display = 'none';
+  }
+}
+
+function bulkAction(action) {
+  const n = selectedUsers.size;
+  if (action === 'email') Toast.info('Email', `Composing email to ${n} user${n !== 1 ? 's' : ''}...`);
+  else if (action === 'export') Toast.success('Exported', `${n} user records exported to CSV.`);
+  else if (action === 'flag') Toast.warning('Flagged', `${n} user${n !== 1 ? 's' : ''} flagged for review.`);
+  else if (action === 'ban') {
+    if (confirm(`Ban ${n} user${n !== 1 ? 's' : ''}? They will lose access to their accounts.`)) {
+      Toast.error('Users Banned', `${n} user${n !== 1 ? 's' : ''} have been banned.`);
+    }
+  }
+}
+
+function viewUserDetail(id) {
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (!user) return;
+  const initials = user.name.split(' ').map(n => n[0]).join('').slice(0,2);
+  document.getElementById('user-modal-body').innerHTML = `
+    <div style="display:flex;align-items:center;gap:1.25rem;margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border-light);">
+      <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,var(--green-primary),var(--green-light));color:#fff;font-size:1.5rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${initials}</div>
+      <div>
+        <div style="font-size:1.125rem;font-weight:800;">${user.name}</div>
+        <div style="font-size:0.875rem;color:var(--text-muted);">${user.email}</div>
+        <div style="font-size:0.875rem;color:var(--text-muted);">${user.phone}</div>
+        <div style="margin-top:0.5rem;">
+          ${user.kyc === 'verified' ? '<span class="badge badge-green"><i class="fa-solid fa-check"></i> KYC Verified</span>' : user.kyc === 'pending' ? '<span class="badge badge-gold">KYC Pending</span>' : '<span class="badge badge-gray">KYC Not Submitted</span>'}
+          &nbsp;
+          ${user.status === 'active' ? '<span class="badge badge-green">Active</span>' : user.status === 'flagged' ? '<span class="badge" style="background:#fef3c7;color:#92400e;">Flagged</span>' : '<span class="badge" style="background:#fee2e2;color:#b91c1c;">Banned</span>'}
+        </div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem;">
+      <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--green-primary);">${user.tickets}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Total Tickets</div>
+      </div>
+      <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--gold);">${Utils.formatNaira(user.spent)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Total Spent</div>
+      </div>
+      <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--info);">${user.referrals}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Referrals</div>
+      </div>
+      <div style="background:var(--bg-secondary);border-radius:8px;padding:1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text-secondary);">${Utils.formatNaira(user.referrals * 300)}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Referral Earnings</div>
+      </div>
+    </div>
+    <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:1.5rem;">
+      <div>User ID: <strong>${user.id}</strong></div>
+      <div>Member since: <strong>${new Date(user.joined).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'})}</strong></div>
+      <div>Country: <strong>Nigeria 🇳🇬</strong></div>
+    </div>
+    <!-- NDPR Consent Panel -->
+    <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:10px;padding:1rem;margin-bottom:1.25rem;">
+      <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;letter-spacing:0.06em;color:#6d28d9;margin-bottom:0.625rem;"><i class="fa-solid fa-shield-halved" style="margin-right:0.375rem;"></i>NDPR Consent Status</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+        <div>
+          <div style="font-size:0.875rem;font-weight:600;">${user.marketingConsent ? '<span style="color:#166534;">Marketing Opt-in — may receive emails &amp; SMS</span>' : '<span style="color:#b91c1c;">Opted Out — do not send marketing</span>'}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">Last updated by user on account settings page</div>
+        </div>
+        <button onclick="toggleMarketingConsent('${user.id}')" class="btn btn-outline btn-sm" style="${user.marketingConsent ? 'color:#b91c1c;border-color:#fca5a5;' : 'color:#166534;border-color:#86efac;'}">
+          ${user.marketingConsent ? '<i class="fa-solid fa-toggle-off"></i> Revoke Consent' : '<i class="fa-solid fa-toggle-on"></i> Grant Consent'}
+        </button>
+      </div>
+      ${NDPR_DELETIONS.find(d => d.userId === user.id && d.status !== 'completed') ? `<div style="margin-top:0.625rem;font-size:0.75rem;background:#fee2e2;border-radius:6px;padding:0.5rem 0.75rem;color:#b91c1c;"><i class="fa-solid fa-triangle-exclamation" style="margin-right:0.375rem;"></i>Active deletion request on file — see NDPR Deletion Requests below.</div>` : ''}
+    </div>
+    <div style="display:flex;gap:0.625rem;flex-wrap:wrap;">
+      <button onclick="${user.marketingConsent ? `Toast.info('Email','Opening email composer for ${user.name}...')` : `Toast.warning('Blocked','${user.name} has opted out of marketing. Cannot send promotional emails per NDPR.')`}" class="btn btn-outline btn-sm"><i class="fa-solid fa-envelope"></i> Send Email</button>
+      <button onclick="Toast.success('Note Added','Admin note saved for this user.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-note-sticky"></i> Add Note</button>
+      ${user.status !== 'banned' ? `<button onclick="banUser('${user.id}');closeUserModal();" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-ban"></i> Ban Account</button>` : ''}
+    </div>`;
+  document.getElementById('user-modal').style.display = 'block';
+  document.body.style.overflow = 'hidden';
+}
+
+function closeUserModal() {
+  document.getElementById('user-modal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function approveKYC(id) {
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (user) { user.kyc = 'verified'; renderUsersTable(); renderKYCQueue(); }
+  Toast.success('KYC Approved', 'User has been KYC verified. They can now claim prizes.');
+}
+
+function approveKYCQueue(id, name) {
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (user) user.kyc = 'verified';
+  KYC_QUEUE.splice(KYC_QUEUE.findIndex(k => k.id === id), 1);
+  renderUsersTable(); renderKYCQueue();
+  Toast.success('KYC Approved', `${name}'s identity has been verified.`);
+}
+
+function rejectKYCQueue(id, name) {
+  KYC_QUEUE.splice(KYC_QUEUE.findIndex(k => k.id === id), 1);
+  renderKYCQueue();
+  Toast.warning('KYC Rejected', `${name} has been notified to resubmit their documents.`);
+}
+
+function flagUserAction(id) {
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (user) { user.status = 'flagged'; renderUsersTable(); }
+  Toast.warning('User Flagged', 'Account flagged for review. User can still access their account.');
+}
+
+function banUser(id) {
+  if (!confirm('Ban this user? They will immediately lose access to their account.')) return;
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (user) { user.status = 'banned'; renderUsersTable(); }
+  Toast.error('User Banned', 'Account has been banned. The user cannot log in.');
+}
+
+function renderNDPRDeletions() {
+  const tbody = document.getElementById('ndpr-tbody');
+  if (!tbody) return;
+  const today = new Date();
+  today.setHours(0,0,0,0);
+
+  tbody.innerHTML = NDPR_DELETIONS.map(r => {
+    const deadlineDate = new Date(r.deadline);
+    const diffMs = deadlineDate - today;
+    const daysLeft = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+
+    let daysCell, daysStyle;
+    if (r.status === 'completed') {
+      daysCell = '—';
+      daysStyle = 'color:var(--text-muted);';
+    } else if (daysLeft < 0) {
+      daysCell = `<span style="color:#b91c1c;font-weight:800;">${Math.abs(daysLeft)} days OVERDUE</span>`;
+      daysStyle = '';
+    } else if (daysLeft <= 5) {
+      daysCell = `<span style="color:#d97706;font-weight:800;">${daysLeft} days left</span>`;
+      daysStyle = '';
+    } else {
+      daysCell = `<span style="color:var(--text-secondary);font-weight:600;">${daysLeft} days left</span>`;
+      daysStyle = '';
+    }
+
+    const statusBadge = r.status === 'completed'
+      ? '<span class="badge badge-green"><i class="fa-solid fa-check"></i> Completed</span>'
+      : r.status === 'in-review'
+      ? '<span class="badge" style="background:#eff6ff;color:#1e40af;border:1px solid #93c5fd;"><i class="fa-solid fa-magnifying-glass"></i> In Review</span>'
+      : daysLeft < 0
+      ? '<span class="badge" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;"><i class="fa-solid fa-triangle-exclamation"></i> Overdue</span>'
+      : '<span class="badge badge-gold"><i class="fa-solid fa-clock"></i> Pending</span>';
+
+    const ticketWarning = r.hasOpenTickets
+      ? '<span class="badge" style="background:#fef3c7;color:#92400e;border:1px solid #fcd34d;" title="User has active ticket purchases — cannot delete financial records"><i class="fa-solid fa-triangle-exclamation"></i> Active tickets</span>'
+      : '<span class="badge badge-gray">None</span>';
+
+    const actions = r.status === 'completed'
+      ? `<button onclick="Toast.info('Record','Deletion completed on ${r.deadline}. Audit log retained per SCUML.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View</button>`
+      : `<div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+          <button onclick="reviewDeletion('${r.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-magnifying-glass"></i> Review</button>
+          ${!r.hasOpenTickets ? `<button onclick="processDeletion('${r.id}','${r.name}')" class="btn btn-sm" style="background:#f3e8ff;border:1px solid #c4b5fd;color:#6d28d9;"><i class="fa-solid fa-trash"></i> Process</button>` : ''}
+          <button onclick="denyDeletion('${r.id}','${r.name}')" class="btn btn-sm" style="background:#fee2e2;border:1px solid #fca5a5;color:#b91c1c;"><i class="fa-solid fa-times"></i> Deny</button>
+        </div>`;
+
+    return `<tr>
+      <td data-label="Request ID" style="font-family:monospace;font-size:0.8125rem;">${r.id}</td>
+      <td data-label="User">
+        <div style="font-weight:600;font-size:0.875rem;">${r.name}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${r.email}</div>
+      </td>
+      <td data-label="Request Date" style="font-size:0.8125rem;">${new Date(r.requestDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="30-day Deadline" style="font-size:0.8125rem;font-weight:600;">${new Date(r.deadline).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="Days Remaining">${daysCell}</td>
+      <td data-label="Reason" style="font-size:0.8125rem;max-width:180px;color:var(--text-muted);">${r.reason}</td>
+      <td data-label="Open Tickets">${ticketWarning}</td>
+      <td data-label="Status">${statusBadge}</td>
+      <td data-label="Actions">${actions}</td>
+    </tr>`;
+  }).join('');
+
+  // Update open badge count
+  const openCount = NDPR_DELETIONS.filter(r => r.status !== 'completed').length;
+  const badge = document.getElementById('ndpr-pending-badge');
+  if (badge) badge.textContent = `${openCount} open`;
+  const stat = document.getElementById('stat-ndpr-count');
+  if (stat) stat.textContent = openCount;
+}
+
+function toggleMarketingConsent(id) {
+  const user = MOCK_USERS_FULL.find(u => u.id === id);
+  if (!user) return;
+  user.marketingConsent = !user.marketingConsent;
+  renderUsersTable();
+  // Re-open modal with updated data
+  viewUserDetail(id);
+  Toast.info('Consent Updated', `${user.name}'s marketing consent ${user.marketingConsent ? 'granted' : 'revoked'}. Change logged for NDPR audit trail.`);
+}
+
+function exportUsers() {
+  Toast.success('CSV Exported', `${filteredUsers.length} user records exported. Marketing opt-out users excluded from marketing list.`);
+}
+
+function reviewDeletion(id) {
+  const r = NDPR_DELETIONS.find(d => d.id === id);
+  if (!r) return;
+  if (r.status === 'pending') { r.status = 'in-review'; renderNDPRDeletions(); }
+  Toast.info('Under Review', `Deletion request ${id} marked as under review. User will be notified within 5 business days.`);
+}
+
+function processDeletion(id, name) {
+  if (!confirm(`Process deletion request for ${name}?\n\nNote: Financial records (transactions, T&C logs, KYC) will be retained under FCCPA §122 and SCUML obligations. Marketing preferences and personal identifiers will be anonymised.`)) return;
+  const r = NDPR_DELETIONS.find(d => d.id === id);
+  if (r) { r.status = 'completed'; renderNDPRDeletions(); }
+  // Update user status in main table
+  const user = MOCK_USERS_FULL.find(u => u.id === r.userId);
+  if (user) { user.status = 'banned'; user.marketingConsent = false; renderUsersTable(); }
+  Toast.success('Deletion Processed', `${name}'s personal data has been anonymised. Compliance records retained. Audit log created.`);
+}
+
+function denyDeletion(id, name) {
+  const reason = prompt(`Reason for denying ${name}'s deletion request (required):`);
+  if (!reason || !reason.trim()) return;
+  const r = NDPR_DELETIONS.find(d => d.id === id);
+  if (r) { r.status = 'completed'; renderNDPRDeletions(); }
+  Toast.warning('Request Denied', `${name} notified of denial. Reason logged. They may lodge a complaint with the NDPC.`);
+}
+
+// Close modal on backdrop click
+document.getElementById('user-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeUserModal();
+});
+</script>
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item active"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,669 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ────────────────────────────────────────────────────────────────────
+
+enum KycStatus {
+  PENDING
+  SUBMITTED
+  VERIFIED
+  REJECTED
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum CampaignStatus {
+  DRAFT
+  REVIEW
+  UPCOMING
+  LIVE
+  PAUSED
+  CLOSED
+  DRAWN
+  CANCELLED
+}
+
+enum PropertyType {
+  RESIDENTIAL
+  COMMERCIAL
+  LAND
+  MIXED_USE
+}
+
+enum DrawMethod {
+  RANDOM
+  RANDOM_ORG_VERIFIED
+}
+
+enum DrawStatus {
+  PENDING
+  SCHEDULED
+  LIVE
+  COMPLETED
+  FILED
+}
+
+enum PaymentGateway {
+  PAYSTACK
+  FLUTTERWAVE
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+enum RefundReason {
+  CAMPAIGN_CANCELLED
+  MINIMUM_NOT_REACHED
+  USER_REQUEST
+}
+
+enum RefundStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+enum NdprRequestStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  REJECTED
+}
+
+enum InfluencerPlatform {
+  INSTAGRAM
+  TIKTOK
+  YOUTUBE
+  TWITTER_X
+  FACEBOOK
+}
+
+enum ContentStatus {
+  DRAFT
+  SUBMITTED
+  APPROVED
+  PUBLISHED
+  REJECTED
+}
+
+// ─── Core Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id               String    @id @default(uuid())
+  email            String    @unique
+  phone            String    @unique
+  fullName         String
+  passwordHash     String
+  bvnEncrypted     String?   // AES-256-GCM: iv:tag:ciphertext (hex)
+  ninEncrypted     String?   // AES-256-GCM: iv:tag:ciphertext (hex)
+  kycStatus        KycStatus @default(PENDING)
+  role             Role      @default(USER)
+  referralCode     String    @unique
+  referredByCode   String?
+  referralEarnings Decimal   @default(0) @db.Decimal(12, 2)
+  referralCount    Int       @default(0)
+  ndprConsentAt    DateTime
+  ndprConsentIp    String
+  tcAcceptedAt     DateTime
+  tcAcceptedIp     String
+  twoFactorSecret  String?   // AES-256-GCM encrypted TOTP secret (admin only)
+  twoFactorEnabled Boolean   @default(false)
+  phoneVerified    Boolean   @default(false)
+  emailVerified    Boolean   @default(false)
+  bannedAt         DateTime? // Account ban timestamp
+  bannedBy         String?   // Admin user id who banned
+  flaggedAt        DateTime? // Account flagged-for-review timestamp
+  flaggedBy        String?   // Admin user id who flagged
+  kycIdType        String?   // e.g. DRIVERS_LICENCE | NATIONAL_ID | PASSPORT | VOTERS_CARD | NIN_SLIP
+  kycDocumentKey   String?   // R2 object key for uploaded identity document
+  kycSubmittedAt   DateTime? // When user last submitted KYC for review
+  deletedAt        DateTime? // NDPR deletion timestamp (anonymisation date)
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  tickets       Ticket[]
+  refunds       Refund[]
+  ndprRequests  NdprRequest[]
+  adminSessions AdminSession[]
+
+  @@index([email])
+  @@index([phone])
+  @@index([referralCode])
+  @@index([kycStatus])
+  @@map("users")
+}
+
+model Campaign {
+  id              String         @id @default(uuid())
+  slug            String         @unique
+  title           String
+  propertyAddress String
+  propertyState   String
+  propertyLga     String
+  propertyType    PropertyType
+  marketValue     Decimal        @db.Decimal(15, 2)
+  reservePrice    Decimal        @db.Decimal(15, 2)
+  ticketPrice     Decimal        @db.Decimal(12, 2)
+  totalTickets    Int
+  minTickets      Int
+  status          CampaignStatus @default(DRAFT)
+  fccpcRef        String?
+  lslgaRef        String?
+  escrowBank              String?
+  escrowAccountNo         String?
+  escrowAccountName       String?
+  // Which payment gateways are accepted for this campaign (admin-configurable)
+  allowedGateways         PaymentGateway[] // defaults to all three; enforced on purchase
+  // Gateway sub-account codes — funds route directly to escrow bank (optional, falls back to env vars)
+  paystackSubaccountCode  String?  // e.g. ACCT_xxxxxxxxxxxxxxx
+  flutterwaveSubaccountId String?  // numeric sub-account id as string
+  skillQuestion   Json           // {question: string, options: string[], correctIndex: number}
+  bundles         Json           // [{tickets: number, price: number, label: string, savings?: number}]
+  drawDate        DateTime?
+  drawMethod      DrawMethod     @default(RANDOM)
+  // ── Two-phase draw commitment ─────────────────────────────────────────────
+  drawPreSeed           String?  // Generated at LIVE; mixed with ticket list at draw time
+  drawPreSeedCommitment String?  // sha256(drawPreSeed), published publicly at LIVE
+  featuredImageKey String?       // R2 object key
+  galleryKeys     String[]       // R2 object keys
+  documentKeys    Json           // {titleDeed?, survey?, fccpcCert?, lslgaCert?, escrowAgreement?} → R2 keys
+  // ── Rich property details ─────────────────────────────────────────────────
+  subtitle        String?        // Short subtitle shown below title
+  description     String?        // Full marketing description
+  bedrooms        Int?
+  bathrooms       Int?
+  buildingArea    Int?           // sqm
+  landArea        Int?           // sqm
+  parkingSpaces   Int?
+  propertyFeatures String[]      // ["Swimming Pool", "BQ", ...]
+  cOfOConfirmed   Boolean?       @default(false)
+  // ── Discovery & ranking ────────────────────────────────────────────────────
+  featured        Boolean        @default(false)  // pinned to top of listings
+  hotScore        Float          @default(0)      // computed: velocity × completeness
+  // ── Legal & trust ──────────────────────────────────────────────────────────
+  propertyLawyer  String?        // e.g. "Bayo Akinlabi & Co."
+  valuationFirm   String?        // NIESV-registered firm name
+  valuationRef    String?        // Valuation report reference
+  cacRegNumber    String?        // CAC registration number
+  fccpcApprovalDate DateTime?    // Date of FCCPC approval
+  createdBy       String         // admin user id
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  publishedAt     DateTime?
+  closedAt        DateTime?
+
+  tickets Ticket[]
+  draw    Draw?
+  refunds Refund[]
+
+  @@index([status])
+  @@index([slug])
+  @@index([propertyState])
+  @@map("campaigns")
+}
+
+model Ticket {
+  id             String         @id @default(uuid())
+  ticketNumber   String         @unique // RP-{YYYY}-{campaignSeq}-{ticketSeq}
+  campaignId     String
+  userId         String
+  bundleLabel    String?
+  quantity       Int
+  unitPrice      Decimal        @db.Decimal(12, 2)
+  totalAmount    Decimal        @db.Decimal(12, 2)
+  paymentRef          String         @unique // gateway transaction reference / bank narration code
+  paymentGateway      PaymentGateway
+  paymentStatus       PaymentStatus  @default(PENDING)
+  // Bank transfer fields (only populated when paymentGateway = BANK_TRANSFER)
+  bankTransferRef      String?        // narration/reference the user says they used
+  bankTransferProofKey String?        // R2 key for uploaded proof screenshot
+  bankTransferNote     String?        // admin note when confirming or rejecting
+  // Gateway settlement tracking
+  gatewayTransactionId String?        // Flutterwave numeric ID / Paystack transaction id (for reliable refunds)
+  escrowSettledAt      DateTime?      // set when gateway confirms payment — proves funds entered escrow
+  skillAnswer         Int            // index of option selected
+  skillCorrect        Boolean
+  ipAddress           String
+  userAgent           String
+  purchasedAt         DateTime       @default(now())
+  receiptNumber       String         @unique // FCCPA §118 receipt number
+
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  refund   Refund?
+  draw     Draw?    @relation("WinnerTicket")
+
+  // NEVER add deletedAt — FCCPA §118 permanence
+  @@index([campaignId])
+  @@index([userId])
+  @@index([paymentStatus])
+  @@index([ticketNumber])
+  @@map("tickets")
+}
+
+model Draw {
+  id                String     @id @default(uuid())
+  campaignId        String     @unique
+  status            DrawStatus @default(PENDING)
+  witnessName       String     // Required — no anonymous draws
+  witnessTitle      String
+  initiatedBy       String     // Admin user ID who triggered the draw
+  // Two-phase commit-reveal integrity fields
+  seedCommitment    String?    // sha256(drawPreSeed) — published at campaign LIVE before any tickets sold
+  drawSeed          String?    // sha256(drawPreSeed + ':' + ticketListHash) — computed at draw initiation
+  // Random.org signed response (only for RANDOM_ORG_VERIFIED draws)
+  randomOrgResponse Json?
+  ticketCount       Int?       // Snapshot of eligible ticket count at draw time
+  winnerTicketId    String?    @unique
+  fccpcNotifiedAt   DateTime?
+  winnerNotifiedAt  DateTime?
+  publicAnnouncedAt DateTime?
+  cpcbFormKey          String?    // R2 key for Form CPC B (FCCPA §124)
+  cpcbFiledAt          DateTime?
+  winnerAcknowledgedAt DateTime?  // Admin records FCCPC acknowledged winner submission
+  cpcbAcknowledgedAt   DateTime?  // Admin records FCCPC acknowledged Form CPC B
+  // Winner claim journey — admin advances one step at a time
+  claimIdentityVerifiedAt  DateTime?  // Step 1: Identity verified
+  claimAcceptanceSignedAt  DateTime?  // Step 2: Winner acceptance signed
+  claimKycCompletedAt      DateTime?  // Step 3: KYC & legal docs completed
+  claimTransferCompletedAt DateTime?  // Step 4: Property transfer completed
+  claimKeysHandedAt        DateTime?  // Step 5: Keys/title deeds handed over
+  createdAt            DateTime   @default(now())
+  updatedAt         DateTime   @updatedAt
+
+  campaign       Campaign        @relation(fields: [campaignId], references: [id])
+  winnerTicket   Ticket?         @relation("WinnerTicket", fields: [winnerTicketId], references: [id])
+  claimDocuments ClaimDocument[]
+
+  @@map("draws")
+}
+
+model ClaimDocument {
+  id               String    @id @default(uuid())
+  drawId           String
+  step             Int       // 1–5: which claim step this document belongs to
+  name             String
+  description      String?
+  requiresPhysical Boolean   @default(false) // true = winner must come to office in person
+  storageKey       String?                   // R2 key set when upload URL is issued
+  mimeType         String?
+  originalFileName String?
+  uploadedAt       DateTime?
+  uploadedByRole   String?   // "winner" | "admin"
+  verifiedAt       DateTime?
+  verifiedBy       String?   // admin userId who verified
+  notes            String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  draw             Draw      @relation(fields: [drawId], references: [id])
+
+  @@map("claim_documents")
+}
+
+model Refund {
+  id          String       @id @default(uuid())
+  ticketId    String       @unique
+  userId      String
+  campaignId  String
+  amount      Decimal      @db.Decimal(12, 2)
+  reason      RefundReason
+  status      RefundStatus @default(PENDING)
+  gatewayRef  String?
+  processedAt DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  ticket   Ticket   @relation(fields: [ticketId], references: [id])
+  user     User     @relation(fields: [userId], references: [id])
+  campaign Campaign @relation(fields: [campaignId], references: [id])
+
+  @@index([status])
+  @@index([campaignId])
+  @@map("refunds")
+}
+
+// ─── Audit Log (immutable append-only) ──────────────────────────────────────
+
+model AuditLog {
+  id         BigInt   @id @default(autoincrement())
+  actorId    String?  // null = system action
+  action     String   // e.g. "campaign.published", "draw.initiated", "user.kyc_verified"
+  entityType String   // e.g. "Campaign", "User", "Ticket"
+  entityId   String
+  payload    Json
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+  // No updatedAt — append-only for compliance
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// ─── NDPR Data Subject Requests ──────────────────────────────────────────────
+
+model NdprRequest {
+  id          String            @id @default(uuid())
+  userId      String
+  requestType String            // "ACCESS" | "CORRECTION" | "DELETION"
+  status      NdprRequestStatus @default(PENDING)
+  requestedAt DateTime          @default(now())
+  dueAt       DateTime          // requestedAt + 30 days
+  processedAt DateTime?
+  processedBy String?           // admin user id
+  notes       String?
+  exportKey   String?           // R2 key for data export zip (ACCESS requests)
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([status])
+  @@map("ndpr_requests")
+}
+
+// ─── Influencer Management ───────────────────────────────────────────────────
+
+model Influencer {
+  id           String   @id @default(uuid())
+  name         String
+  email        String?
+  phone        String?
+  handle       String?
+  platforms    InfluencerPlatform[]
+  followerCount Int?
+  engagementRate Decimal? @db.Decimal(5, 2)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  campaigns InfluencerCampaign[]
+
+  @@map("influencers")
+}
+
+model InfluencerCampaign {
+  id                  String        @id @default(uuid())
+  influencerId        String
+  campaignId          String        // RaffleProp campaign id
+  campaignTitle       String        // denormalized for display
+  agreementSigned     Boolean       @default(false)
+  agreementKey        String?       // R2 key for signed agreement
+  briefKey            String?       // R2 key for content brief
+  fccpcStatementKey   String?       // R2 key for FCCPC endorsement statement
+  contentStatus       ContentStatus @default(DRAFT)
+  contentUrl          String?       // live post URL
+  impressions         Int?
+  clicks              Int?
+  conversions         Int?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  influencer Influencer @relation(fields: [influencerId], references: [id])
+
+  @@index([influencerId])
+  @@map("influencer_campaigns")
+}
+
+// ─── Admin Sessions (2FA-verified) ───────────────────────────────────────────
+
+model AdminSession {
+  id            String   @id @default(uuid())
+  userId        String
+  refreshToken  String   @unique // hashed
+  twoFaVerified Boolean  @default(false)
+  ipAddress     String
+  userAgent     String
+  expiresAt     DateTime
+  revokedAt     DateTime?
+  createdAt     DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@map("admin_sessions")
+}
+
+// ─── Regulatory Calendar Deadlines ───────────────────────────────────────────
+
+model RegulatoryDeadline {
+  id          String   @id @default(uuid())
+  campaignId  String?  // null = global deadline
+  title       String
+  description String
+  category    String   // "FCCPA" | "NDPR" | "LSLGA" | "TAX"
+  dueAt       DateTime
+  status      String   @default("PENDING") // "PENDING" | "COMPLETED" | "OVERDUE"
+  completedAt DateTime?
+  completedBy String?  // admin user id
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([dueAt])
+  @@index([status])
+  @@map("regulatory_deadlines")
+}
+
+// ─── Broadcast Emails ────────────────────────────────────────────────────────
+
+model Broadcast {
+  id         String   @id @default(uuid())
+  subject    String
+  body       String
+  audience   String   // "ALL_USERS" | "NEWSLETTER" | "CAMPAIGN_TICKETS" | "ALL_TICKET_HOLDERS"
+  campaignId String?
+  sentBy     String   // admin user ID
+  sentCount  Int      @default(0)
+  failCount  Int      @default(0)
+  status     String   // "SENT" | "PARTIAL" | "FAILED"
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@map("broadcasts")
+}
+
+// ─── Newsletter / Campaign Notification Subscribers ──────────────────────────
+
+model NewsletterSubscriber {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  confirmedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  @@index([email])
+  @@map("newsletter_subscribers")
+}
+
+// ─── CMS Content Models ──────────────────────────────────────────────────────
+
+/// Singleton row — always id = 'global'. Upserted, never re-created.
+model SiteSettings {
+  id                  String   @id @default("global")
+  siteName            String   @default("RaffleProp")
+  tagline             String?
+  supportEmail        String?
+  supportPhone        String?
+  whatsappNumber      String?
+  twitterUrl          String?
+  instagramUrl        String?
+  facebookUrl         String?
+  youtubeUrl          String?
+  tiktokUrl           String?
+  linkedinUrl         String?
+  maintenanceMode     Boolean  @default(false)
+  maintenanceBanner   String?  // shown when maintenanceMode = false but banner is set
+  footerTagline       String?
+  termsUrl            String?
+  privacyUrl          String?
+  // ── Homepage sections ──────────────────────────────────────────────────────
+  heroSection         Json?    // { badgeText, heading, subheading }
+  heroStats           Json?    // [{ label, value }] × 3
+  statsSection        Json?    // [{ label, value }] × 4
+  ctaBanner           Json?    // { heading, subtext, primaryButtonLabel, secondaryButtonLabel }
+  notificationSection Json?    // { heading, subtext }
+  // ── Company / compliance info ──────────────────────────────────────────────
+  companyInfo         Json?    // { cacNumber, fccpcRef, lslgaRef, scumlRef, brandDescription, paymentNote, copyrightText, lawyerName, lawyerFirm, dpoName, privacyEmail }
+  // ── About page content ─────────────────────────────────────────────────────
+  aboutMission        Json?    // { heading, paragraphs: string[] }
+  aboutValues         Json?    // [{ icon, title, body }]
+  // ── Blog page content ──────────────────────────────────────────────────────
+  blogTopics          Json?    // [{ icon, label }]
+  // ── Document Vault ─────────────────────────────────────────────────────────
+  documentVault       Json?    // [{ slot, label, url?, r2Key? }]
+  updatedAt           DateTime @updatedAt
+  updatedBy           String?  // admin user id
+
+  @@map("site_settings")
+}
+
+model TrustBadge {
+  id        String   @id @default(uuid())
+  text      String
+  iconClass String   // FontAwesome class e.g. "fa-shield-halved"
+  order     Int      @default(0)
+  enabled   Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([enabled])
+  @@map("trust_badges")
+}
+
+model HowItWorksStep {
+  id          String   @id @default(uuid())
+  stepNumber  Int      // display number shown on the card (1–4)
+  icon        String?  // optional FontAwesome class
+  title       String
+  description String
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("how_it_works_steps")
+}
+
+model TeamMember {
+  id          String   @id @default(uuid())
+  name        String
+  title       String
+  bio         String
+  photoKey    String?  // R2 object key
+  initials    String?  // fallback e.g. "OA"
+  avatarColor String?  // hex colour for initials avatar
+  linkedinUrl String?
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("team_members")
+}
+
+model CompanyMilestone {
+  id          String   @id @default(uuid())
+  year        String   // display label e.g. "2023" or "Q1 2024"
+  heading     String
+  description String
+  order       Int      @default(0)
+  published   Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("company_milestones")
+}
+
+model Faq {
+  id        String   @id @default(uuid())
+  question  String
+  answer    String
+  category  String   @default("general") // "general" | "payments" | "draw" | "property" | "legal"
+  order     Int      @default(0)
+  published Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  createdBy String?
+
+  @@index([category])
+  @@index([published])
+  @@map("faqs")
+}
+
+model Testimonial {
+  id          String   @id @default(uuid())
+  authorName  String
+  authorTitle String?  // e.g. "Lagos, Nigeria" or "Software Engineer"
+  avatarKey   String?  // R2 object key for avatar image
+  body        String
+  rating      Int      @default(5) // 1–5
+  published   Boolean  @default(false)
+  featured    Boolean  @default(false)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([published])
+  @@map("testimonials")
+}
+
+model WinnerStory {
+  id            String    @id @default(uuid())
+  winnerName    String
+  propertyTitle String    // campaign title
+  propertyState String?
+  prize         String?   // e.g. "₦45M 3-Bedroom Apartment"
+  drawDate      DateTime?
+  imageKey      String?   // R2 object key
+  blurb            String?   // short quote from winner
+  drawArchiveUrl   String?   // YouTube/video URL of the live draw archive
+  published     Boolean   @default(false)
+  featured      Boolean   @default(false)
+  order         Int       @default(0)
+  campaignId    String?   // optional link to the actual campaign
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([published])
+  @@map("winner_stories")
+}
+
+// ─── CMS Content Pages ───────────────────────────────────────────────────────
+
+model ContentPage {
+  id          String   @id @default(uuid())
+  slug        String   @unique
+  title       String
+  content     Json     // structured content blocks
+  metaTitle   String?
+  metaDesc    String?
+  status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
+  publishedAt DateTime?
+  createdBy   String
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("content_pages")
+}

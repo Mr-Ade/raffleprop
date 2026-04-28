@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile & KYC | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=profile.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item active"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+  <main class="portal-main" id="main-content">
+<div class="portal-mobile-header" id="portal-mobile-header">
+  <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+  <div>
+    <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+    <div class="portal-mobile-header-email" id="pmob-email"></div>
+  </div>
+  <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+</div>
+    <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;margin-bottom:0.5rem;">Profile & KYC</h1>
+    <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:2rem;">Keep your profile up to date. KYC is required when you win a property draw.</p>
+
+    <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:2rem;align-items:start;" id="profile-grid">
+
+      <!-- Avatar + KYC status -->
+      <div>
+        <div class="card" style="text-align:center;padding:2rem;margin-bottom:1.25rem;">
+          <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--green-primary),var(--green-light));color:#fff;font-size:2rem;font-weight:700;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;" id="avatar-initial">A</div>
+          <div style="font-size:1.0625rem;font-weight:700;" id="profile-name">Loading...</div>
+          <div style="font-size:0.8125rem;color:var(--text-muted);" id="profile-email"></div>
+          <div style="margin-top:1rem;"><span class="badge badge-gold" id="kyc-status-badge"><i class="fa-solid fa-clock"></i> KYC Pending</span></div>
+          <button onclick="document.getElementById('profile-photo-input').click()" class="btn btn-outline btn-sm" style="margin-top:1rem;"><i class="fa-solid fa-camera"></i> Change Photo</button>
+          <input type="file" id="profile-photo-input" style="display:none;" accept="image/*" onchange="handlePhotoChange(this)">
+        </div>
+        <!-- KYC checklist -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:0.9375rem;font-weight:700;">KYC Verification Status</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i><span>Name provided</span></div>
+            <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i><span>Email verified</span></div>
+            <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;"><i class="fa-solid fa-check-circle" style="color:var(--success);"></i><span>Phone verified</span></div>
+            <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;color:var(--text-muted);" id="bvn-check"><i class="fa-solid fa-circle-xmark" style="color:var(--border);"></i><span>BVN (required for winners)</span></div>
+            <div style="display:flex;align-items:center;gap:0.75rem;font-size:0.875rem;color:var(--text-muted);" id="id-check"><i class="fa-solid fa-circle-xmark" style="color:var(--border);"></i><span>Government ID</span></div>
+          </div>
+          <div style="padding:1rem 1.25rem;background:#fffbeb;border-top:1px solid #fde68a;font-size:0.8125rem;color:#92400e;border-radius:0 0 14px 14px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> BVN and ID are only required if you win. You can enter draws without completing KYC.
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile form -->
+      <div>
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header"><h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-user" style="color:var(--green-primary);margin-right:0.5rem;"></i>Personal Information</h3></div>
+          <div class="card-body">
+            <form id="profile-form" onsubmit="saveProfile(event)">
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+                <div class="form-group">
+                  <label class="form-label">First Name</label>
+                  <input type="text" class="form-input" id="pf-firstname" placeholder="Adaeze">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Last Name</label>
+                  <input type="text" class="form-input" id="pf-lastname" placeholder="Okonkwo">
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input type="email" class="form-input" id="pf-email" placeholder="adaeze@example.com">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-input" id="pf-phone" placeholder="080 1234 5678">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Home Address</label>
+                <textarea class="form-textarea" id="pf-address" rows="2" placeholder="14 Admiralty Way, Lekki Phase 1, Lagos" style="min-height:60px;resize:none;"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:0;">
+                <label class="form-label">Country of Residence</label>
+                <select class="form-select" id="pf-country">
+                  <option value="NG" selected>Nigeria 🇳🇬</option>
+                  <option value="UK">United Kingdom 🇬🇧</option>
+                  <option value="US">United States 🇺🇸</option>
+                  <option value="CA">Canada 🇨🇦</option>
+                  <option value="DE">Germany 🇩🇪</option>
+                  <option value="AE">UAE 🇦🇪</option>
+                </select>
+              </div>
+              <button type="submit" class="btn btn-primary" style="margin-top:1.25rem;"><i class="fa-solid fa-save"></i> Save Changes</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- KYC fields -->
+        <div class="card" style="margin-bottom:1.25rem;">
+          <div class="card-header">
+            <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-id-card" style="color:var(--green-primary);margin-right:0.5rem;"></i>KYC Information <span style="font-size:0.75rem;color:var(--text-muted);font-weight:400;">(required for winners only)</span></h3>
+          </div>
+          <div class="card-body">
+            <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:0.875rem 1rem;margin-bottom:1.25rem;font-size:0.875rem;color:#92400e;">
+              <i class="fa-solid fa-shield-halved"></i> <strong>Security Note:</strong> BVN and NIN are encrypted with AES-256 and are only accessed during winner verification. We comply with NDPR.
+            </div>
+            <div class="form-group">
+              <label class="form-label">BVN (Bank Verification Number)</label>
+              <input type="text" class="form-input" id="pf-bvn" placeholder="Enter 11-digit BVN" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')">
+              <div class="form-hint">Required to claim prize. Encrypted at rest.</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">NIN (National Identity Number)</label>
+              <input type="text" class="form-input" id="pf-nin" placeholder="Enter NIN" maxlength="11">
+            </div>
+            <div class="form-group">
+              <label class="form-label">ID Document Type</label>
+              <select class="form-select" id="pf-id-type">
+                <option value="">Select document type</option>
+                <option>National ID Card (NIN slip)</option>
+                <option>International Passport</option>
+                <option>Driver's Licence</option>
+                <option>Voter's Card (PVC)</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom:0;">
+              <label class="form-label">Upload ID Document</label>
+              <div style="border:2px dashed var(--border);border-radius:10px;padding:1.5rem;text-align:center;cursor:pointer;transition:border-color 0.2s;" onmouseover="this.style.borderColor='var(--green-primary)'" onmouseout="this.style.borderColor='var(--border)'" onclick="Toast.info('Upload', 'File upload available in the live platform.')">
+                <i class="fa-solid fa-cloud-arrow-up" style="font-size:2rem;color:var(--text-muted);margin-bottom:0.5rem;"></i>
+                <div style="font-size:0.875rem;font-weight:600;">Click to upload or drag & drop</div>
+                <div style="font-size:0.75rem;color:var(--text-muted);">PNG, JPG, PDF (max 5MB)</div>
+              </div>
+            </div>
+            <button onclick="saveKYC()" class="btn btn-primary" style="margin-top:1.25rem;"><i class="fa-solid fa-save"></i> Save KYC Information</button>
+          </div>
+        </div>
+
+        <!-- NDPR / Account actions -->
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-lock" style="color:var(--text-muted);margin-right:0.5rem;"></i>Privacy & Account</h3></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:0.875rem;">
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
+              <div><div style="font-weight:600;font-size:0.875rem;">Marketing Emails</div><div style="font-size:0.8125rem;color:var(--text-muted);">Campaign announcements, winner spotlights</div></div>
+              <label style="position:relative;width:48px;height:26px;cursor:pointer;">
+                <input type="checkbox" checked style="opacity:0;position:absolute;" onchange="Toast.success('Preference saved','')">
+                <div style="position:absolute;inset:0;background:var(--green-primary);border-radius:100px;transition:background 0.2s;"></div>
+                <div style="position:absolute;top:3px;left:3px;width:20px;height:20px;background:#fff;border-radius:50%;transition:transform 0.2s;"></div>
+              </label>
+            </div>
+            <div style="height:1px;background:var(--border-light);"></div>
+            <button onclick="requestDataExport()" class="btn btn-outline btn-sm" style="align-self:flex-start;"><i class="fa-solid fa-download"></i> Request My Data (NDPR)</button>
+            <button onclick="deleteAccount()" class="btn btn-sm" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;align-self:flex-start;"><i class="fa-solid fa-trash"></i> Delete Account</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = Auth.getUser();
+  if (!user) return;
+
+  // Populate sidebar user info
+  const greet = document.getElementById('user-greeting');
+  const emailEl = document.getElementById('user-email');
+  if (greet) greet.textContent = user.name || 'Account';
+  if (emailEl) emailEl.textContent = user.email || user.phone || '';
+
+  const names = (user.name || '').split(' ');
+  const el = id => document.getElementById(id);
+  if (el('profile-name')) el('profile-name').textContent = user.name || 'User';
+  if (el('profile-email')) el('profile-email').textContent = user.email || user.phone || '';
+  if (el('avatar-initial')) el('avatar-initial').textContent = (user.name || 'U')[0].toUpperCase();
+  if (el('pf-firstname')) el('pf-firstname').value = names[0] || '';
+  if (el('pf-lastname')) el('pf-lastname').value = names.slice(1).join(' ') || '';
+  if (el('pf-email')) el('pf-email').value = user.email || '';
+  if (el('pf-phone')) el('pf-phone').value = user.phone || '';
+  const g = document.getElementById('profile-grid');
+  if (g && window.innerWidth < 768) g.style.gridTemplateColumns = '1fr';
+});
+
+function saveProfile(e) {
+  e.preventDefault();
+  const user = Auth.getUser() || {};
+  const first = document.getElementById('pf-firstname').value.trim();
+  const last = document.getElementById('pf-lastname').value.trim();
+  user.name = (first + ' ' + last).trim();
+  user.email = document.getElementById('pf-email').value.trim();
+  user.phone = document.getElementById('pf-phone').value.trim();
+  Auth.setUser(user);
+  document.getElementById('profile-name').textContent = user.name;
+  document.getElementById('avatar-initial').textContent = user.name[0].toUpperCase();
+  Toast.success('Profile Saved!', 'Your information has been updated.');
+}
+
+function saveKYC() {
+  const bvn = document.getElementById('pf-bvn').value;
+  if (bvn && bvn.length !== 11) { Toast.error('Invalid BVN', 'BVN must be exactly 11 digits.'); return; }
+  if (bvn) {
+    document.getElementById('bvn-check').innerHTML = '<i class="fa-solid fa-check-circle" style="color:var(--success);"></i><span style="color:var(--text-primary);">BVN provided (encrypted)</span>';
+  }
+  Toast.success('KYC Information Saved', 'Your data is encrypted and stored securely.');
+}
+
+function handlePhotoChange(input) {
+  if (!input.files || !input.files[0]) return;
+  Toast.success('Photo Updated', 'Profile photo has been changed.');
+}
+
+function requestDataExport() { Toast.info('Data Request Submitted', 'You will receive your data export within 30 days per NDPR requirements.'); }
+function deleteAccount() {
+  if (confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+    Auth.logout();
+    Toast.warning('Account Deleted', 'Your account has been scheduled for deletion.');
+  }
+}
+</script>
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+    <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+    <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+    <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+    <a href="profile.html" class="pbn-item active"><i class="fa-solid fa-user"></i>Profile</a>
+    <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+    <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

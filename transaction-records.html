@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction Records | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=transaction-records.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item active"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="portal-main" id="main-content">
+    <div class="portal-mobile-header" id="portal-mobile-header">
+      <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+      <div>
+        <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+        <div class="portal-mobile-header-email" id="pmob-email"></div>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+    </div>
+
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;">Transaction Records</h1>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">Permanent legal records of all your ticket purchases under FCCPA 2018 §118.</p>
+      </div>
+      <a href="my-tickets.html" class="btn btn-outline btn-sm"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+    </div>
+
+    <!-- Legal permanence notice -->
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:0.875rem 1rem;margin-bottom:1rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-scale-balanced" style="color:#ea580c;flex-shrink:0;margin-top:0.125rem;font-size:1rem;"></i>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);">
+        <strong>These records are permanently stored and cannot be deleted.</strong> Under the Federal Competition &amp; Consumer Protection Act 2018 §118, every transaction record is a legal document containing mandatory fields. Records must be retained for 7 years per FCCPA regulatory requirements.
+      </div>
+    </div>
+
+    <!-- §118 fields reference -->
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:0.875rem 1rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);flex-shrink:0;margin-top:0.125rem;"></i>
+      <div style="font-size:0.8125rem;color:var(--text-secondary);">
+        <strong>FCCPA §118 mandatory fields included in every record:</strong> Company name &amp; registered address · Transaction date &amp; reference · Ticket numbers · Campaign description · Unit price · Quantity · Total price · VAT (7.5%) · Grand total.
+      </div>
+    </div>
+
+    <!-- Summary stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-records">—</div>
+        <div class="stat-label">Total Records</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--text-primary);" id="stat-total-paid">—</div>
+        <div class="stat-label">Total Paid (incl. VAT)</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-vat">—</div>
+        <div class="stat-label">Total VAT (7.5%)</div>
+      </div>
+    </div>
+
+    <!-- Filter -->
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+      <input type="text" id="rec-search" aria-label="Search transaction records" placeholder="Search by reference, ticket number or campaign..." class="form-input" style="flex:1;min-width:200px;" oninput="filterRecords(this.value)">
+      <select class="form-select" style="width:180px;" onchange="filterByYear(this.value)" id="year-filter">
+        <option value="all">All Years</option>
+      </select>
+    </div>
+
+    <!-- Records table -->
+    <div style="background:#fff;border-radius:14px;border:1px solid var(--border);overflow:hidden;">
+      <div style="overflow-x:auto;">
+        <table class="data-table data-table-responsive" id="records-table">
+          <thead>
+            <tr>
+              <th>Ref</th>
+              <th>Date</th>
+              <th>Campaign</th>
+              <th>Tickets</th>
+              <th>Qty</th>
+              <th>Unit Price</th>
+              <th>Subtotal</th>
+              <th>VAT 7.5%</th>
+              <th>Total Paid</th>
+              <th>Method</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="records-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="no-records" style="display:none;text-align:center;padding:5rem 2rem;background:#fff;border-radius:14px;border:1px solid var(--border);margin-top:1rem;">
+      <i class="fa-solid fa-file-invoice" style="font-size:3rem;color:var(--border);margin-bottom:1rem;"></i>
+      <h3 style="font-weight:700;color:var(--text-muted);">No transaction records</h3>
+      <p style="color:var(--text-muted);margin-top:0.5rem;">Records appear here after your first ticket purchase.</p>
+      <a href="campaigns.html" class="btn btn-primary" style="margin-top:1.5rem;">Browse Active Campaigns</a>
+    </div>
+  </main>
+</div>
+
+<!-- §118 Receipt Modal -->
+<div id="receipt-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeReceiptModal()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div>
+        <div style="font-size:1rem;font-weight:800;">Official Receipt</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">FCCPA 2018 §118 Legal Record — Permanent Copy</div>
+      </div>
+      <div style="display:flex;gap:0.5rem;align-items:center;">
+        <button onclick="printReceipt()" class="btn btn-outline btn-sm"><i class="fa-solid fa-print"></i> Print / PDF</button>
+        <button onclick="closeReceiptModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+      </div>
+    </div>
+    <div id="receipt-modal-body" style="padding:1.5rem;"></div>
+  </div>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+let allRecords = [];
+let filteredRecords = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  const _u = Auth.getUser();
+  if (_u) {
+    const greet = document.getElementById('user-greeting');
+    const emailEl = document.getElementById('user-email');
+    if (greet) greet.textContent = _u.name || 'Account';
+    if (emailEl) emailEl.textContent = _u.email || _u.phone || '';
+  }
+
+  const savedTickets = JSON.parse(localStorage.getItem('rp_tickets') || '[]');
+  if (savedTickets.length === 0) {
+    allRecords = [
+      {
+        id: 'TXN001', campaignId: 'lekki-duplex-001',
+        campaignTitle: '4-Bedroom Detached Duplex', location: 'Lekki Phase 1, Lagos',
+        qty: 10, unitPrice: 1800, subtotal: 18000, vat: 1350, total: 19350,
+        tickets: ['RP-LEK-14203','RP-LEK-14204','RP-LEK-14205','RP-LEK-14206','RP-LEK-14207','RP-LEK-14208','RP-LEK-14209','RP-LEK-14210','RP-LEK-14211','RP-LEK-14212'],
+        date: new Date(Date.now() - 5 * 86400000).toISOString(),
+        method: 'Paystack', status: 'confirmed',
+        fccpcRef: 'FCCPC/SP/2024/001'
+      },
+      {
+        id: 'TXN002', campaignId: 'gwarinpa-abuja-002',
+        campaignTitle: '3-Bedroom Semi-Detached', location: 'Gwarinpa, Abuja',
+        qty: 5, unitPrice: 2000, subtotal: 10000, vat: 750, total: 10750,
+        tickets: ['RP-GWA-08877','RP-GWA-08878','RP-GWA-08879','RP-GWA-08880','RP-GWA-08881'],
+        date: new Date(Date.now() - 12 * 86400000).toISOString(),
+        method: 'Flutterwave', status: 'confirmed',
+        fccpcRef: 'FCCPC/SP/2024/002'
+      }
+    ];
+  } else {
+    allRecords = savedTickets.map(t => {
+      const unitPrice = Math.round(t.price / t.qty);
+      const subtotal = t.price;
+      const vat = Math.round(subtotal * 0.075);
+      return { ...t, unitPrice, subtotal, vat, total: subtotal + vat };
+    });
+  }
+
+  filteredRecords = allRecords;
+
+  // Populate year filter
+  const years = [...new Set(allRecords.map(r => new Date(r.date).getFullYear()))].sort((a,b)=>b-a);
+  const yf = document.getElementById('year-filter');
+  years.forEach(y => { const o = document.createElement('option'); o.value = y; o.textContent = y; yf.appendChild(o); });
+
+  renderRecords(allRecords);
+  updateStats(allRecords);
+});
+
+function updateStats(records) {
+  document.getElementById('stat-records').textContent = records.length;
+  document.getElementById('stat-total-paid').textContent = Utils.formatNaira(records.reduce((s,r)=>s+r.total,0));
+  document.getElementById('stat-vat').textContent = Utils.formatNaira(records.reduce((s,r)=>s+r.vat,0));
+}
+
+function renderRecords(records) {
+  const tbody = document.getElementById('records-tbody');
+  const noRec = document.getElementById('no-records');
+  const table = document.getElementById('records-table');
+  if (!tbody) return;
+  if (records.length === 0) {
+    table.style.display = 'none';
+    noRec.style.display = 'block';
+    return;
+  }
+  table.style.display = 'table';
+  noRec.style.display = 'none';
+
+  tbody.innerHTML = records.map(r => `
+    <tr>
+      <td data-label="Ref"><code style="font-size:0.8125rem;font-weight:700;">${r.id}</code></td>
+      <td data-label="Date" style="font-size:0.8125rem;white-space:nowrap;">${new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td data-label="Campaign"><div style="font-weight:600;font-size:0.875rem;">${r.campaignTitle}</div><div style="font-size:0.75rem;color:var(--text-muted);">${r.location}</div></td>
+      <td data-label="Tickets">
+        <div style="display:flex;flex-direction:column;gap:0.2rem;">
+          ${r.tickets.slice(0,2).map(tn=>`<code style="font-size:0.7rem;color:var(--green-primary);background:var(--green-50);padding:0.1rem 0.3rem;border-radius:4px;">${tn}</code>`).join('')}
+          ${r.tickets.length>2?`<span style="font-size:0.75rem;color:var(--text-muted);">+${r.tickets.length-2} more</span>`:''}
+        </div>
+      </td>
+      <td data-label="Qty"><strong>${r.qty}</strong></td>
+      <td data-label="Unit Price" style="font-size:0.875rem;">${Utils.formatNaira(r.unitPrice)}</td>
+      <td data-label="Subtotal" style="font-size:0.875rem;">${Utils.formatNaira(r.subtotal)}</td>
+      <td data-label="VAT 7.5%" style="font-size:0.875rem;color:var(--text-muted);">${Utils.formatNaira(r.vat)}</td>
+      <td data-label="Total Paid" style="font-weight:700;">${Utils.formatNaira(r.total)}</td>
+      <td data-label="Method" style="font-size:0.8125rem;">${r.method}</td>
+      <td data-label="Actions">
+        <div style="display:flex;gap:0.375rem;flex-wrap:wrap;">
+          <button onclick="showReceipt('${r.id}')" class="btn btn-outline btn-sm" title="View §118 Receipt"><i class="fa-solid fa-receipt"></i> Receipt</button>
+        </div>
+        <div style="font-size:0.6875rem;color:var(--text-muted);margin-top:0.25rem;display:flex;align-items:center;gap:0.25rem;"><i class="fa-solid fa-lock" style="font-size:0.6rem;"></i> Permanent record</div>
+      </td>
+    </tr>`).join('');
+}
+
+function filterRecords(q) {
+  const lq = q.toLowerCase();
+  filteredRecords = allRecords.filter(r =>
+    r.id.toLowerCase().includes(lq) ||
+    r.campaignTitle.toLowerCase().includes(lq) ||
+    r.tickets.some(tn => tn.toLowerCase().includes(lq))
+  );
+  renderRecords(filteredRecords);
+}
+
+function filterByYear(y) {
+  filteredRecords = y === 'all' ? allRecords : allRecords.filter(r => new Date(r.date).getFullYear() == y);
+  renderRecords(filteredRecords);
+}
+
+function showReceipt(id) {
+  const r = allRecords.find(x => x.id === id);
+  if (!r) return;
+  const dateStr = new Date(r.date).toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+
+  document.getElementById('receipt-modal-body').innerHTML = `
+    <div style="font-family:monospace;font-size:0.75rem;color:var(--text-muted);margin-bottom:1rem;text-align:center;letter-spacing:0.06em;text-transform:uppercase;">
+      Official Receipt — FCCPA 2018 §118 Legal Record
+    </div>
+    <div style="background:var(--green-50);border:1px solid var(--green-primary);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1.25rem;">
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--green-primary);margin-bottom:0.375rem;">Issuing Company</div>
+      <div style="font-weight:700;font-size:0.9375rem;">RaffleProp Ltd</div>
+      <div style="font-size:0.8125rem;color:var(--text-muted);">14 Admiralty Way, Lekki Phase 1, Lagos, Nigeria</div>
+      <div style="font-size:0.8125rem;color:var(--text-muted);">CAC Reg: RC-1234567 &nbsp;|&nbsp; FCCPC Ref: ${r.fccpcRef || '—'}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1.25rem;">
+      <div><div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Receipt / Ref No.</div><div style="font-weight:700;">${r.id}</div></div>
+      <div><div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Transaction Date</div><div style="font-weight:700;">${dateStr}</div></div>
+      <div><div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Payment Method</div><div>${r.method}</div></div>
+      <div><div style="font-size:0.6875rem;font-weight:700;text-transform:uppercase;color:var(--text-muted);">Status</div><div><span class="badge badge-green">Confirmed</span></div></div>
+    </div>
+    <div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:1rem 0;margin-bottom:1.25rem;">
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.5rem;">Description of Goods / Services</div>
+      <div style="font-weight:600;margin-bottom:0.25rem;">${r.campaignTitle} — Promotional Competition Entry Tickets</div>
+      <div style="font-size:0.8125rem;color:var(--text-muted);margin-bottom:0.75rem;">${r.location}</div>
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:0.25rem 1rem;font-size:0.8125rem;align-items:center;">
+        <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;">ITEM</div>
+        <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;text-align:right;">QTY × UNIT</div>
+        <div style="font-weight:600;color:var(--text-muted);font-size:0.75rem;text-align:right;">SUBTOTAL</div>
+        <div>Competition Entry Ticket(s)</div>
+        <div style="text-align:right;">${r.qty} × ${Utils.formatNaira(r.unitPrice)}</div>
+        <div style="text-align:right;font-weight:700;">${Utils.formatNaira(r.subtotal)}</div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0.375rem;margin-bottom:1.25rem;font-size:0.875rem;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">Subtotal</span><span>${Utils.formatNaira(r.subtotal)}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--text-muted);">VAT (7.5%)</span><span>${Utils.formatNaira(r.vat)}</span></div>
+      <div style="display:flex;justify-content:space-between;font-weight:900;font-size:1rem;border-top:2px solid var(--text-primary);padding-top:0.5rem;margin-top:0.25rem;"><span>Grand Total Paid</span><span>${Utils.formatNaira(r.total)}</span></div>
+    </div>
+    <div style="background:var(--bg-secondary);border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;">
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin-bottom:0.5rem;">Ticket Numbers Issued</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
+        ${r.tickets.map(tn=>`<code style="font-size:0.75rem;font-weight:700;color:var(--green-primary);background:var(--green-50);padding:0.125rem 0.375rem;border-radius:4px;">${tn}</code>`).join('')}
+      </div>
+    </div>
+    <div style="font-size:0.75rem;color:var(--text-muted);text-align:center;line-height:1.6;">
+      This is a permanent legal record under FCCPA 2018 §118. Records are stored for a minimum of 7 years and cannot be deleted.<br>
+      Questions? <strong>support@raffleprop.ng</strong> | <strong>+234 800 RAFFLE</strong>
+    </div>
+  `;
+  document.getElementById('receipt-modal').style.display = 'flex';
+}
+
+function closeReceiptModal() {
+  document.getElementById('receipt-modal').style.display = 'none';
+}
+
+function printReceipt() {
+  Toast.info('Print / Save PDF', 'Use your browser\'s Print function (Ctrl+P / Cmd+P) to save as PDF.');
+}
+</script>
+
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+  <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+  <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+  <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+  <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+  <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+  <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

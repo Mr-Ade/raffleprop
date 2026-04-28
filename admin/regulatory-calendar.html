@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Regulatory Calendar | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    .timeline-item { display: flex; gap: 1rem; align-items: flex-start; padding: 1rem 0; border-bottom: 1px solid var(--border-light); }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-dot { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1rem; }
+    .timeline-dot.upcoming { background: #fef9c3; color: #a16207; }
+    .timeline-dot.overdue { background: #fee2e2; color: #dc2626; }
+    .timeline-dot.complete { background: #dcfce7; color: var(--success); }
+    .timeline-dot.info { background: #eff6ff; color: var(--info); }
+    @media print { .admin-sidebar, nav.admin-bottom-nav, .admin-topbar button { display: none !important; } }
+    @media (max-width: 480px) {
+      .timeline-item { padding: 0.75rem 0; gap: 0.625rem; }
+      .timeline-item .deadline-title { font-size: 0.875rem; }
+      .timeline-dot { width: 32px; height: 32px; font-size: 0.875rem; }
+    }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Regulatory Calendar</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">FCCPA + LSLGA deadlines computed from campaign draw dates</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button onclick="window.print()" class="btn btn-outline btn-sm"><i class="fa-solid fa-print"></i> Print</button>
+      <button onclick="exportCalendar()" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Summary cards -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:2rem;" id="cal-stats"></div>
+
+    <!-- Regulatory info banner -->
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:1rem 1.25rem;margin-bottom:2rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;margin-top:0.1rem;flex-shrink:0;font-size:1.125rem;"></i>
+      <div>
+        <strong style="font-size:0.875rem;color:#9a3412;">FCCPA 2018 — Mandatory Post-Draw Obligations</strong>
+        <p style="font-size:0.8125rem;color:#ea580c;margin-top:0.25rem;line-height:1.6;">
+          <strong>14 days before draw:</strong> Notify FCCPC in writing of draw date, venue, and method (FCCPA 2018 §124).<br>
+          <strong>3 days after draw:</strong> Submit winner details to FCCPC for verification.<br>
+          <strong>21 days after draw:</strong> File Form CPC B post-draw report with FCCPC.<br>
+          <strong>12 months from approval:</strong> Sell-in period expires — ticket sales must close and all unsold campaigns returned to FCCPC for re-approval.
+        </p>
+      </div>
+    </div>
+
+    <!-- Deadline filter -->
+    <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center;">
+      <span style="font-size:0.875rem;font-weight:600;color:var(--text-secondary);">Filter:</span>
+      <button onclick="filterDeadlines('all')" id="fil-all" class="btn btn-primary btn-sm">All</button>
+      <button onclick="filterDeadlines('overdue')" id="fil-overdue" class="btn btn-outline btn-sm">Overdue</button>
+      <button onclick="filterDeadlines('upcoming')" id="fil-upcoming" class="btn btn-outline btn-sm">Upcoming (30 days)</button>
+      <button onclick="filterDeadlines('sellin')" id="fil-sellin" class="btn btn-outline btn-sm">Sell-in Expiry</button>
+      <button onclick="filterDeadlines('complete')" id="fil-complete" class="btn btn-outline btn-sm">Completed</button>
+    </div>
+
+    <!-- Timeline -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">Deadline Timeline</h3>
+        <span style="font-size:0.8125rem;color:var(--text-muted);" id="deadline-count"></span>
+      </div>
+      <div class="card-body" id="timeline-list" style="padding:0 1.5rem;"></div>
+    </div>
+
+    <!-- LSLGA Annual Renewal -->
+    <div class="card">
+      <div class="card-header">
+        <h3 style="font-size:1rem;font-weight:700;">LSLGA Annual Licence Renewal</h3>
+        <span class="badge badge-gold">Lagos Only</span>
+      </div>
+      <div class="card-body">
+        <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+          <div style="flex:1;min-width:220px;">
+            <div style="font-weight:600;">Lagos State Lotteries &amp; Gaming Authority</div>
+            <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.25rem;">Licence expires annually. Renewal must be filed before expiry. Fee: ₦575,000 per licence year. Failure to renew results in suspension of all Lagos campaign ticket sales.</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:0.8125rem;color:var(--text-muted);">Next Renewal Due</div>
+            <div style="font-weight:800;font-size:1.125rem;color:var(--gold);">31 Dec 2025</div>
+            <button onclick="Toast.info('LSLGA Renewal','In production, this would open the LSLGA renewal application form.')" class="btn btn-outline btn-sm" style="margin-top:0.5rem;">Start Renewal</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="calculator.html" class="abn-item"><i class="fa-solid fa-calculator"></i><span>Calculator</span></a>
+  <a href="compliance.html" class="abn-item"><i class="fa-solid fa-shield-halved"></i><span>Compliance</span></a>
+  <a href="regulatory-calendar.html" class="abn-item active"><i class="fa-solid fa-calendar-check"></i><span>Calendar</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+let allDeadlines = [];
+let completedIds = new Set();
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('regulatory-calendar');
+  buildDeadlines();
+  renderStats();
+  renderTimeline('all');
+});
+
+function addDays(dateStr, days) {
+  const d = new Date(dateStr);
+  d.setDate(d.getDate() + days);
+  return d;
+}
+
+function deadlineStatus(date) {
+  const now = new Date();
+  const diff = (date - now) / (1000 * 60 * 60 * 24);
+  if (diff < 0) return 'overdue';
+  if (diff <= 30) return 'upcoming';
+  return 'info';
+}
+
+function buildDeadlines() {
+  allDeadlines = [];
+  MOCK_DATA.campaigns.forEach(c => {
+    if (!c.drawDate) return;
+    const drawD = new Date(c.drawDate);
+
+    allDeadlines.push({
+      id: c.id + '-notify',
+      campaign: c.title,
+      location: c.location,
+      action: 'Notify FCCPC of draw date',
+      detail: 'Written notification to FCCPC of draw date, venue, and method — FCCPA 2018 §124',
+      date: addDays(c.drawDate, -14),
+      icon: 'fa-bell',
+      type: 'notify'
+    });
+    allDeadlines.push({
+      id: c.id + '-winner',
+      campaign: c.title,
+      location: c.location,
+      action: 'Submit winner details to FCCPC',
+      detail: 'Name, contact, ticket number, and verification documents for the draw winner',
+      date: addDays(c.drawDate, 3),
+      icon: 'fa-user-check',
+      type: 'winner'
+    });
+    allDeadlines.push({
+      id: c.id + '-formcpcb',
+      campaign: c.title,
+      location: c.location,
+      action: 'File Form CPC B — Post-Draw Report',
+      detail: 'Complete FCCPC post-draw report: winner confirmation, prize transfer evidence, escrow closure',
+      date: addDays(c.drawDate, 21),
+      icon: 'fa-file-contract',
+      type: 'report'
+    });
+  });
+
+  // Sell-in expiry: FCCPC approval date + 12 months
+  MOCK_DATA.campaigns.forEach(c => {
+    if (!c.fccpcApprovalDate) return;
+    const expiryDate = new Date(c.fccpcApprovalDate);
+    expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+    allDeadlines.push({
+      id: c.id + '-sellin',
+      campaign: c.title,
+      location: c.location,
+      action: 'Sell-in Period Expires — FCCPC Re-Approval Required',
+      detail: `FCCPC approval granted ${new Date(c.fccpcApprovalDate).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}. Maximum 12-month sell-in period. Ticket sales must cease and campaign re-submitted to FCCPC after this date if not yet drawn.`,
+      date: expiryDate,
+      icon: 'fa-hourglass-end',
+      type: 'sellin'
+    });
+  });
+
+  // Sort by date ascending
+  allDeadlines.sort((a, b) => a.date - b.date);
+}
+
+function renderStats() {
+  const now = new Date();
+  const in7 = allDeadlines.filter(d => !completedIds.has(d.id) && (d.date - now) / 86400000 <= 7 && (d.date - now) / 86400000 >= 0).length;
+  const thisMonth = allDeadlines.filter(d => !completedIds.has(d.id) && d.date.getMonth() === now.getMonth() && d.date.getFullYear() === now.getFullYear()).length;
+  const overdue = allDeadlines.filter(d => !completedIds.has(d.id) && d.date < now).length;
+
+  const sellInCount = allDeadlines.filter(d => d.type === 'sellin' && !completedIds.has(d.id)).length;
+  const sellInSoon = allDeadlines.filter(d => d.type === 'sellin' && !completedIds.has(d.id) && (d.date - now) / 86400000 <= 90 && (d.date - now) / 86400000 >= 0).length;
+
+  document.getElementById('cal-stats').innerHTML = `
+    <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+      <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);">${allDeadlines.length}</div>
+      <div class="stat-label">Total Deadlines</div>
+    </div>
+    <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+      <div style="font-size:1.75rem;font-weight:900;color:var(--gold);">${in7}</div>
+      <div class="stat-label">Due in 7 Days</div>
+    </div>
+    <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+      <div style="font-size:1.75rem;font-weight:900;color:var(--info);">${thisMonth}</div>
+      <div class="stat-label">This Month</div>
+    </div>
+    <div class="stat-card" style="padding:1rem;border-top:4px solid #dc2626;">
+      <div style="font-size:1.75rem;font-weight:900;color:#dc2626;">${overdue}</div>
+      <div class="stat-label">Overdue</div>
+    </div>
+    <div class="stat-card" style="padding:1rem;border-top:4px solid #8b5cf6;" title="Campaigns with FCCPC sell-in expiry within 90 days">
+      <div style="font-size:1.75rem;font-weight:900;color:#8b5cf6;">${sellInSoon}</div>
+      <div class="stat-label">Sell-in Expiring (90d)</div>
+    </div>`;
+}
+
+function renderTimeline(filter) {
+  // Update filter buttons
+  ['all', 'overdue', 'upcoming', 'sellin', 'complete'].forEach(f => {
+    const btn = document.getElementById('fil-' + f);
+    if (btn) {
+      btn.className = f === filter ? 'btn btn-primary btn-sm' : 'btn btn-outline btn-sm';
+    }
+  });
+
+  const now = new Date();
+  let filtered = allDeadlines.filter(d => {
+    const status = completedIds.has(d.id) ? 'complete' : deadlineStatus(d.date);
+    if (filter === 'all') return true;
+    if (filter === 'complete') return completedIds.has(d.id);
+    if (filter === 'overdue') return status === 'overdue';
+    if (filter === 'upcoming') return status === 'upcoming';
+    if (filter === 'sellin') return d.type === 'sellin';
+    return true;
+  });
+
+  document.getElementById('deadline-count').textContent = `${filtered.length} deadline${filtered.length !== 1 ? 's' : ''}`;
+
+  const container = document.getElementById('timeline-list');
+  if (filtered.length === 0) {
+    container.innerHTML = `<div style="text-align:center;padding:3rem 1rem;color:var(--text-muted);"><i class="fa-solid fa-calendar-check" style="font-size:2rem;margin-bottom:0.75rem;display:block;"></i>No deadlines in this category.</div>`;
+    return;
+  }
+
+  container.innerHTML = filtered.map(d => {
+    const isComplete = completedIds.has(d.id);
+    const status = isComplete ? 'complete' : deadlineStatus(d.date);
+    const diff = Math.round((d.date - now) / 86400000);
+    const dotIcon = isComplete ? 'fa-check' : (status === 'overdue' ? 'fa-exclamation' : (status === 'upcoming' ? 'fa-clock' : 'fa-' + d.icon));
+    let dueLabel;
+    if (isComplete) dueLabel = '<span style="color:var(--success);font-weight:600;">Completed</span>';
+    else if (diff < 0) dueLabel = `<span style="color:#dc2626;font-weight:700;">${Math.abs(diff)} days overdue</span>`;
+    else if (diff === 0) dueLabel = '<span style="color:#dc2626;font-weight:700;">Due TODAY</span>';
+    else if (diff <= 7) dueLabel = `<span style="color:#d97706;font-weight:700;">Due in ${diff} days</span>`;
+    else dueLabel = `<span style="color:var(--text-muted);">Due in ${diff} days</span>`;
+
+    return `<div class="timeline-item">
+      <div class="timeline-dot ${status}">
+        <i class="fa-solid ${dotIcon}"></i>
+      </div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:0.5rem;">
+          <div>
+            <div style="font-weight:700;font-size:0.9375rem;">${d.action}</div>
+            <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.2rem;">${d.campaign} — ${d.location}</div>
+            <div style="font-size:0.8125rem;color:var(--text-secondary);margin-top:0.25rem;">${d.detail}</div>
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:0.9375rem;font-weight:700;">${d.date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+            <div style="margin-top:0.25rem;">${dueLabel}</div>
+          </div>
+        </div>
+        ${!isComplete ? `<button onclick="markComplete('${d.id}')" class="btn btn-outline btn-sm" style="margin-top:0.625rem;"><i class="fa-solid fa-check"></i> Mark Complete</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function filterDeadlines(filter) {
+  renderTimeline(filter);
+}
+
+function markComplete(id) {
+  completedIds.add(id);
+  renderStats();
+  renderTimeline('all');
+  Toast.success('Deadline Completed', 'This regulatory deadline has been marked as complete.');
+}
+
+function exportCalendar() {
+  const rows = allDeadlines.map(d => ({
+    campaign: d.campaign,
+    location: d.location,
+    action: d.action,
+    date: d.date.toISOString().split('T')[0],
+    status: completedIds.has(d.id) ? 'complete' : deadlineStatus(d.date)
+  }));
+  const headers = Object.keys(rows[0]).join(',');
+  const csv = rows.map(r => Object.values(r).map(v => `"${v}"`).join(',')).join('\n');
+  const blob = new Blob([headers + '\n' + csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'regulatory-calendar.csv'; a.click();
+  URL.revokeObjectURL(url);
+  Toast.success('Exported', 'Regulatory calendar exported as CSV.');
+}
+</script>
+</body>
+</html>

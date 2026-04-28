@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "campaigns" ADD COLUMN     "featured" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "hotScore" DOUBLE PRECISION NOT NULL DEFAULT 0;

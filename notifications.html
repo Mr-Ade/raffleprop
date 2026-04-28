@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications | RaffleProp</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>if (!localStorage.getItem('rp_user')) { window.location.replace('login.html?redirect=notifications.html'); }</script>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+
+<div class="portal-layout">
+  <aside class="portal-sidebar desktop-only">
+    <div style="padding:0 0.25rem 1rem;border-bottom:1px solid var(--border-light);margin-bottom:0.75rem;">
+      <div id="user-greeting" style="font-size:0.875rem;font-weight:700;"></div>
+      <div id="user-email" style="font-size:0.8125rem;color:var(--text-muted);"></div>
+    </div>
+    <nav>
+      <a href="dashboard.html" class="portal-nav-item"><i class="fa-solid fa-gauge-high"></i> Dashboard</a>
+      <a href="my-tickets.html" class="portal-nav-item"><i class="fa-solid fa-ticket"></i> My Tickets</a>
+      <a href="transaction-records.html" class="portal-nav-item"><i class="fa-solid fa-file-invoice"></i> Transaction Records</a>
+      <a href="referrals.html" class="portal-nav-item"><i class="fa-solid fa-users"></i> Referrals</a>
+      <a href="notifications.html" class="portal-nav-item active"><i class="fa-solid fa-bell"></i> Notifications</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Legal & Privacy</div>
+      <a href="t-and-c-acceptance.html" class="portal-nav-item"><i class="fa-solid fa-file-contract"></i> T&amp;C Acceptance Log</a>
+      <a href="data-rights.html" class="portal-nav-item"><i class="fa-solid fa-shield-halved"></i> Data Rights Centre</a>
+      <div style="font-size:0.6875rem;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);padding:0.875rem 0.5rem 0.25rem;">Account</div>
+      <a href="profile.html" class="portal-nav-item"><i class="fa-solid fa-user"></i> Profile &amp; KYC</a>
+      <a href="winner-verification.html" class="portal-nav-item"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner Portal</a>
+      <div style="height:1px;background:var(--border-light);margin:0.75rem 0;"></div>
+      <a href="campaigns.html" class="portal-nav-item"><i class="fa-solid fa-magnifying-glass"></i> Browse Campaigns</a>
+      <button onclick="Auth.logout()" class="portal-nav-item" style="width:100%;text-align:left;color:#dc2626;"><i class="fa-solid fa-right-from-bracket" style="color:#dc2626;"></i> Log Out</button>
+    </nav>
+  </aside>
+
+  <main class="portal-main" id="main-content">
+    <div class="portal-mobile-header" id="portal-mobile-header">
+      <div class="portal-mobile-header-avatar" id="pmob-avatar">U</div>
+      <div>
+        <div class="portal-mobile-header-name" id="pmob-name">Loading...</div>
+        <div class="portal-mobile-header-email" id="pmob-email"></div>
+      </div>
+      <a href="campaigns.html" class="btn btn-gold btn-sm" style="margin-left:auto;white-space:nowrap;"><i class="fa-solid fa-ticket"></i> Buy</a>
+    </div>
+
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:1rem;">
+      <div>
+        <h1 style="font-size:1.625rem;font-weight:900;letter-spacing:-0.02em;">Notifications</h1>
+        <p style="color:var(--text-muted);font-size:0.875rem;margin-top:0.25rem;">Draw alerts, payment confirmations, winner announcements, and regulatory updates.</p>
+      </div>
+      <button onclick="markAllRead()" class="btn btn-outline btn-sm" id="mark-all-btn"><i class="fa-solid fa-check-double"></i> Mark All Read</button>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap;" id="filter-tabs">
+      <button onclick="filterNotifs('all')" class="btn btn-primary btn-sm" data-filter="all">All</button>
+      <button onclick="filterNotifs('draw')" class="btn btn-outline btn-sm" data-filter="draw"><i class="fa-solid fa-dice" style="color:var(--gold);"></i> Draw Alerts</button>
+      <button onclick="filterNotifs('payment')" class="btn btn-outline btn-sm" data-filter="payment"><i class="fa-solid fa-receipt" style="color:var(--green-primary);"></i> Payments</button>
+      <button onclick="filterNotifs('winner')" class="btn btn-outline btn-sm" data-filter="winner"><i class="fa-solid fa-trophy" style="color:var(--gold);"></i> Winner</button>
+      <button onclick="filterNotifs('refund')" class="btn btn-outline btn-sm" data-filter="refund"><i class="fa-solid fa-rotate-left" style="color:#3b82f6;"></i> Refunds</button>
+      <button onclick="filterNotifs('legal')" class="btn btn-outline btn-sm" data-filter="legal"><i class="fa-solid fa-scale-balanced" style="color:var(--text-muted);"></i> Legal</button>
+    </div>
+
+    <!-- Notification feed -->
+    <div id="notif-feed" style="display:flex;flex-direction:column;gap:0.75rem;"></div>
+
+    <div id="no-notifs" style="display:none;text-align:center;padding:4rem 2rem;background:#fff;border-radius:14px;border:1px solid var(--border);">
+      <i class="fa-solid fa-bell-slash" style="font-size:2.5rem;color:var(--border);margin-bottom:1rem;"></i>
+      <h3 style="font-weight:700;color:var(--text-muted);">No notifications in this category</h3>
+    </div>
+  </main>
+</div>
+
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+const NOTIFS = [
+  {
+    id: 'N001', type: 'payment', read: true,
+    icon: 'fa-receipt', iconColor: 'var(--green-primary)', iconBg: 'var(--green-50)',
+    title: 'Payment Confirmed — §118 Record Issued',
+    time: new Date(Date.now() - 5 * 86400000).toISOString(),
+    body: 'Your payment of ₦19,350 (incl. VAT) for <strong>10 tickets — 4-Bedroom Detached Duplex, Lekki Phase 1</strong> has been confirmed. A permanent FCCPA §118 receipt has been issued.',
+    actions: [
+      { label: 'View Receipt', icon: 'fa-receipt', href: 'transaction-records.html' },
+      { label: 'My Tickets', icon: 'fa-ticket', href: 'my-tickets.html' }
+    ],
+    meta: 'TXN001 · Paystack · FCCPC Ref: FCCPC/SP/2024/001'
+  },
+  {
+    id: 'N002', type: 'payment', read: true,
+    icon: 'fa-receipt', iconColor: 'var(--green-primary)', iconBg: 'var(--green-50)',
+    title: 'Payment Confirmed — §118 Record Issued',
+    time: new Date(Date.now() - 12 * 86400000).toISOString(),
+    body: 'Your payment of ₦10,750 (incl. VAT) for <strong>5 tickets — 3-Bedroom Semi-Detached, Gwarinpa, Abuja</strong> has been confirmed. A permanent FCCPA §118 receipt has been issued.',
+    actions: [
+      { label: 'View Receipt', icon: 'fa-receipt', href: 'transaction-records.html' },
+      { label: 'My Tickets', icon: 'fa-ticket', href: 'my-tickets.html' }
+    ],
+    meta: 'TXN002 · Flutterwave · FCCPC Ref: FCCPC/SP/2024/002'
+  },
+  {
+    id: 'N003', type: 'draw', read: false,
+    icon: 'fa-dice', iconColor: 'var(--gold)', iconBg: '#fefce8',
+    title: 'Draw Alert — Lekki Duplex Draw in 30 Days',
+    time: new Date(Date.now() - 2 * 86400000).toISOString(),
+    body: 'The live draw for the <strong>4-Bedroom Detached Duplex, Lekki Phase 1</strong> is scheduled for <strong>15 December 2024</strong>. You hold <strong>10 tickets</strong> (RP-LEK-14203 to RP-LEK-14212).\n\nThe FCCPC has been formally notified of the draw date as required by FCCPA 2018 §124 (14-day pre-draw notification). The draw will be conducted live and recorded.',
+    actions: [
+      { label: 'View Campaign', icon: 'fa-eye', href: 'campaign-detail.html?id=lekki-duplex-001' }
+    ],
+    meta: 'FCCPC §124 notification filed · Draw: 15 Dec 2024 · Venue: TBC'
+  },
+  {
+    id: 'N004', type: 'draw', read: false,
+    icon: 'fa-dice', iconColor: 'var(--gold)', iconBg: '#fefce8',
+    title: 'Draw Alert — Gwarinpa Draw in 48 Days',
+    time: new Date(Date.now() - 1 * 86400000).toISOString(),
+    body: 'The live draw for the <strong>3-Bedroom Semi-Detached, Gwarinpa, Abuja</strong> is scheduled for <strong>29 December 2024</strong>. You hold <strong>5 tickets</strong> (RP-GWA-08877 to RP-GWA-08881).\n\nFCCPC has been notified per FCCPA 2018 §124.',
+    actions: [
+      { label: 'View Campaign', icon: 'fa-eye', href: 'campaign-detail.html?id=gwarinpa-abuja-002' }
+    ],
+    meta: 'FCCPC §124 notification filed · Draw: 29 Dec 2024 · Venue: TBC'
+  },
+  {
+    id: 'N005', type: 'legal', read: true,
+    icon: 'fa-scale-balanced', iconColor: 'var(--text-muted)', iconBg: 'var(--bg-secondary)',
+    title: 'Terms & Conditions Updated — v3.1',
+    time: new Date(Date.now() - 45 * 86400000).toISOString(),
+    body: 'RaffleProp\'s Terms &amp; Conditions have been updated to version 3.1 (effective 1 March 2024). Key changes include updated FCCPC approval disclosure requirements and revised winner transfer agreement procedures. Your continued use of the platform constitutes acceptance.',
+    actions: [
+      { label: 'Read T&C v3.1', icon: 'fa-file-contract', href: 'terms.html' },
+      { label: 'Acceptance Log', icon: 'fa-list-check', href: 't-and-c-acceptance.html' }
+    ],
+    meta: 'T&C v3.1 · Effective 1 March 2024'
+  },
+  {
+    id: 'N006', type: 'legal', read: true,
+    icon: 'fa-shield-halved', iconColor: 'var(--green-primary)', iconBg: 'var(--green-50)',
+    title: 'NDPR Data Rights Reminder',
+    time: new Date(Date.now() - 30 * 86400000).toISOString(),
+    body: 'Under the Nigeria Data Protection Regulation (NDPR) 2019, you have the right to access, correct, and request deletion of your personal data. Visit the Data Rights Centre to download your data export, manage consent, or submit a deletion request.',
+    actions: [
+      { label: 'Data Rights Centre', icon: 'fa-shield-halved', href: 'data-rights.html' }
+    ],
+    meta: 'NDPR 2019 compliance · 30-day response guarantee'
+  }
+];
+
+let currentFilter = 'all';
+
+function timeAgo(isoStr) {
+  const diff = Date.now() - new Date(isoStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  const hours = Math.floor(mins / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days} day${days>1?'s':''} ago`;
+  if (hours > 0) return `${hours} hour${hours>1?'s':''} ago`;
+  return `${mins} min${mins>1?'s':''} ago`;
+}
+
+function renderNotifs(list) {
+  const feed = document.getElementById('notif-feed');
+  const noNotifs = document.getElementById('no-notifs');
+  if (list.length === 0) {
+    feed.style.display = 'none';
+    noNotifs.style.display = 'block';
+    return;
+  }
+  feed.style.display = 'flex';
+  noNotifs.style.display = 'none';
+
+  feed.innerHTML = list.map(n => `
+    <div id="notif-${n.id}" style="background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.25rem;display:flex;gap:1rem;align-items:flex-start;transition:opacity 0.2s;${!n.read?'border-left:3px solid var(--green-primary);':''}" onclick="markRead('${n.id}')">
+      <div style="width:2.5rem;height:2.5rem;border-radius:10px;background:${n.iconBg};display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <i class="fa-solid ${n.icon}" style="color:${n.iconColor};font-size:1rem;"></i>
+      </div>
+      <div style="flex:1;min-width:0;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.375rem;">
+          <div style="font-weight:700;font-size:0.9375rem;">${n.title}${!n.read?'<span style="display:inline-block;width:0.5rem;height:0.5rem;border-radius:50%;background:var(--green-primary);margin-left:0.5rem;vertical-align:middle;"></span>':''}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);white-space:nowrap;">${timeAgo(n.time)}</div>
+        </div>
+        <div style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:0.75rem;line-height:1.6;">${n.body.replace(/\n/g,'<br>')}</div>
+        ${n.meta ? `<div style="font-size:0.75rem;color:var(--text-muted);font-family:monospace;background:var(--bg-secondary);padding:0.3rem 0.625rem;border-radius:6px;display:inline-block;margin-bottom:0.75rem;">${n.meta}</div>` : ''}
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+          ${n.actions.map(a=>`<a href="${a.href}" class="btn btn-outline btn-sm"><i class="fa-solid ${a.icon}"></i> ${a.label}</a>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function filterNotifs(type) {
+  currentFilter = type;
+  // Update tab states
+  document.querySelectorAll('#filter-tabs button').forEach(b => {
+    if (b.dataset.filter === type) {
+      b.className = 'btn btn-primary btn-sm';
+    } else {
+      b.className = 'btn btn-outline btn-sm';
+    }
+  });
+  const filtered = type === 'all' ? NOTIFS : NOTIFS.filter(n => n.type === type);
+  renderNotifs(filtered);
+}
+
+function markRead(id) {
+  const n = NOTIFS.find(x => x.id === id);
+  if (n) n.read = true;
+  const el = document.getElementById(`notif-${id}`);
+  if (el) {
+    el.style.borderLeft = '';
+    const dot = el.querySelector('span[style*="border-radius:50%"]');
+    if (dot) dot.remove();
+  }
+}
+
+function markAllRead() {
+  NOTIFS.forEach(n => n.read = true);
+  filterNotifs(currentFilter);
+  Toast.success('All Read', 'All notifications marked as read.');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const _u = Auth.getUser();
+  if (_u) {
+    const greet = document.getElementById('user-greeting');
+    const emailEl = document.getElementById('user-email');
+    if (greet) greet.textContent = _u.name || 'Account';
+    if (emailEl) emailEl.textContent = _u.email || _u.phone || '';
+  }
+  renderNotifs(NOTIFS);
+});
+</script>
+
+<nav class="portal-bottom-nav" aria-label="Mobile portal navigation">
+  <a href="dashboard.html" class="pbn-item"><i class="fa-solid fa-gauge-high"></i>Home</a>
+  <a href="my-tickets.html" class="pbn-item"><i class="fa-solid fa-ticket"></i>Tickets</a>
+  <a href="referrals.html" class="pbn-item"><i class="fa-solid fa-users"></i>Referrals</a>
+  <a href="profile.html" class="pbn-item"><i class="fa-solid fa-user"></i>Profile</a>
+  <a href="campaigns.html" class="pbn-item"><i class="fa-solid fa-trophy"></i>Browse</a>
+  <button onclick="Auth.logout()" class="pbn-item pbn-logout"><i class="fa-solid fa-right-from-bracket"></i>Logout</button>
+</nav>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  var u = Auth.getUser();
+  if (!u) return;
+  var av = document.getElementById("pmob-avatar");
+  var nm = document.getElementById("pmob-name");
+  var em = document.getElementById("pmob-email");
+  if (av) av.textContent = (u.name || "U")[0].toUpperCase();
+  if (nm) nm.textContent = u.name || "Account";
+  if (em) em.textContent = u.email || u.phone || "";
+});
+</script>
+</body>
+</html>

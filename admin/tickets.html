@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ticket Registry | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+        <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Ticket Registry</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Complete record of all issued tickets across all campaigns</p>
+    </div>
+    <div style="display:flex;gap:0.75rem;">
+      <button onclick="exportAllTickets()" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export CSV</button>
+      <button onclick="printRegistry()" class="btn btn-outline btn-sm"><i class="fa-solid fa-print"></i> Print</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-total-tickets">26,520</div>
+        <div class="stat-label">Total Tickets Issued</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--gold);" id="stat-today-tickets">1,247</div>
+        <div class="stat-label">Sold Today</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-confirmed">26,312</div>
+        <div class="stat-label">Confirmed</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--warning);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--warning);" id="stat-pending-tickets">208</div>
+        <div class="stat-label">Pending Payment</div>
+      </div>
+    </div>
+
+    <!-- Campaign selector + filters -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="flex-wrap:wrap;gap:0.75rem;">
+        <h3 style="font-size:1rem;font-weight:700;">Ticket Registry</h3>
+      </div>
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border-light);display:flex;gap:0.75rem;flex-wrap:wrap;align-items:flex-end;">
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:180px;">
+          <label class="form-label" style="font-size:0.75rem;">Campaign</label>
+          <select class="form-select" id="campaign-filter" onchange="loadCampaignTickets(this.value)">
+            <option value="all">All Campaigns</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:160px;">
+          <label class="form-label" style="font-size:0.75rem;">Payment Status</label>
+          <select class="form-select" id="payment-filter" onchange="filterTickets()">
+            <option value="all">All Status</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="pending">Pending</option>
+            <option value="refunded">Refunded</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1;min-width:160px;">
+          <label class="form-label" style="font-size:0.75rem;">Payment Method</label>
+          <select class="form-select" id="method-filter" onchange="filterTickets()">
+            <option value="all">All Methods</option>
+            <option value="Paystack">Paystack</option>
+            <option value="Flutterwave">Flutterwave</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+          </select>
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:0.75rem;">Date From</label>
+          <input type="date" class="form-input" id="date-from" onchange="filterTickets()">
+        </div>
+        <div class="form-group" style="margin-bottom:0;">
+          <label class="form-label" style="font-size:0.75rem;">Date To</label>
+          <input type="date" class="form-input" id="date-to" onchange="filterTickets()">
+        </div>
+        <div class="form-group" style="margin-bottom:0;flex:1.5;min-width:200px;">
+          <label class="form-label" style="font-size:0.75rem;">Search Ticket / Name / Email</label>
+          <input type="text" class="form-input" id="ticket-search" aria-label="Search tickets by ticket number or buyer name" placeholder="RP-LEK-14203 or Adaeze..." oninput="filterTickets()">
+        </div>
+      </div>
+
+      <!-- Bulk export row -->
+      <div style="padding:0.75rem 1.25rem;border-bottom:1px solid var(--border-light);display:flex;align-items:center;gap:0.75rem;background:var(--bg-secondary);flex-wrap:wrap;">
+        <span style="font-size:0.8125rem;font-weight:700;" id="filtered-count">Showing all tickets</span>
+        <div style="flex:1;"></div>
+        <button onclick="exportFilteredTickets()" class="btn btn-outline btn-sm"><i class="fa-solid fa-file-csv"></i> Export Filtered</button>
+        <button onclick="verifyPayments()" class="btn btn-outline btn-sm"><i class="fa-solid fa-shield-check"></i> Verify Payments</button>
+      </div>
+
+      <div style="overflow-x:auto;">
+        <table class="data-table" id="tickets-registry-table">
+          <thead>
+            <tr>
+              <th><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+              <th>Ticket Number</th>
+              <th>Holder</th>
+              <th>Campaign</th>
+              <th>Bundle</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Gateway Ref</th>
+              <th>Purchase Date</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tickets-registry-tbody"></tbody>
+        </table>
+      </div>
+      <div style="padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);flex-wrap:wrap;gap:0.75rem;">
+        <div style="font-size:0.8125rem;color:var(--text-muted);" id="tickets-footer-count">Showing 30 of 26,520 tickets</div>
+        <div style="display:flex;gap:0.375rem;">
+          <button class="btn btn-outline btn-sm" disabled><i class="fa-solid fa-chevron-left"></i></button>
+          <button class="btn btn-outline btn-sm" style="background:var(--green-primary);color:#fff;border-color:var(--green-primary);">1</button>
+          <button class="btn btn-outline btn-sm">2</button>
+          <button class="btn btn-outline btn-sm">3</button>
+          <span style="align-self:center;font-size:0.8125rem;color:var(--text-muted);">...</span>
+          <button class="btn btn-outline btn-sm">885</button>
+          <button class="btn btn-outline btn-sm"><i class="fa-solid fa-chevron-right"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campaign breakdown -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Tickets by Campaign</h3></div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Campaign</th>
+              <th>Total Capacity</th>
+              <th>Sold</th>
+              <th>Remaining</th>
+              <th>Progress</th>
+              <th>Revenue</th>
+              <th>Min. Threshold</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="campaign-summary-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Transaction log -->
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1rem;font-weight:700;"><i class="fa-solid fa-clock-rotate-left" style="margin-right:0.5rem;color:var(--text-muted);"></i>Recent Transactions</h3>
+        <button onclick="exportAllTickets()" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export All</button>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Transaction ID</th>
+              <th>User</th>
+              <th>Campaign</th>
+              <th>Qty</th>
+              <th>Amount</th>
+              <th>Gateway</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const MOCK_TICKET_HOLDERS = [
+  'Adaeze Okonkwo','Emeka Chukwu','Blessing Adeyemi','Tunde Fashola','Chidinma Eze',
+  'Dr. Yemi Adebayo','Ngozi Ibe','Fatima Musa','Babatunde Okafor','Ifeoma Nwosu',
+  'Chukwuemeka Obi','Aisha Muhammad','Olusegun Bankole','Kelechi Orji','Musa Ibrahim',
+  'Obinna Chibuike','Funmilayo Sule','Perpetua Nwosu','Stella Okonkwo','Bello Karimi'
+];
+
+const METHODS = ['Paystack','Paystack','Paystack','Flutterwave','Flutterwave','Bank Transfer'];
+const CAMPAIGNS_MAP = {
+  'lekki-duplex-001': { prefix:'LEK', name:'Lekki Phase 1 Duplex' },
+  'gwarinpa-abuja-002': { prefix:'GWA', name:'Gwarinpa Abuja' },
+  'banana-island-003': { prefix:'BAN', name:'Banana Island Mansion' }
+};
+
+let allRegistryTickets = [];
+let filteredRegistryTickets = [];
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('tickets');
+
+  // Populate campaign selector
+  const sel = document.getElementById('campaign-filter');
+  MOCK_DATA.campaigns.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.title + ' — ' + c.location;
+    sel.appendChild(opt);
+  });
+
+  // Generate mock tickets
+  allRegistryTickets = generateMockRegistry(30);
+  filteredRegistryTickets = [...allRegistryTickets];
+  renderRegistry(filteredRegistryTickets);
+  renderCampaignSummary();
+  renderTransactions();
+});
+
+function generateMockRegistry(count) {
+  const tickets = [];
+  const campaigns = MOCK_DATA.campaigns.filter(c => c.status !== 'upcoming');
+  for (let i = 0; i < count; i++) {
+    const campaign = campaigns[Math.floor(Math.random() * campaigns.length)];
+    const cInfo = CAMPAIGNS_MAP[campaign.id];
+    const holder = MOCK_TICKET_HOLDERS[Math.floor(Math.random() * MOCK_TICKET_HOLDERS.length)];
+    const method = METHODS[Math.floor(Math.random() * METHODS.length)];
+    const bundles = [1,5,10,20];
+    const qty = bundles[Math.floor(Math.random() * bundles.length)];
+    const prices = {1:2500,5:10000,10:18000,20:32000};
+    const daysAgo = Math.floor(Math.random() * 23);
+    const date = new Date(Date.now() - daysAgo * 86400000);
+    const statuses = ['confirmed','confirmed','confirmed','confirmed','pending','pending'];
+    tickets.push({
+      id: 'TXN' + String(1000 + i).padStart(6,'0'),
+      ticketNum: `RP-${cInfo.prefix}-${String(Math.floor(Math.random() * 20000) + 1).padStart(5,'0')}`,
+      holder,
+      email: holder.toLowerCase().replace(/[^a-z]/g,'').slice(0,6) + '@gmail.com',
+      campaignId: campaign.id,
+      campaignName: cInfo.name,
+      qty,
+      amount: prices[qty],
+      method,
+      gatewayRef: method === 'Bank Transfer' ? 'MANUAL-' + String(Math.floor(Math.random() * 9000)+1000) : method.toUpperCase().slice(0,3) + String(Math.floor(Math.random() * 900000000)+100000000),
+      date: date.toISOString(),
+      status: statuses[Math.floor(Math.random() * statuses.length)]
+    });
+  }
+  return tickets.sort((a,b) => new Date(b.date) - new Date(a.date));
+}
+
+function renderRegistry(tickets) {
+  const tbody = document.getElementById('tickets-registry-tbody');
+  document.getElementById('filtered-count').textContent = `Showing ${tickets.length} tickets`;
+  document.getElementById('tickets-footer-count').textContent = `Showing ${tickets.length} of 26,520 tickets`;
+
+  if (!tbody) return;
+  tbody.innerHTML = tickets.map(t => {
+    const statusBadge = t.status === 'confirmed'
+      ? '<span class="badge badge-green">Confirmed</span>'
+      : t.status === 'pending'
+      ? '<span class="badge badge-gold">Pending</span>'
+      : '<span class="badge badge-gray">Refunded</span>';
+    return `<tr>
+      <td><input type="checkbox" value="${t.id}"></td>
+      <td><code style="font-size:0.8125rem;font-weight:700;color:var(--green-primary);background:var(--green-50);padding:0.125rem 0.5rem;border-radius:4px;">${t.ticketNum}</code></td>
+      <td>
+        <div style="font-weight:600;font-size:0.875rem;">${t.holder}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">${t.email}</div>
+      </td>
+      <td style="font-size:0.8125rem;">${t.campaignName}</td>
+      <td style="text-align:center;"><strong>×${t.qty}</strong></td>
+      <td style="font-weight:600;color:var(--green-primary);">${Utils.formatNaira(t.amount)}</td>
+      <td style="font-size:0.8125rem;">${t.method}</td>
+      <td><code style="font-size:0.75rem;color:var(--text-muted);">${t.gatewayRef}</code></td>
+      <td style="font-size:0.8125rem;color:var(--text-muted);">${new Date(t.date).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+      <td>${statusBadge}</td>
+      <td>
+        <div style="display:flex;gap:0.25rem;">
+          <button onclick="viewTicketDetail('${t.id}')" class="btn btn-outline btn-sm" title="View"><i class="fa-solid fa-eye"></i></button>
+          <button onclick="downloadReceipt('${t.id}')" class="btn btn-outline btn-sm" title="Receipt"><i class="fa-solid fa-file-pdf"></i></button>
+          ${t.status === 'pending' ? `<button onclick="confirmPayment('${t.id}')" class="btn btn-sm" style="background:#f0fdf4;border:1px solid #86efac;color:#166534;" title="Confirm"><i class="fa-solid fa-check"></i></button>` : ''}
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderCampaignSummary() {
+  const tbody = document.getElementById('campaign-summary-tbody');
+  if (!tbody) return;
+  tbody.innerHTML = MOCK_DATA.campaigns.map(c => {
+    const pct = Utils.pct(c.soldTickets, c.totalTickets);
+    const remaining = c.totalTickets - c.soldTickets;
+    const revenue = c.soldTickets * c.ticketPrice;
+    const minThreshold = c.minThreshold || Math.floor(c.totalTickets * 0.8);
+    const meetsThreshold = c.soldTickets >= minThreshold;
+    return `<tr>
+      <td>
+        <div style="font-weight:600;">${c.title}</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">${c.location}</div>
+        <span class="badge ${c.status === 'active' ? 'badge-green' : c.status === 'upcoming' ? 'badge-gold' : 'badge-gray'}">${c.status}</span>
+      </td>
+      <td>${Utils.formatNumber(c.totalTickets)}</td>
+      <td><strong>${Utils.formatNumber(c.soldTickets)}</strong></td>
+      <td style="color:var(--text-muted);">${Utils.formatNumber(remaining)}</td>
+      <td style="min-width:120px;">
+        <div class="progress-wrap" style="margin-bottom:0.25rem;"><div class="progress-fill" style="width:${pct}%;"></div></div>
+        <span style="font-size:0.75rem;color:var(--text-muted);">${pct}%</span>
+      </td>
+      <td style="font-weight:700;color:var(--green-primary);">${Utils.formatNaira(revenue)}</td>
+      <td>
+        <div style="font-size:0.8125rem;">${Utils.formatNumber(minThreshold)}</div>
+        <span style="font-size:0.75rem;" class="${meetsThreshold ? 'badge badge-green' : 'badge badge-gray'}">${meetsThreshold ? '✓ Met' : 'Not met'}</span>
+      </td>
+      <td>
+        <button onclick="exportCampaignTickets('${c.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Export</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function renderTransactions() {
+  const tbody = document.getElementById('transactions-tbody');
+  if (!tbody) return;
+  const recent = allRegistryTickets.slice(0, 10);
+  tbody.innerHTML = recent.map(t => `
+    <tr>
+      <td><code style="font-size:0.75rem;">${t.id}</code></td>
+      <td style="font-weight:600;font-size:0.875rem;">${t.holder}</td>
+      <td style="font-size:0.8125rem;">${t.campaignName}</td>
+      <td><strong>×${t.qty}</strong></td>
+      <td style="font-weight:600;color:var(--green-primary);">${Utils.formatNaira(t.amount)}</td>
+      <td style="font-size:0.8125rem;">${t.method}</td>
+      <td style="font-size:0.8125rem;color:var(--text-muted);">${new Date(t.date).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
+      <td>${t.status === 'confirmed' ? '<span class="badge badge-green">Confirmed</span>' : '<span class="badge badge-gold">Pending</span>'}</td>
+    </tr>`).join('');
+}
+
+function filterTickets() {
+  const q = document.getElementById('ticket-search').value.toLowerCase();
+  const campaignId = document.getElementById('campaign-filter').value;
+  const payment = document.getElementById('payment-filter').value;
+  const method = document.getElementById('method-filter').value;
+  const dateFrom = document.getElementById('date-from').value;
+  const dateTo = document.getElementById('date-to').value;
+
+  filteredRegistryTickets = allRegistryTickets.filter(t => {
+    if (campaignId !== 'all' && t.campaignId !== campaignId) return false;
+    if (payment !== 'all' && t.status !== payment) return false;
+    if (method !== 'all' && t.method !== method) return false;
+    if (dateFrom && new Date(t.date) < new Date(dateFrom)) return false;
+    if (dateTo && new Date(t.date) > new Date(dateTo + 'T23:59:59')) return false;
+    if (q && !t.ticketNum.toLowerCase().includes(q) && !t.holder.toLowerCase().includes(q) && !t.email.toLowerCase().includes(q) && !t.id.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  renderRegistry(filteredRegistryTickets);
+}
+
+function loadCampaignTickets(campaignId) {
+  filterTickets();
+}
+
+function toggleSelectAll(checkbox) {
+  document.querySelectorAll('#tickets-registry-tbody input[type=checkbox]').forEach(cb => {
+    cb.checked = checkbox.checked;
+  });
+}
+
+function viewTicketDetail(id) {
+  const t = allRegistryTickets.find(t => t.id === id);
+  if (!t) return;
+  Toast.info('Ticket Details', `${t.ticketNum} — ${t.holder} — ${Utils.formatNaira(t.amount)} — ${t.status}`);
+}
+
+function downloadReceipt(id) {
+  Toast.info('Generating Receipt', 'PDF receipt is being generated for download.');
+}
+
+function confirmPayment(id) {
+  const t = allRegistryTickets.find(t => t.id === id);
+  if (t) { t.status = 'confirmed'; filterTickets(); }
+  Toast.success('Payment Confirmed', 'Ticket has been confirmed. User will be notified.');
+}
+
+function exportFilteredTickets() {
+  const headers = ['Ticket Number','Holder','Email','Campaign','Qty','Amount','Method','Gateway Ref','Date','Status'];
+  const rows = filteredRegistryTickets.map(t => [
+    t.ticketNum, t.holder, t.email, t.campaignName, t.qty, t.amount, t.method, t.gatewayRef,
+    new Date(t.date).toLocaleDateString('en-GB'), t.status
+  ]);
+  exportCSV([headers, ...rows], `tickets-filtered-${Date.now()}.csv`);
+}
+
+function exportAllTickets() {
+  const headers = ['Ticket Number','Holder','Email','Campaign','Qty','Amount','Method','Gateway Ref','Date','Status'];
+  const rows = allRegistryTickets.map(t => [
+    t.ticketNum, t.holder, t.email, t.campaignName, t.qty, t.amount, t.method, t.gatewayRef,
+    new Date(t.date).toLocaleDateString('en-GB'), t.status
+  ]);
+  exportCSV([headers, ...rows], `tickets-all-${Date.now()}.csv`);
+}
+
+function exportCampaignTickets(campaignId) {
+  const campaign = Utils.getCampaign(campaignId);
+  const headers = ['Ticket Number','Holder','Email','Qty','Amount','Method','Gateway Ref','Date','Status'];
+  const rows = allRegistryTickets.filter(t => t.campaignId === campaignId).map(t => [
+    t.ticketNum, t.holder, t.email, t.qty, t.amount, t.method, t.gatewayRef,
+    new Date(t.date).toLocaleDateString('en-GB'), t.status
+  ]);
+  exportCSV([headers, ...rows], `tickets-${campaignId}-${Date.now()}.csv`);
+  Toast.success('Export Ready', `${campaign ? campaign.title : 'Campaign'} tickets exported.`);
+}
+
+function verifyPayments() {
+  Toast.info('Verifying Payments', 'Cross-referencing with Paystack and Flutterwave webhooks... This may take a moment.');
+  setTimeout(() => Toast.success('Verification Complete', 'All 26,312 confirmed tickets verified against gateway records.'), 2500);
+}
+
+function printRegistry() {
+  Toast.info('Print', 'Opening print dialog for the current filtered view.');
+  setTimeout(() => window.print(), 500);
+}
+</script>
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item active"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body>
+</html>

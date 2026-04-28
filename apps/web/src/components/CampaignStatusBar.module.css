@@ -1,0 +1,25 @@
+.cancelConfirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: #fee2e2;
+  border: 1px solid #fca5a5;
+  border-radius: var(--radius);
+  padding: 0.25rem 0.625rem;
+  font-size: 0.8rem;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.cancelYes {
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.cancelNo {
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+}

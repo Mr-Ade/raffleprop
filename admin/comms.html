@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Communications Hub | RaffleProp Admin</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+  <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    .template-card { background:#fff;border:1px solid var(--border);border-radius:12px;padding:1.125rem 1.25rem;margin-bottom:0.75rem;transition:box-shadow 0.15s; }
+    .template-card:hover { box-shadow:0 2px 12px rgba(0,0,0,0.08); }
+    .fccpc-flag { display:inline-flex;align-items:center;gap:0.375rem;font-size:0.75rem;font-weight:700;padding:0.25rem 0.625rem;border-radius:20px; }
+    .fccpc-ok { background:var(--green-50);color:var(--green-primary); }
+    .fccpc-missing { background:#fef2f2;color:#ef4444; }
+    .cm-tab { display:none; }
+    .cm-tab.active { display:block; }
+    .tab-btn { padding:0.625rem 1.25rem;border:none;background:none;font-size:0.875rem;font-weight:600;color:var(--text-muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap; }
+    .tab-btn.active { color:var(--green-primary);border-bottom-color:var(--green-primary); }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+    <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Communications Hub</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">All outgoing communication templates with FCCPC statement compliance and NDPR opt-in enforcement</p>
+    </div>
+    <button onclick="openNewTemplateModal()" class="btn btn-primary"><i class="fa-solid fa-plus"></i> New Template</button>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--green-primary);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);" id="stat-compliant">8</div>
+        <div class="stat-label">FCCPC Compliant Templates</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--error);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--error);" id="stat-flagged">2</div>
+        <div class="stat-label">Flagged (Missing Statement)</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--info);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--info);" id="stat-ndpr">10</div>
+        <div class="stat-label">NDPR-Compliant Templates</div>
+      </div>
+      <div class="stat-card" style="padding:1rem;border-top:4px solid var(--gold);">
+        <div style="font-size:1.75rem;font-weight:900;color:var(--gold);" id="stat-sent">4,218</div>
+        <div class="stat-label">Messages Sent (30 days)</div>
+      </div>
+    </div>
+
+    <!-- FCCPA §118 compliance notice -->
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:flex-start;gap:0.75rem;">
+      <i class="fa-solid fa-triangle-exclamation" style="color:#ea580c;margin-top:0.1rem;flex-shrink:0;font-size:1.125rem;"></i>
+      <div>
+        <strong style="font-size:0.875rem;color:#9a3412;">Mandatory: FCCPC Approval Statement in All Promotional Templates</strong>
+        <p style="font-size:0.8125rem;color:#ea580c;margin-top:0.25rem;line-height:1.6;">
+          All outgoing communications promoting a RaffleProp campaign must include the FCCPC approval statement. Templates flagged as missing this statement <strong>cannot be sent</strong> until the statement is added. NDPR requires opt-in consent for all marketing communications — the system will block sending to users who have not consented.
+        </p>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div style="border-bottom:1px solid var(--border);margin-bottom:1.75rem;display:flex;gap:0;overflow-x:auto;">
+      <button class="tab-btn active" onclick="switchCommsTab('templates',this)"><i class="fa-solid fa-file-lines" style="margin-right:0.35rem;"></i>Templates</button>
+      <button class="tab-btn" onclick="switchCommsTab('send',this)"><i class="fa-solid fa-paper-plane" style="margin-right:0.35rem;"></i>Send Message</button>
+      <button class="tab-btn" onclick="switchCommsTab('log',this)"><i class="fa-solid fa-list" style="margin-right:0.35rem;"></i>Send Log</button>
+      <button class="tab-btn" onclick="switchCommsTab('ndpr',this)"><i class="fa-solid fa-shield-halved" style="margin-right:0.35rem;"></i>NDPR Opt-in</button>
+    </div>
+
+    <!-- Templates Tab -->
+    <div id="tab-templates" class="cm-tab active">
+      <div class="filter-row" style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:1.25rem;">
+        <select class="form-select" style="min-width:140px;flex:1;" onchange="filterTemplates(this.value)">
+          <option value="all">All Types</option>
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="push">Push Notification</option>
+        </select>
+        <select class="form-select" style="min-width:160px;flex:1;" onchange="filterByFCCPC(this.value)">
+          <option value="all">All Compliance Status</option>
+          <option value="compliant">FCCPC Compliant</option>
+          <option value="flagged">Flagged</option>
+        </select>
+      </div>
+      <div id="templates-list"></div>
+    </div>
+
+    <!-- Send Tab -->
+    <div id="tab-send" class="cm-tab">
+      <div class="card">
+        <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Send Communication</h3></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Select Template</label>
+            <select class="form-select" id="send-template-select" onchange="previewTemplate(this.value)">
+              <option value="">Select a template...</option>
+            </select>
+          </div>
+          <div id="fccpc-send-warning" style="display:none;background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:0.75rem 1rem;margin-bottom:1rem;font-size:0.8125rem;color:#ef4444;">
+            <i class="fa-solid fa-xmark-circle"></i> <strong>Cannot send:</strong> This template is missing the FCCPC approval statement. Add the statement before sending.
+          </div>
+          <div class="form-group">
+            <label class="form-label">Audience</label>
+            <select class="form-select" id="send-audience">
+              <option value="opted-in">All opted-in users (NDPR compliant)</option>
+              <option value="campaign">Campaign ticket holders only</option>
+              <option value="campaign-lekki">Lekki campaign holders</option>
+              <option value="campaign-gwarinpa">Gwarinpa campaign holders</option>
+              <option value="winners">Winners only</option>
+            </select>
+          </div>
+          <div style="background:var(--green-50);border:1px solid var(--green-primary);border-radius:8px;padding:0.75rem 1rem;font-size:0.8125rem;margin-bottom:1rem;">
+            <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);"></i> <strong>NDPR Enforcement:</strong> Messages will only be sent to users who have given valid marketing consent. Users who have opted out or not opted in will be automatically excluded from the send list.
+          </div>
+          <div id="send-preview" style="display:none;">
+            <label class="form-label">Message Preview</label>
+            <div id="preview-content" style="background:var(--bg-secondary);border-radius:8px;padding:1rem;font-size:0.875rem;line-height:1.7;margin-bottom:1rem;border:1px solid var(--border);min-height:80px;white-space:pre-wrap;"></div>
+          </div>
+          <button onclick="sendMessage()" class="btn btn-primary" id="send-btn" style="width:100%;" disabled><i class="fa-solid fa-paper-plane"></i> Send Message</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Log Tab -->
+    <div id="tab-log" class="cm-tab">
+      <div class="card">
+        <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Message Send Log</h3></div>
+        <div style="overflow-x:auto;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Template</th>
+                <th>Type</th>
+                <th>Audience</th>
+                <th>Recipients</th>
+                <th>FCCPC Statement</th>
+                <th>NDPR Compliant</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="send-log-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- NDPR Tab -->
+    <div id="tab-ndpr" class="cm-tab">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;flex-wrap:wrap;">
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">NDPR Opt-in Summary</h3></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+              <div style="background:var(--green-50);border-radius:8px;padding:1rem;text-align:center;">
+                <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);">6,891</div>
+                <div style="font-size:0.8125rem;color:var(--green-primary);font-weight:600;">Opted In (Email)</div>
+              </div>
+              <div style="background:#fef2f2;border-radius:8px;padding:1rem;text-align:center;">
+                <div style="font-size:1.75rem;font-weight:900;color:#ef4444;">1,541</div>
+                <div style="font-size:0.8125rem;color:#ef4444;font-weight:600;">Opted Out (Email)</div>
+              </div>
+              <div style="background:var(--green-50);border-radius:8px;padding:1rem;text-align:center;">
+                <div style="font-size:1.75rem;font-weight:900;color:var(--green-primary);">5,204</div>
+                <div style="font-size:0.8125rem;color:var(--green-primary);font-weight:600;">Opted In (SMS)</div>
+              </div>
+              <div style="background:#fef2f2;border-radius:8px;padding:1rem;text-align:center;">
+                <div style="font-size:1.75rem;font-weight:900;color:#ef4444;">3,228</div>
+                <div style="font-size:0.8125rem;color:#ef4444;font-weight:600;">Opted Out (SMS)</div>
+              </div>
+            </div>
+            <div style="background:#eff6ff;border-radius:8px;padding:0.875rem;margin-top:1rem;font-size:0.8125rem;color:#3b82f6;">
+              <i class="fa-solid fa-info-circle"></i> <strong>NDPR Rule:</strong> Marketing messages can only be sent to opted-in users. Transaction and regulatory notifications (§118 receipts, draw alerts) can be sent to all registered users regardless of marketing consent.
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">NDPR Deletion Requests</h3></div>
+          <div class="card-body">
+            <div id="ndpr-deletion-list">
+              <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:0.875rem;margin-bottom:0.75rem;">
+                <div style="font-weight:700;font-size:0.875rem;">DRR-2024-001 — Account Deletion Request</div>
+                <div style="font-size:0.8125rem;color:var(--text-muted);">User: u***@gmail.com · Submitted: 1 Dec 2024 · <strong style="color:#ea580c;">Due: 31 Dec 2024 (30 days)</strong></div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.625rem;">
+                  <button onclick="Toast.success('Processing','Deletion request DRR-2024-001 has been marked as processing.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-trash-can"></i> Process Deletion</button>
+                  <button onclick="Toast.info('View','Full deletion request details.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> View</button>
+                </div>
+              </div>
+              <div style="background:var(--bg-secondary);border-radius:8px;padding:0.875rem;margin-bottom:0.75rem;">
+                <div style="font-weight:700;font-size:0.875rem;">DRR-2024-002 — Data Export Request</div>
+                <div style="font-size:0.8125rem;color:var(--text-muted);">User: f***@yahoo.com · Submitted: 5 Dec 2024 · <strong style="color:var(--green-primary);">Due: 4 Jan 2025</strong></div>
+                <div style="display:flex;gap:0.5rem;margin-top:0.625rem;">
+                  <button onclick="Toast.success('Export Sent','Data export has been sent to the user\'s registered email.')" class="btn btn-outline btn-sm"><i class="fa-solid fa-download"></i> Send Export</button>
+                </div>
+              </div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);text-align:center;padding:0.5rem;">
+                <a href="../admin/users.html" style="color:var(--green-primary);">View all NDPR requests in User Management →</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- New Template Modal -->
+<div id="new-template-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9000;align-items:center;justify-content:center;padding:1rem;" onclick="if(event.target===this)closeNewTemplateModal()">
+  <div style="background:#fff;border-radius:16px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,0.25);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);">
+      <div style="font-size:1rem;font-weight:800;">Create Communication Template</div>
+      <button onclick="closeNewTemplateModal()" style="background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--text-muted);line-height:1;">×</button>
+    </div>
+    <div style="padding:1.5rem;">
+      <div class="form-group"><label class="form-label">Template Name</label><input type="text" class="form-input" id="tmpl-name" placeholder="e.g. Draw Alert — 7 Days Before"></div>
+      <div class="form-group"><label class="form-label">Channel</label>
+        <select class="form-select" id="tmpl-channel">
+          <option value="email">Email</option>
+          <option value="sms">SMS</option>
+          <option value="push">Push Notification</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Template Type</label>
+        <select class="form-select" id="tmpl-type">
+          <option value="marketing">Marketing / Promotional</option>
+          <option value="transactional">Transactional (§118 receipt, draw alert)</option>
+          <option value="regulatory">Regulatory Notice</option>
+          <option value="winner">Winner Notification</option>
+          <option value="refund">Refund Notice</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Message Body</label>
+        <textarea class="form-input" id="tmpl-body" rows="6" style="resize:vertical;" placeholder="Write your message here. Use {{name}}, {{campaign}}, {{draw_date}}, {{ticket_number}} as placeholders."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">FCCPC Approval Statement</label>
+        <div style="display:flex;align-items:flex-start;gap:0.75rem;padding:0.875rem;background:var(--bg-secondary);border-radius:8px;">
+          <input type="checkbox" id="tmpl-fccpc" style="width:1rem;height:1rem;accent-color:var(--green-primary);flex-shrink:0;margin-top:0.1rem;">
+          <span style="font-size:0.875rem;">This template includes the FCCPC approval statement: <em>"This promotional competition has been approved by the Federal Competition &amp; Consumer Protection Commission. FCCPC Ref: {{fccpc_ref}}"</em></span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">NDPR Opt-in Required?</label>
+        <div style="display:flex;align-items:center;gap:0.75rem;padding:0.75rem;background:var(--bg-secondary);border-radius:8px;">
+          <input type="checkbox" id="tmpl-ndpr" checked style="width:1rem;height:1rem;accent-color:var(--green-primary);">
+          <span style="font-size:0.875rem;">Only send to users who have opted in for this channel (required for marketing type)</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:0.75rem;margin-top:1rem;">
+        <button onclick="closeNewTemplateModal()" class="btn btn-outline" style="flex:1;">Cancel</button>
+        <button onclick="saveTemplate()" class="btn btn-primary" style="flex:2;"><i class="fa-solid fa-save"></i> Save Template</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item active"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+const TEMPLATES = [
+  { id: 'T001', name: 'Draw Alert — 30 Days Before', channel: 'email', type: 'transactional', fccpcStatement: true, ndprRequired: false, body: 'Dear {{name}},\n\nYour draw for {{campaign}} is scheduled for {{draw_date}}. You hold {{ticket_count}} tickets.\n\nThis promotional competition has been approved by the Federal Competition & Consumer Protection Commission. FCCPC Ref: {{fccpc_ref}}\n\nGood luck!\n\nRaffleProp Team' },
+  { id: 'T002', name: 'Payment Confirmation — §118 Receipt', channel: 'email', type: 'transactional', fccpcStatement: true, ndprRequired: false, body: 'Dear {{name}},\n\nPayment confirmed for {{qty}} ticket(s) for {{campaign}}. Total paid: {{amount}} (incl. VAT).\n\nTicket numbers: {{ticket_numbers}}\n\nThis is a permanent FCCPA §118 legal receipt. FCCPC Ref: {{fccpc_ref}}\n\nRaffleProp Ltd · 14 Admiralty Way, Lekki Phase 1, Lagos · CAC: RC-1234567' },
+  { id: 'T003', name: 'Winner Notification', channel: 'email', type: 'winner', fccpcStatement: true, ndprRequired: false, body: 'Congratulations {{name}}!\n\nYour ticket {{ticket_number}} was selected as the winner of {{campaign}}. FCCPC has been notified (Ref: {{fccpc_ref}}).\n\nVisit raffleprop.ng/winner-verification to complete your claim.' },
+  { id: 'T004', name: 'Refund Notice — Threshold Not Met', channel: 'email', type: 'refund', fccpcStatement: true, ndprRequired: false, body: 'Dear {{name}},\n\nThe {{campaign}} promotional competition did not reach its minimum ticket threshold and will not proceed. A full refund of {{amount}} will be processed to your original payment method within {{refund_days}} days.\n\nThis promotion was approved by the FCCPC (Ref: {{fccpc_ref}}). A Form CPC B has been filed with the FCCPC noting this promotion did not proceed.' },
+  { id: 'T005', name: 'New Campaign Launch — Marketing', channel: 'email', type: 'marketing', fccpcStatement: true, ndprRequired: true, body: 'Hi {{name}},\n\nA new RaffleProp campaign is now live: {{campaign}}.\n\nThis promotional competition is FCCPC approved. Ref: {{fccpc_ref}}.\n\nBrowse at raffleprop.ng/campaigns\n\nTo unsubscribe, click here: {{unsubscribe_link}}' },
+  { id: 'T006', name: 'Draw Alert SMS — 7 Days Before', channel: 'sms', type: 'transactional', fccpcStatement: true, ndprRequired: false, body: 'RaffleProp: {{campaign}} draw is in 7 days ({{draw_date}}). You hold {{ticket_count}} ticket(s). FCCPC approved - Ref: {{fccpc_ref}}. Good luck! Reply STOP to opt out.' },
+  { id: 'T007', name: 'Promotional SMS — Campaign Push', channel: 'sms', type: 'marketing', fccpcStatement: false, ndprRequired: true, body: 'Win a property with RaffleProp! Buy tickets for {{campaign}} from ₦{{price}}/ticket. Limited time offer!' },
+  { id: 'T008', name: 'NDPR Data Rights Reminder', channel: 'email', type: 'regulatory', fccpcStatement: false, ndprRequired: false, body: 'Dear {{name}},\n\nAs part of our NDPR compliance commitment, you can view, download, or request deletion of your data at any time via your RaffleProp account Data Rights Centre.\n\nVisit: raffleprop.ng/data-rights' },
+  { id: 'T009', name: 'Push — Flash Sale Reminder', channel: 'push', type: 'marketing', fccpcStatement: false, ndprRequired: true, body: '🏠 RaffleProp: Only {{tickets_left}} tickets left for {{campaign}}! Draw in {{draw_days}} days.' },
+  { id: 'T010', name: 'Winner Claim Reminder', channel: 'email', type: 'winner', fccpcStatement: true, ndprRequired: false, body: 'Dear {{name}},\n\nReminder: Your winner claim for {{campaign}} is awaiting completion. Please visit your Winner Verification Portal to submit your documents. FCCPC Ref: {{fccpc_ref}}.' }
+];
+
+const SEND_LOG = [
+  { date: '2024-12-05', template: 'Draw Alert — 30 Days Before', channel: 'Email', audience: 'Campaign ticket holders', recipients: 18420, fccpc: true, ndpr: true, status: 'Sent' },
+  { date: '2024-12-05', template: 'Draw Alert SMS — 7 Days Before', channel: 'SMS', audience: 'Campaign ticket holders', recipients: 8100, fccpc: true, ndpr: true, status: 'Sent' },
+  { date: '2024-11-30', template: 'New Campaign Launch — Marketing', channel: 'Email', audience: 'Opted-in users', recipients: 6891, fccpc: true, ndpr: true, status: 'Sent' },
+  { date: '2024-11-15', template: 'Promotional SMS — Campaign Push', channel: 'SMS', audience: 'All users', recipients: 0, fccpc: false, ndpr: false, status: 'Blocked — Missing FCCPC Statement' }
+];
+
+let activeFilter = 'all';
+let activeFCCPCFilter = 'all';
+
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('comms');
+  renderTemplates();
+  renderSendLog();
+  populateSendSelect();
+});
+
+function renderTemplates() {
+  let list = TEMPLATES;
+  if (activeFilter !== 'all') list = list.filter(t => t.channel === activeFilter);
+  if (activeFCCPCFilter === 'compliant') list = list.filter(t => t.fccpcStatement);
+  if (activeFCCPCFilter === 'flagged') list = list.filter(t => !t.fccpcStatement);
+
+  document.getElementById('templates-list').innerHTML = list.map(t => `
+    <div class="template-card">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.625rem;">
+        <div>
+          <div style="font-weight:700;font-size:0.9375rem;">${t.name}</div>
+          <div style="display:flex;gap:0.5rem;margin-top:0.375rem;flex-wrap:wrap;">
+            <span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-size:0.7rem;text-transform:capitalize;">
+              <i class="fa-solid ${t.channel==='email'?'fa-envelope':t.channel==='sms'?'fa-mobile':'fa-bell'}" style="margin-right:0.25rem;"></i>${t.channel}
+            </span>
+            <span class="badge" style="background:var(--bg-secondary);color:var(--text-muted);font-size:0.7rem;text-transform:capitalize;">${t.type}</span>
+            ${t.ndprRequired ? '<span class="badge" style="background:#eff6ff;color:#3b82f6;font-size:0.7rem;">NDPR Opt-in Required</span>' : ''}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-shrink:0;">
+          <span class="fccpc-flag ${t.fccpcStatement ? 'fccpc-ok' : 'fccpc-missing'}">
+            <i class="fa-solid ${t.fccpcStatement ? 'fa-shield-halved' : 'fa-triangle-exclamation'}"></i>
+            ${t.fccpcStatement ? 'FCCPC Statement ✓' : 'Missing FCCPC Statement'}
+          </span>
+        </div>
+      </div>
+      <div style="font-size:0.8125rem;color:var(--text-muted);background:var(--bg-secondary);padding:0.75rem;border-radius:6px;margin-bottom:0.75rem;line-height:1.6;white-space:pre-wrap;max-height:80px;overflow:hidden;">${t.body}</div>
+      <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+        <button onclick="editTemplate('${t.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-pen"></i> Edit</button>
+        ${!t.fccpcStatement ? `<button onclick="addFCCPCStatement('${t.id}')" class="btn btn-primary btn-sm"><i class="fa-solid fa-shield-halved"></i> Add FCCPC Statement</button>` : ''}
+        <button onclick="previewFullTemplate('${t.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-eye"></i> Preview</button>
+        <button onclick="duplicateTemplate('${t.id}')" class="btn btn-outline btn-sm"><i class="fa-solid fa-copy"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+function renderSendLog() {
+  document.getElementById('send-log-tbody').innerHTML = SEND_LOG.map(l => `
+    <tr>
+      <td style="font-size:0.8125rem;">${l.date}</td>
+      <td style="font-weight:600;font-size:0.875rem;">${l.template}</td>
+      <td style="font-size:0.8125rem;">${l.channel}</td>
+      <td style="font-size:0.8125rem;">${l.audience}</td>
+      <td style="font-weight:600;">${l.recipients.toLocaleString()}</td>
+      <td>${l.fccpc ? '<span class="badge badge-green">✓</span>' : '<span class="badge" style="background:#fef2f2;color:#ef4444;">Missing</span>'}</td>
+      <td>${l.ndpr ? '<span class="badge badge-green">✓</span>' : '<span class="badge" style="background:#fef2f2;color:#ef4444;">No</span>'}</td>
+      <td><span class="badge ${l.status==='Sent'?'badge-green':''}" style="${l.status!=='Sent'?'background:#fef2f2;color:#ef4444;':''}">${l.status}</span></td>
+    </tr>`).join('');
+}
+
+function populateSendSelect() {
+  const sel = document.getElementById('send-template-select');
+  TEMPLATES.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.textContent = `[${t.channel.toUpperCase()}] ${t.name}`;
+    sel.appendChild(opt);
+  });
+}
+
+function filterTemplates(val) {
+  activeFilter = val;
+  renderTemplates();
+}
+
+function filterByFCCPC(val) {
+  activeFCCPCFilter = val;
+  renderTemplates();
+}
+
+function previewTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  const warning = document.getElementById('fccpc-send-warning');
+  const preview = document.getElementById('send-preview');
+  const btn = document.getElementById('send-btn');
+  if (!t) { warning.style.display = 'none'; preview.style.display = 'none'; btn.disabled = true; return; }
+  if (!t.fccpcStatement && t.type === 'marketing') {
+    warning.style.display = 'block'; preview.style.display = 'none'; btn.disabled = true;
+  } else {
+    warning.style.display = 'none';
+    document.getElementById('preview-content').textContent = t.body;
+    preview.style.display = 'block';
+    btn.disabled = false;
+  }
+}
+
+function previewFullTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  Toast.info('Template Preview', t.body.substring(0, 200) + '...');
+}
+
+function addFCCPCStatement(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  t.fccpcStatement = true;
+  t.body += '\n\nThis promotional competition has been approved by the Federal Competition & Consumer Protection Commission. FCCPC Ref: {{fccpc_ref}}';
+  renderTemplates();
+  Toast.success('FCCPC Statement Added', `Template "${t.name}" now includes the FCCPC approval statement.`);
+}
+
+function editTemplate(id) {
+  Toast.info('Edit Template', 'Full template editor available in the production platform.');
+}
+
+function duplicateTemplate(id) {
+  const t = TEMPLATES.find(x => x.id === id);
+  if (!t) return;
+  Toast.success('Duplicated', `"${t.name}" duplicated. Edit the copy as needed.`);
+}
+
+function sendMessage() {
+  const sel = document.getElementById('send-template-select').value;
+  const t = TEMPLATES.find(x => x.id === sel);
+  if (!t) return;
+  const audience = document.getElementById('send-audience').value;
+  Toast.success('Message Queued', `"${t.name}" has been queued for delivery to opted-in users in the selected audience.`);
+}
+
+function switchCommsTab(tab, btn) {
+  document.querySelectorAll('.cm-tab').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function openNewTemplateModal() { document.getElementById('new-template-modal').style.display = 'flex'; }
+function closeNewTemplateModal() { document.getElementById('new-template-modal').style.display = 'none'; }
+
+function saveTemplate() {
+  const name = document.getElementById('tmpl-name').value.trim();
+  const body = document.getElementById('tmpl-body').value.trim();
+  if (!name || !body) { Toast.error('Required Fields', 'Please provide a template name and body.'); return; }
+  const fccpcChecked = document.getElementById('tmpl-fccpc').checked;
+  if (!fccpcChecked && document.getElementById('tmpl-type').value === 'marketing') {
+    Toast.error('FCCPC Statement Required', 'Marketing templates must include the FCCPC approval statement. Tick the checkbox to confirm.');
+    return;
+  }
+  Toast.success('Template Saved', `"${name}" has been saved to the template library.`);
+  closeNewTemplateModal();
+}
+</script>
+</body>
+</html>

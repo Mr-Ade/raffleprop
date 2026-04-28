@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard | RaffleProp</title>
+  <link rel="stylesheet" href="../css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    const u = JSON.parse(localStorage.getItem('rp_user') || '{}');
+    if (!u || !u.isAdmin) { window.location.replace('../login.html'); }
+  </script>
+  <style>
+    @media (max-width: 768px) {
+      #charts-row-1, #charts-row-2 { grid-template-columns: 1fr !important; }
+    }
+  </style>
+</head>
+<body style="margin:0;">
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="admin-sidebar"></div>
+
+<div class="admin-main" role="main" id="main-content">
+  <div class="admin-topbar">
+        <div>
+      <h1 style="font-size:1.25rem;font-weight:800;letter-spacing:-0.02em;">Revenue Dashboard</h1>
+      <p style="font-size:0.8125rem;color:var(--text-muted);">Live data · Last updated just now</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
+      <button onclick="location.reload()" class="btn btn-outline btn-sm"><i class="fa-solid fa-rotate"></i> Refresh</button>
+    </div>
+  </div>
+
+  <div class="admin-content">
+
+    <!-- Stats Grid -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1.25rem;margin-bottom:2rem;">
+      <div class="stat-card" style="border-left:4px solid var(--green-primary);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Total Revenue</div>
+          <i class="fa-solid fa-naira-sign" style="color:var(--green-primary);font-size:1.125rem;"></i>
+        </div>
+        <div class="stat-value">₦66.3M</div>
+        <div class="stat-change up"><i class="fa-solid fa-arrow-trend-up"></i> +12.4% this week</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--gold);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Tickets Sold Today</div>
+          <i class="fa-solid fa-ticket" style="color:var(--gold);font-size:1.125rem;"></i>
+        </div>
+        <div class="stat-value">1,247</div>
+        <div class="stat-change up"><i class="fa-solid fa-arrow-trend-up"></i> +8.1% vs yesterday</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--info);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Registered Users</div>
+          <i class="fa-solid fa-users" style="color:var(--info);font-size:1.125rem;"></i>
+        </div>
+        <div class="stat-value">8,432</div>
+        <div class="stat-change up"><i class="fa-solid fa-arrow-trend-up"></i> +234 new today</div>
+      </div>
+      <div class="stat-card" style="border-left:4px solid var(--success);">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Active Campaigns</div>
+          <i class="fa-solid fa-trophy" style="color:var(--success);font-size:1.125rem;"></i>
+        </div>
+        <div class="stat-value">2</div>
+        <div class="stat-change" style="color:var(--text-muted);">1 upcoming in 14 days</div>
+      </div>
+    </div>
+
+    <!-- Regulatory cost trackers -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin-bottom:2rem;">
+      <div class="card" style="padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;">
+          <i class="fa-solid fa-shield-halved" style="color:var(--green-primary);font-size:1rem;"></i>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">FCCPC Monitoring Fees</div>
+        </div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text-primary);margin-bottom:0.25rem;">₦1,700,000</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Lekki: ₦850,000 · Gwarinpa: ₦850,000</div>
+        <div style="display:flex;flex-direction:column;gap:0.25rem;margin-top:0.625rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:var(--text-muted);">4-Bed Duplex, Lekki</span><span class="badge badge-green">Paid</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:var(--text-muted);">3-Bed Semi-Det., Gwarinpa</span><span class="badge badge-green">Paid</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:var(--text-muted);">Banana Island Penthouse</span><span class="badge" style="background:#fef3c7;color:#92400e;">Pending</span></div>
+        </div>
+      </div>
+      <div class="card" style="padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;">
+          <i class="fa-solid fa-building-columns" style="color:#3b82f6;font-size:1rem;"></i>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">LSLGA Levy (Lagos)</div>
+        </div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text-primary);margin-bottom:0.25rem;">₦575,000</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Lagos campaigns only · Annual licence renewal due Dec 31</div>
+        <div style="display:flex;flex-direction:column;gap:0.25rem;margin-top:0.625rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:var(--text-muted);">4-Bed Duplex, Lekki (Lagos)</span><span class="badge badge-green">Paid</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;"><span style="color:var(--text-muted);">Annual Licence Renewal 2025</span><span class="badge" style="background:#fef3c7;color:#92400e;">Due 31 Dec</span></div>
+        </div>
+      </div>
+      <div class="card" style="padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;">
+          <i class="fa-solid fa-chart-pie" style="color:var(--gold);font-size:1rem;"></i>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Regulatory Cost Ratio</div>
+        </div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text-primary);margin-bottom:0.25rem;">3.4%</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">of gross revenue consumed by regulatory fees</div>
+        <div style="margin-top:0.75rem;">
+          <div style="height:8px;border-radius:4px;background:var(--border);overflow:hidden;">
+            <div style="height:100%;width:3.4%;border-radius:4px;background:var(--gold);"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;margin-top:0.25rem;"><span style="color:var(--text-muted);">₦2,275,000 total fees</span><span style="color:var(--text-muted);">/ ₦66.3M revenue</span></div>
+        </div>
+      </div>
+      <div class="card" style="padding:1.25rem;">
+        <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.75rem;">
+          <i class="fa-solid fa-vault" style="color:var(--text-muted);font-size:1rem;"></i>
+          <div style="font-size:0.8rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">Escrow Balance</div>
+        </div>
+        <div style="font-size:1.5rem;font-weight:900;color:var(--text-primary);margin-bottom:0.25rem;">₦63.8M</div>
+        <div style="font-size:0.8125rem;color:var(--text-muted);">Held in First Bank escrow — all ticket proceeds secured</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.625rem;font-size:0.8125rem;">
+          <i class="fa-solid fa-circle-check" style="color:var(--green-primary);"></i>
+          <span style="color:var(--green-primary);font-weight:600;">Escrow account verified</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div id="charts-row-1" style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+      <!-- Revenue line chart -->
+      <div class="card">
+        <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+          <h3 style="font-size:1rem;font-weight:700;">Revenue — Last 11 Days</h3>
+          <select class="form-select" style="width:140px;" onchange="updateRevenuePeriod(this.value)">
+            <option>Last 11 days</option>
+            <option>Last 30 days</option>
+            <option>This month</option>
+          </select>
+        </div>
+        <div class="card-body" style="padding:1rem 1.25rem 1.5rem;">
+          <div style="height:240px;"><canvas id="revenue-chart"></canvas></div>
+        </div>
+      </div>
+      <!-- Campaign tickets bar -->
+      <div class="card">
+        <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Tickets per Campaign</h3></div>
+        <div class="card-body" style="padding:1rem 1.25rem 1.5rem;">
+          <div style="height:240px;"><canvas id="ticket-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Second row -->
+    <div id="charts-row-2" style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:2rem;">
+      <!-- Day-of-week chart -->
+      <div class="card">
+        <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Sales by Day of Week</h3></div>
+        <div class="card-body" style="padding:1rem 1.25rem 1.5rem;">
+          <div style="height:200px;"><canvas id="daily-tickets-chart"></canvas></div>
+        </div>
+      </div>
+      <!-- Payment gateway donut -->
+      <div class="card">
+        <div class="card-header"><h3 style="font-size:1rem;font-weight:700;">Payment Gateway Split</h3></div>
+        <div class="card-body" style="padding:1rem 1.25rem 1.5rem;">
+          <div style="height:200px;"><canvas id="gateway-chart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Campaign progress overview -->
+    <div class="card" style="margin-bottom:2rem;">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <h3 style="font-size:1rem;font-weight:700;">Campaign Progress</h3>
+        <a href="campaigns.html" class="btn btn-outline btn-sm">Manage Campaigns →</a>
+      </div>
+      <div class="card-body" id="campaign-progress" style="display:flex;flex-direction:column;gap:1rem;"></div>
+    </div>
+
+    <!-- Live purchases feed -->
+    <div class="card">
+      <div class="card-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div style="display:flex;align-items:center;gap:0.75rem;">
+          <h3 style="font-size:1rem;font-weight:700;">Live Purchase Feed</h3>
+          <div class="live-indicator"><span class="live-dot"></span> LIVE</div>
+        </div>
+        <span style="font-size:0.8125rem;color:var(--text-muted);">New purchases appear automatically</span>
+      </div>
+      <div id="live-feed" style="min-height:200px;"></div>
+    </div>
+  </div>
+</div>
+
+<script defer src="../js/main.js"></script>
+<script defer src="../js/admin.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  injectAdminSidebar('dashboard');
+
+  // Campaign progress
+  const cpEl = document.getElementById('campaign-progress');
+  if (cpEl) {
+    cpEl.innerHTML = MOCK_DATA.campaigns.map(c => {
+      const pct = Utils.pct(c.soldTickets, c.totalTickets);
+      const revenue = c.soldTickets * c.ticketPrice;
+      return `
+      <div style="display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
+        <div style="flex:1;min-width:200px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+            <div style="font-weight:600;font-size:0.875rem;">${c.title} — <span style="color:var(--text-muted);font-weight:400;">${c.location}</span></div>
+            <div style="display:flex;gap:0.5rem;align-items:center;"><span class="badge ${c.status === 'active' ? 'badge-green' : c.status === 'upcoming' ? 'badge-gold' : 'badge-gray'}">${c.status}</span></div>
+          </div>
+          <div class="progress-wrap"><div class="progress-fill" style="width:${pct}%;"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;"><span>${Utils.formatNumber(c.soldTickets)} / ${Utils.formatNumber(c.totalTickets)} tickets</span><span>${pct}%</span></div>
+        </div>
+        <div style="text-align:right;flex-shrink:0;">
+          <div style="font-weight:800;font-size:1.125rem;color:var(--green-primary);">${Utils.formatNaira(revenue)}</div>
+          <div style="font-size:0.75rem;color:var(--text-muted);">revenue</div>
+        </div>
+      </div>`;
+    }).join('<div class="divider"></div>');
+  }
+});
+
+function updateRevenuePeriod(val) {
+  Toast.info('Filter Applied', `Showing ${val} data.`);
+}
+</script>
+<nav class="admin-bottom-nav" aria-label="Admin mobile navigation">
+  <a href="index.html" class="abn-item active"><i class="fa-solid fa-gauge-high"></i><span>Dashboard</span></a>
+  <a href="campaigns.html" class="abn-item"><i class="fa-solid fa-trophy"></i><span>Campaigns</span></a>
+  <a href="draw.html" class="abn-item"><i class="fa-solid fa-dice"></i><span>Draw</span></a>
+  <a href="users.html" class="abn-item"><i class="fa-solid fa-users"></i><span>Users</span></a>
+  <a href="tickets.html" class="abn-item"><i class="fa-solid fa-ticket"></i><span>Tickets</span></a>
+  <a href="content.html" class="abn-item"><i class="fa-solid fa-pen-to-square"></i><span>Content</span></a>
+</nav>
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House Raffle Master Plan</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--dark:#0D0D0D;--dark2:#141414;--dark3:#1C1C1C;--dark4:#242424;--cream:#F5F0E8;--muted:#888;--text:#D8D0C0;--danger:#E05252;--success:#52C97A}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:var(--text);font-family:'Outfit',sans-serif;font-weight:300;line-height:1.7;font-size:15px}
+.hero{background:linear-gradient(160deg,#0D0D0D 0%,#1a1408 50%,#0D0D0D 100%);border-bottom:1px solid rgba(201,168,76,.2);padding:80px 60px 70px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);pointer-events:none}
+.htag{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.3);padding:6px 16px;margin-bottom:32px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(38px,5vw,64px);font-weight:900;line-height:1.1;color:var(--cream);max-width:700px;margin-bottom:24px}
+.hero h1 span{color:var(--gold)}
+.hero-sub{font-size:16px;color:var(--muted);max-width:560px;margin-bottom:48px}
+.hero-stats{display:flex;gap:48px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold)}
+.stat-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:center;gap:20px;padding:60px 60px 0;margin-bottom:8px}
+.phn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.phl{flex:1;height:1px;background:linear-gradient(to right,rgba(201,168,76,.4),transparent)}
+section{padding:0 60px 20px}
+section h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--cream);margin-bottom:32px;padding-top:12px}
+.card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:2px;padding:28px 32px;margin-bottom:16px}
+.card-gold{border-color:rgba(201,168,76,.25);background:linear-gradient(135deg,rgba(201,168,76,.05) 0%,var(--dark3) 100%)}
+.card h3{font-family:'Outfit',sans-serif;font-weight:600;font-size:16px;color:var(--cream);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.icon{width:28px;height:28px;background:rgba(201,168,76,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.steps{display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:48px 1fr;gap:0 20px}
+.step-left{display:flex;flex-direction:column;align-items:center}
+.step-dot{width:36px;height:36px;background:var(--dark4);border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);flex-shrink:0}
+.step-conn{width:1px;flex:1;background:rgba(201,168,76,.2);margin:4px 0;min-height:24px}
+.step-content{padding:6px 0 32px}
+.step-content h4{font-weight:600;font-size:15px;color:var(--cream);margin-bottom:8px}
+.step-content p,.step-content li{color:var(--text);font-size:14px;line-height:1.75}
+.step-content ul{padding-left:16px;margin-top:6px}
+.step-content li{margin-bottom:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tw{overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--dark4);color:var(--gold);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px 16px;text-align:left;font-weight:400}
+td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.alert{padding:16px 20px;border-left:3px solid;margin-bottom:16px;font-size:14px}
+.aw{border-color:#E0A652;background:rgba(224,166,82,.07);color:#D8B87A}
+.ad{border-color:var(--danger);background:rgba(224,82,82,.07);color:#E07A7A}
+.as{border-color:var(--success);background:rgba(82,201,122,.07);color:#7AE09A}
+.alert strong{display:block;margin-bottom:4px}
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:2px;margin-right:6px}
+.tg{background:rgba(201,168,76,.15);color:var(--gold)}
+.tr{background:rgba(224,82,82,.15);color:#E07A7A}
+.ts{background:rgba(82,201,122,.15);color:#7AE09A}
+.tb{background:rgba(82,152,224,.15);color:#7AB0E0}
+.div{height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.15),transparent);margin:48px 60px}
+.bt{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);margin-top:4px;font-family:'Playfair Display',serif;font-size:18px;color:var(--cream)}
+.cl{list-style:none}
+.cl li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:12px;font-size:13.5px;align-items:flex-start}
+.cl li::before{content:'◻';color:var(--gold);flex-shrink:0;font-size:14px;margin-top:1px}
+.plat{background:var(--dark3);border:1px solid rgba(255,255,255,.06);padding:20px 24px;border-radius:2px}
+.pname{font-weight:600;color:var(--cream);font-size:14px;margin-bottom:6px}
+.pdesc{font-size:13px;color:var(--muted);margin-bottom:10px}
+.puse{font-size:12.5px;color:var(--text)}
+.footer{margin-top:80px;padding:40px 60px;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;text-align:center}
+@media(max-width:700px){.hero,section,.ph{padding-left:24px;padding-right:24px}.div{margin-left:24px;margin-right:24px}.g2{grid-template-columns:1fr}.hero-stats{gap:28px}}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="htag">House Raffle Master Plan</div>
+  <h1>Sell Your House.<br>Raise <span>&#8358;50 Million+</span><br>Via Raffle.</h1>
+  <p class="hero-sub">A complete, step-by-step operational guide covering legal frameworks, pricing strategy, marketing playbooks, payment infrastructure, and draw execution.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val">&#8358;2,500</span><span class="stat-label">Recommended Ticket Price</span></div>
+    <div class="stat"><span class="stat-val">25,000</span><span class="stat-label">Tickets to Sell</span></div>
+    <div class="stat"><span class="stat-val">&#8358;62.5M</span><span class="stat-label">Gross Revenue Target</span></div>
+    <div class="stat"><span class="stat-val">8 Weeks</span><span class="stat-label">Campaign Duration</span></div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="ph"><span class="phn">Pricing Strategy</span><div class="phl"></div></div>
+<section>
+  <h2>Why &#8358;2,500 Per Ticket (Not &#8358;1,000)</h2>
+  <div class="alert aw"><strong>&#9888; The &#8358;1,000 Problem</strong>At &#8358;1,000 per ticket you need 50,000 buyers minimum before costs. That volume is extremely hard to reach for a first-time raffle. Platform fees, marketing, and refunds will erode your margin severely.</div>
+  <div class="tw"><table>
+    <tr><th>Ticket Price</th><th>Tickets Needed for &#8358;50M</th><th>Feasibility</th><th>Verdict</th></tr>
+    <tr><td>&#8358;1,000</td><td>50,000</td><td>Very hard — massive reach required</td><td><span class="tag tr">Not Recommended</span></td></tr>
+    <tr><td>&#8358;2,500</td><td>20,000</td><td>Very achievable online + offline</td><td><span class="tag ts">Best Choice</span></td></tr>
+    <tr><td>&#8358;5,000</td><td>10,000</td><td>Achievable but limits participation</td><td><span class="tag tg">Good Alternative</span></td></tr>
+    <tr><td>&#8358;10,000</td><td>5,000</td><td>Smallest audience, slowest uptake</td><td><span class="tag tr">Risky</span></td></tr>
+  </table></div>
+  <div class="g2">
+    <div class="card card-gold"><h3><span class="icon">&#127942;</span>Target: &#8358;62.5M Gross</h3><p>Sell <strong style="color:var(--cream)">25,000 tickets at &#8358;2,500</strong> each. This gives a 25% buffer above &#8358;50M to absorb costs and still net above your minimum target.</p></div>
+    <div class="card"><h3><span class="icon">&#128161;</span>Bundle Pricing Strategy</h3><p>Drive higher revenue per buyer:</p><ul style="margin-top:10px;list-style:none"><li style="margin-bottom:6px">1 ticket &#8212; &#8358;2,500</li><li style="margin-bottom:6px">5 tickets &#8212; &#8358;10,000 (saves &#8358;2,500)</li><li style="margin-bottom:6px">10 tickets &#8212; &#8358;18,000 (saves &#8358;7,000)</li><li>20 tickets &#8212; &#8358;32,000 (saves &#8358;18,000)</li></ul></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- LEGAL -->
+<div class="ph"><span class="phn">Phase 01 &#8212; Before Anything Else</span><div class="phl"></div></div>
+<section>
+  <h2>Legal Foundation &amp; Compliance</h2>
+  <div class="alert ad"><strong>&#128680; Do NOT launch before completing this phase</strong>Running an unlicensed raffle in Nigeria can be classified as illegal lottery or fraud. Payment platforms can freeze your accounts. Participants can sue. You can face criminal liability. Do this first, without exception.</div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">01</div><div class="step-conn"></div></div><div class="step-content"><h4>Hire a Property Lawyer (Mandatory)</h4><p>Engage a licensed Nigerian lawyer experienced in property transactions. They will:</p><ul><li>Verify the house title &#8212; Certificate of Occupancy (C of O), Governor's Consent, or Deed of Assignment</li><li>Confirm no encumbrances (mortgages, disputes, liens) exist on the property</li><li>Draft a legally binding Raffle Terms and Conditions document</li><li>Draft a Winner Transfer Agreement to be executed after the draw</li><li>Advise on correct legal structure (promotional competition vs. lottery)</li></ul><p style="margin-top:8px;color:var(--muted);font-size:13px">Estimated cost: &#8358;200,000 &#8211; &#8358;500,000</p></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">02</div><div class="step-conn"></div></div><div class="step-content"><h4>Structure as a "Competition" Not a Lottery</h4><p>A pure lottery in Nigeria requires a federal license under the National Lottery Act 2005 &#8212; expensive and slow. Instead, structure it as a <strong>promotional competition</strong> and add a minimal skill element (e.g., "Answer: what colour is Nigeria's flag?"). This sidesteps lottery classification in most states. Your lawyer will advise the exact approach for your state.</p></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">03</div><div class="step-conn"></div></div><div class="step-content"><h4>Register a Business Entity with the CAC</h4><p>Register with the <strong>Corporate Affairs Commission</strong> to receive payments legitimately:</p><ul><li><strong>Business Name Registration</strong> &#8212; fast (1&#8211;3 days), affordable (~&#8358;10,000 at cacregistration.gov.ng)</li><li><strong>Limited Liability Company</strong> &#8212; more credible for large transactions (1&#8211;2 weeks, ~&#8358;30,000&#8211;&#8358;100,000)</li></ul><p style="margin-top:8px">Then open a dedicated <strong>corporate bank account</strong> for raffle proceeds. Never mix with personal funds.</p></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">04</div><div class="step-conn"></div></div><div class="step-content"><h4>Draft and Publish Full Terms &amp; Conditions</h4><p>Publish before selling any ticket. Must clearly state:</p><ul><li>Full property description &#8212; address, size, title type, current valuation</li><li>Ticket price and all purchase methods accepted</li><li>Total tickets available (hard cap &#8212; never exceed this number)</li><li>Draw date, time, and venue</li><li>How the winner is selected &#8212; specify RNG or physical draw method</li><li>Refund policy &#8212; exactly what triggers a full refund to all buyers</li><li>What happens if the minimum ticket threshold is not reached</li><li>Tax obligations of the winner</li><li>Property transfer timeline after the draw</li><li>Dispute resolution procedure</li><li>Your CAC registration number, company name, and full contact details</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">05</div><div class="step-conn"></div></div><div class="step-content"><h4>Get an Independent Property Valuation</h4><p>Hire a certified estate valuer registered with the <strong>Nigerian Institution of Estate Surveyors and Valuers (NIESV)</strong> to produce a formal valuation report. This proves the property value is genuine &#8212; one of your strongest trust and marketing assets.</p><p style="margin-top:8px;color:var(--muted);font-size:13px">Estimated cost: &#8358;50,000 &#8211; &#8358;200,000</p></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">06</div><div class="step-conn"></div></div><div class="step-content"><h4>Set Up an Escrow Arrangement (Strongly Recommended)</h4><p>Partner with a Nigerian bank or licensed escrow service to hold all ticket proceeds. Funds are released to you only after the draw is confirmed and winner verified. This is the single most powerful trust signal you can offer &#8212; promote it in every marketing asset.</p><p style="margin-top:8px">Nigerian banks offering escrow: <strong>GTBank, Zenith Bank, First Bank, Stanbic IBTC</strong>. Also explore fintech escrow solutions.</p></div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PROPERTY -->
+<div class="ph"><span class="phn">Phase 02 &#8212; The Product</span><div class="phl"></div></div>
+<section>
+  <h2>Property Documentation &amp; Presentation</h2>
+  <p style="margin-bottom:24px;color:var(--muted)">The house is your product. Present it with the quality of a premium real estate listing &#8212; because buyers are handing over real money based entirely on what you show them.</p>
+  <div class="g2">
+    <div class="card"><h3><span class="icon">&#128203;</span>Documents to Gather</h3><ul class="cl"><li>Certificate of Occupancy (C of O) or equivalent title</li><li>Deed of Assignment (if applicable)</li><li>Current stamped survey plan</li><li>Independent NIESV valuation report</li><li>Building plan approval (if applicable)</li><li>Utility receipts showing active connections</li><li>Property tax receipts (land use charge or tenement rates)</li><li>Structural/engineering inspection report if available</li></ul></div>
+    <div class="card"><h3><span class="icon">&#128247;</span>Visual Assets to Create</h3><ul class="cl"><li>Professional photography &#8212; all rooms, exterior, compound, neighbourhood</li><li>Drone/aerial footage of property and surroundings</li><li>10-minute walkthrough video tour, professionally shot and edited</li><li>60&#8211;90 second teaser video for social media</li><li>3D virtual tour or floor plan diagram</li><li>Neighbourhood context photos &#8212; proximity to roads, markets, amenities</li><li>Before/after photos if any renovations were done</li></ul></div>
+  </div>
+  <div class="card card-gold"><h3><span class="icon">&#128196;</span>Create a Property Information Pack (PDF)</h3><p>Compile everything into a polished, downloadable PDF that buyers can read and share. Include property photos, valuation summary, location map, title description, FAQ, T&amp;C summary, and how to buy a ticket. Link to this from every marketing touchpoint &#8212; it converts fence-sitters into buyers.</p></div>
+</section>
+<div class="div"></div>
+
+<!-- INFRASTRUCTURE -->
+<div class="ph"><span class="phn">Phase 03 &#8212; Infrastructure</span><div class="phl"></div></div>
+<section>
+  <h2>Payment &amp; Ticketing Systems</h2>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">A</div><div class="step-conn"></div></div><div class="step-content"><h4>Payment Gateways &#8212; Set Up at Least Two</h4><p>Never rely on a single provider. Set up two to prevent lost sales from outages:</p>
+    <div class="g2" style="margin-top:12px">
+      <div class="plat"><div class="pname">Paystack</div><div class="pdesc">Nigeria's most trusted payment gateway</div><div class="puse">Register at paystack.com/ng &#8594; Complete business KYC with CAC documents &#8594; Integrate via payment link or website plugin &#8594; Accepts card, bank transfer, USSD</div></div>
+      <div class="plat"><div class="pname">Flutterwave</div><div class="pdesc">Pan-African processor, excellent reliability</div><div class="puse">Register at flutterwave.com &#8594; Use Flutterwave Store or payment link &#8594; Accepts card, bank transfer, mobile money, USSD</div></div>
+      <div class="plat"><div class="pname">Direct Bank Transfer</div><div class="pdesc">Many Nigerians prefer direct bank transfer</div><div class="puse">Publish corporate account number &#8594; Buyer sends with name + phone as reference &#8594; Confirm ticket via WhatsApp/SMS automatically or manually</div></div>
+      <div class="plat"><div class="pname">Opay / Moniepoint / Kuda</div><div class="pdesc">For buyers without traditional bank accounts</div><div class="puse">Accept transfers from digital wallets &#8594; Especially effective for younger demographics and northern Nigeria outreach</div></div>
+    </div>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">B</div><div class="step-conn"></div></div><div class="step-content"><h4>Ticket System &#8212; Three Options</h4>
+    <div style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+      <div class="card" style="margin:0;padding:18px 22px"><h3 style="margin-bottom:6px"><span class="icon" style="font-size:11px">1</span>Dedicated Raffle Platform (Easiest)</h3><p style="font-size:13.5px">Platforms like <strong>Raffall.com</strong> or Nigerian alternatives handle ticket issuance, payment, and draws automatically. They typically charge 3&#8211;10% commission. Search "house raffle platform Nigeria" to find currently active local options and verify fees before committing.</p></div>
+      <div class="card" style="margin:0;padding:18px 22px"><h3 style="margin-bottom:6px"><span class="icon" style="font-size:11px">2</span>Custom Website (Recommended for Control)</h3><p style="font-size:13.5px">Hire a web developer to build a landing page using <strong>WordPress + WooCommerce</strong> or <strong>Webflow</strong>. Paystack and Flutterwave plugins auto-generate order IDs which become ticket numbers. An admin dashboard shows all purchases. Cost: &#8358;50,000&#8211;&#8358;200,000.</p></div>
+      <div class="card" style="margin:0;padding:18px 22px"><h3 style="margin-bottom:6px"><span class="icon" style="font-size:11px">3</span>Google Forms + Spreadsheet (Low Budget, Early Stage Only)</h3><p style="font-size:13.5px">Collect buyer details via Google Forms, assign ticket numbers manually in Google Sheets, confirm via WhatsApp. Only viable under ~500 tickets &#8212; becomes unmanageable at scale.</p></div>
+    </div>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">C</div><div class="step-conn"></div></div><div class="step-content"><h4>Ticket Confirmation &#8212; Every Buyer Gets Proof</h4><ul><li><strong>Email:</strong> Automated via payment gateway + Mailchimp or Brevo (free tools)</li><li><strong>WhatsApp:</strong> Via WhatsApp Business. For scale, use WhatsApp Business API: Twilio, Vonage, or WhatApp</li><li><strong>SMS:</strong> For non-smartphone users &#8212; use Termii, Bulksmsnigeria.com, or Africa's Talking</li><li><strong>Public ticket registry (optional but powerful):</strong> A webpage listing all issued ticket numbers (not buyer names) so anyone can verify their number is registered</li></ul></div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- MARKETING -->
+<div class="ph"><span class="phn">Phase 04 &#8212; Go to Market</span><div class="phl"></div></div>
+<section>
+  <h2>Marketing Strategy &amp; Channel Execution</h2>
+  <div class="alert as"><strong>&#10003; Your Goal: 25,000 ticket buyers in 8 weeks</strong>Approximately 450 tickets per day. With all channels active simultaneously and a strong referral system, this is very achievable.</div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">1</div><div class="step-conn"></div></div><div class="step-content"><h4>Instagram &amp; Facebook (Primary Digital Channels)</h4><ul><li>Create dedicated pages: @[YourRaffleName] on Instagram + matching Facebook Page</li><li>Post daily: property clips, countdown posts, buyer spotlights, "only X tickets left" updates</li><li>Run paid Facebook and Instagram Ads targeting Nigerian adults 25&#8211;55, interested in real estate, homeownership, and investment. Starting budget: &#8358;30,000&#8211;&#8358;80,000 per week</li><li>Use Reels &#8212; short property clips get disproportionate organic reach</li><li>Instagram Stories: daily sold-ticket counter, countdown timers, Q&amp;A boxes</li><li>Pin your purchase link in bio and add link stickers to every story</li><li>Run retargeting ads to website visitors who did not complete a purchase</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">2</div><div class="step-conn"></div></div><div class="step-content"><h4>WhatsApp (Highest Conversion Rate of Any Channel)</h4><ul><li>Set up WhatsApp Business with a product catalog showing property details</li><li>Create a WhatsApp Broadcast List &#8212; send daily updates to opted-in buyers and leads</li><li>Create a public WhatsApp Community or Channel for announcements and Q&amp;A</li><li>Message your entire personal contact list first &#8212; warm audiences convert fastest</li><li>Post in relevant WhatsApp groups: real estate, investment, alumni, church/mosque, professional associations</li><li>Incentivize every buyer to forward your message to 5 contacts</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">3</div><div class="step-conn"></div></div><div class="step-content"><h4>TikTok (Massive Organic Reach Potential)</h4><ul><li>Post daily short videos: property tours, "Win this house for &#8358;2,500" hooks, countdown content</li><li>TikTok's algorithm can make a single video viral overnight with zero ad spend</li><li>Partner with Nigerian real estate and lifestyle TikTok creators</li><li>Post 1&#8211;2 times per day throughout the campaign</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">4</div><div class="step-conn"></div></div><div class="step-content"><h4>Twitter / X</h4><ul><li>Post detailed threads explaining the raffle, showing the property, addressing concerns publicly</li><li>Use hashtags: #NigeriaRealEstate #HouseRaffle #WinAHouse #[YourCity]Property</li><li>Engage with Nigerian real estate and investment communities</li><li>Sponsor posts from creators with engaged audiences in real estate and finance</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">5</div><div class="step-conn"></div></div><div class="step-content"><h4>YouTube</h4><ul><li>Upload a full 10-minute professional property tour video</li><li>Upload a "How the Raffle Works" trust video &#8212; cover the legal setup, escrow, and draw process step by step</li><li>Run YouTube pre-roll ads targeting Nigerian viewers interested in real estate and investment</li><li>Partner with Nigerian real estate YouTubers for sponsored content or collaboration</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">6</div><div class="step-conn"></div></div><div class="step-content"><h4>Influencer Partnerships</h4><ul><li>Target Nigerian influencers in real estate, personal finance, investment, lifestyle, and entertainment &#8212; 50K to 2M followers</li><li>Offer commission: &#8358;200&#8211;&#8358;500 per verified ticket sold through their unique referral link</li><li>Or negotiate flat fees for dedicated posts &#8212; research current Nigerian influencer rates</li><li>Micro-influencers (10K&#8211;100K) in niche real estate communities often convert better than celebrities</li><li>Give each influencer: trackable link, content brief, key talking points, property photos and clips, and your Property Information PDF</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">7</div><div class="step-conn"></div></div><div class="step-content"><h4>Referral Programme &#8212; Your Most Powerful Growth Engine</h4><ul><li>Every ticket buyer automatically receives a unique referral link</li><li>For every 5 paid tickets sold through their link, they earn 1 free ticket</li><li>Or offer cash: &#8358;300 per referred ticket sold, paid after the draw completes</li><li>Publish a public referral leaderboard &#8212; top referrers get recognition and bonus prizes</li><li>Track via unique shortened URLs (Bitly, Rebrandly) or buyer-tied promo codes</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">8</div><div class="step-conn"></div></div><div class="step-content"><h4>Diaspora Marketing (Often Overlooked, High Value)</h4><ul><li>Nigerians in the UK, US, Canada, and Europe actively invest in Nigerian real estate</li><li>Target them on Facebook with diaspora interest targeting ("Nigerian in UK", "Nigerian community abroad")</li><li>Post in Nigerian diaspora Facebook groups and WhatsApp communities</li><li>A &#8358;2,500 ticket is approximately &#163;1.50 or $2 USD &#8212; an extremely low barrier for diaspora buyers</li><li>Ensure your payment gateway accepts international cards &#8212; both Paystack and Flutterwave do</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">9</div><div class="step-conn"></div></div><div class="step-content"><h4>Offline Marketing</h4><ul><li>Print flyers and distribute at markets, banks, churches, mosques, offices, and motor parks</li><li>Erect a banner or billboard at the property itself: "Win this house &#8212; enter at [your website]"</li><li>Radio advertising &#8212; highly effective for reaching older demographics with purchasing power. Book morning and evening drive-time spots on local and national stations</li><li>Attend real estate exhibitions, investment summits, and community events to promote in person</li><li>Partner with estate agents to promote to their client lists in exchange for a referral fee per ticket sold</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">10</div><div class="step-conn"></div></div><div class="step-content"><h4>Press &amp; Media Coverage</h4><ul><li>Write and distribute a press release to: Punch, Vanguard, Guardian, BusinessDay, Nairametrics, TechCabal</li><li>Pitch real estate journalists and bloggers for editorial coverage &#8212; "Nigerian sells house via raffle for &#8358;2,500" is inherently newsworthy</li><li>Consider hiring a PR agency or freelance PR consultant for media outreach</li><li>Apply to appear on NTA, Channels TV, or AIT real estate and investment programmes as a guest</li></ul></div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- TRUST -->
+<div class="ph"><span class="phn">Phase 05 &#8212; Trust Engineering</span><div class="phl"></div></div>
+<section>
+  <h2>Building Buyer Trust (Non-Negotiable)</h2>
+  <p style="margin-bottom:24px;color:var(--muted)">The biggest obstacle in this raffle is overcoming healthy Nigerian skepticism. Scams are rampant. You must prove legitimacy proactively and continuously &#8212; not just once at launch.</p>
+  <div class="g2">
+    <div class="card card-gold"><h3><span class="icon">&#10003;</span>Trust Signals &#8212; Implement Every One</h3><ul class="cl"><li>Display your CAC registration number on your website and all marketing</li><li>Name and photo of the property lawyer overseeing the process, publicly stated</li><li>Named escrow arrangement with a verifiable institution</li><li>Published independent property valuation report, or available on request</li><li>Weekly live video tours of the property via Instagram/Facebook Live</li><li>Physical company address or office, publicly listed</li><li>Apply for verified/blue tick status on relevant platforms</li><li>Dedicated customer support phone number and email &#8212; respond within 2 hours</li><li>Real-time public ticket counter on your website</li><li>Video testimonials from early ticket buyers</li><li>Public written statement from your named lawyer confirming legality</li><li>Prominently state "All funds held in escrow at [Bank Name]" in all marketing</li></ul></div>
+    <div class="card"><h3><span class="icon">&#128247;</span>Ongoing Transparency Actions</h3><ul class="cl"><li>Post weekly "progress update" videos &#8212; tickets sold, questions answered live</li><li>Go live at the property regularly &#8212; show it is real, accessible, and yours</li><li>Never delete skeptical comments &#8212; answer them professionally and publicly</li><li>Run a mid-campaign mini draw &#8212; award secondary prizes (phones, laptops) via live video to demonstrate your draw process works and that you actually pay winners</li><li>Publish full Terms and Conditions before selling any tickets</li><li>Create a dedicated FAQ video answering: "Is this a scam?", "What if all tickets don't sell?", "How exactly does the draw work?", "Can I see the title document?"</li><li>Show your face consistently &#8212; anonymous raffles raise far more suspicion</li></ul></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- TIMELINE -->
+<div class="ph"><span class="phn">Phase 06 &#8212; Execution Timeline</span><div class="phl"></div></div>
+<section>
+  <h2>8-Week Campaign Roadmap</h2>
+  <div class="tw"><table>
+    <tr><th>Period</th><th>Phase</th><th>Key Activities</th><th>Ticket Target</th></tr>
+    <tr><td><strong style="color:var(--gold)">Weeks -3 to -1</strong></td><td>Pre-launch</td><td>Complete all legal steps, CAC registration, property docs, website built and tested, payment gateways live, influencers briefed, press release written</td><td>0 &#8212; nothing sold yet</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 1</strong></td><td>Launch</td><td>Coordinated launch across all platforms, influencer posts live simultaneously, press release distributed, WhatsApp broadcast to personal network, ads activated</td><td>2,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 2</strong></td><td>Momentum</td><td>Daily content, first property live tour, public Q&amp;A session, referral programme activated, radio ads begin, offline flyer distribution starts</td><td>6,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 3</strong></td><td>Growth</td><td>Second wave of influencer posts, mini-prize live draw (phones/laptops) to build trust, media coverage follow-up, property agent partnerships activated</td><td>10,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 4</strong></td><td>Mid-Campaign Push</td><td>Announce "10,000 tickets sold!" milestone, retargeting ads for non-buyers, bundle discount promotion, first referral leaderboard published</td><td>14,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 5</strong></td><td>Expansion</td><td>Diaspora marketing campaign launched, new influencer partnerships activated, referral leaderboard updated, second wave of radio advertising</td><td>18,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 6</strong></td><td>Final Third</td><td>Announce final two weeks of sales, "only X,000 tickets left" urgency messaging, increase ad spend, final press push, draw date officially announced</td><td>21,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 7</strong></td><td>Countdown</td><td>Daily countdown posts, FOMO content, last-chance bundle offers, referral programme final push, draw logistics finalised</td><td>24,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 8</strong></td><td>Draw Week</td><td>Final ticket sales close, announce draw date/time/venue/live stream link, build maximum anticipation, prepare draw day logistics</td><td>25,000</td></tr>
+  </table></div>
+</section>
+<div class="div"></div>
+
+<!-- DRAW DAY -->
+<div class="ph"><span class="phn">Phase 07 &#8212; Draw Day</span><div class="phl"></div></div>
+<section>
+  <h2>Conducting the Draw &#8212; Step by Step</h2>
+  <div class="alert aw"><strong>&#9888; The draw is your most legally and reputationally sensitive moment</strong>Execute it with total transparency, independent witnesses, and professional video documentation. Any perception of manipulation will destroy trust and expose you to legal action.</div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">1</div><div class="step-conn"></div></div><div class="step-content"><h4>Choose Your Draw Method &#8212; Use Both</h4><ul><li><strong>Digital Random Number Generator:</strong> Use Random.org &#8212; publicly verifiable and internationally trusted. Record the entire screen during the draw. The timestamped result is your primary record.</li><li><strong>Physical Draw:</strong> Print all ticket numbers, seal in a drum or box, and have an independent person (notary public, lawyer, or respected community figure) draw a ticket on camera in front of live audience.</li></ul><p style="margin-top:8px;color:var(--muted);font-size:13px">Using both methods is the most credible approach. Digital RNG confirms, physical draw validates &#8212; hardest to dispute.</p></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">2</div><div class="step-conn"></div></div><div class="step-content"><h4>Draw Day Logistics</h4><ul><li>Secure a venue &#8212; the property itself is the most credible option; a hotel event room is the alternative</li><li>Invite: your property lawyer, a notary public or commissioner for oaths, a bank representative from your escrow institution, and at least 2 independent community witnesses</li><li>Hire a professional video crew to record the event start to finish</li><li>Set up simultaneous live streams on Facebook, YouTube, and Instagram &#8212; publicise the link 48 hours in advance</li><li>Hire a professional MC to explain each step of the draw process clearly on camera</li><li>Display the full list of issued ticket numbers on a screen for public verification</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">3</div><div class="step-conn"></div></div><div class="step-content"><h4>After the Draw &#8212; Winner Verification</h4><ul><li>Announce the winning ticket number live on camera and all active streams</li><li>Contact the winner immediately via phone call, WhatsApp, email, and SMS simultaneously</li><li>Give the winner 48&#8211;72 hours to respond and come forward &#8212; state this in T&amp;Cs and announce it at the draw</li><li>Winner must provide: valid government-issued ID, BVN for banking verification, and proof of ticket purchase</li><li>Your lawyer verifies identity and initiates the property transfer process</li><li>If winner cannot be reached within the stated period, proceed to the next drawn ticket &#8212; this must be written into T&amp;Cs and announced</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">4</div><div class="step-conn"></div></div><div class="step-content"><h4>Property Transfer to Winner</h4><ul><li>Your lawyer prepares a Deed of Assignment transferring the property to the winner</li><li>Both parties sign the deed before a notary public</li><li>File for Governor's Consent at the relevant State Land Bureau if required in your state</li><li>Hand over all original title documents, keys, survey plan, and a formal handover letter</li><li>Document the entire handover on video and publish it as your final campaign post &#8212; this becomes powerful evidence and marketing for any future ventures</li><li>Full title processing typically takes 2&#8211;8 weeks after deed signing depending on the state</li></ul></div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">5</div><div class="step-conn"></div></div><div class="step-content"><h4>Fund Release and Post-Draw Settlement</h4><ul><li>Upon confirmed draw completion and winner verification, escrow agent releases all held funds to your corporate account</li><li>Deduct all agreed costs: platform commissions, marketing spend, legal fees, operational costs</li><li>Pay all referral commissions within 7 business days</li><li>File appropriate tax returns with FIRS (Federal Inland Revenue Service) on your proceeds</li><li>Post a public thank-you announcement to all 25,000 ticket buyers &#8212; this goodwill is invaluable for future campaigns</li></ul></div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- FINANCIALS -->
+<div class="ph"><span class="phn">Phase 08 &#8212; Financial Projections</span><div class="phl"></div></div>
+<section>
+  <h2>Budget &amp; Revenue Breakdown</h2>
+  <div class="g2">
+    <div>
+      <p style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Revenue Scenarios</p>
+      <div class="tw"><table>
+        <tr><th>Scenario</th><th>Tickets Sold</th><th>Gross Revenue</th></tr>
+        <tr><td>Minimum Viable</td><td>20,000</td><td style="color:var(--gold)">&#8358;50,000,000</td></tr>
+        <tr><td>Target</td><td>25,000</td><td style="color:var(--gold)">&#8358;62,500,000</td></tr>
+        <tr><td>Stretch</td><td>30,000</td><td style="color:var(--gold)">&#8358;75,000,000</td></tr>
+      </table></div>
+    </div>
+    <div>
+      <p style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Cost Estimate (Target Scenario)</p>
+      <div class="tw"><table>
+        <tr><th>Cost Item</th><th>Est. Cost</th></tr>
+        <tr><td>Legal fees (lawyer + CAC + notary + title transfer)</td><td>&#8358;500,000</td></tr>
+        <tr><td>Website development</td><td>&#8358;150,000</td></tr>
+        <tr><td>Professional property photography + video</td><td>&#8358;200,000</td></tr>
+        <tr><td>NIESV property valuation report</td><td>&#8358;100,000</td></tr>
+        <tr><td>Payment gateway fees (~2% of gross)</td><td>&#8358;1,250,000</td></tr>
+        <tr><td>Social media ads &#8212; 8 weeks</td><td>&#8358;1,600,000</td></tr>
+        <tr><td>Influencer fees (flat + commission)</td><td>&#8358;800,000</td></tr>
+        <tr><td>Referral commissions (est. 20% participation)</td><td>&#8358;1,500,000</td></tr>
+        <tr><td>Radio, print, and offline marketing</td><td>&#8358;500,000</td></tr>
+        <tr><td>Draw day event + professional video crew</td><td>&#8358;300,000</td></tr>
+        <tr><td>SMS and email communication tools</td><td>&#8358;100,000</td></tr>
+        <tr><td>Contingency buffer</td><td>&#8358;500,000</td></tr>
+      </table>
+      <div class="bt"><span>Total Estimated Costs</span><span style="color:var(--gold)">~&#8358;7,500,000</span></div>
+      <div class="bt" style="margin-top:8px;border-color:var(--success);background:rgba(82,201,122,.07)"><span>Estimated Net Proceeds</span><span style="color:var(--success)">~&#8358;55,000,000+</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- RISK -->
+<div class="ph"><span class="phn">Phase 09 &#8212; Risk Management</span><div class="phl"></div></div>
+<section>
+  <h2>Risk Mitigation Plan</h2>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th>Likelihood</th><th>Mitigation</th></tr>
+    <tr><td><strong>Insufficient tickets sold</strong></td><td><span class="tag tg">Medium</span></td><td>State in T&amp;Cs: minimum 20,000 tickets must sell or all buyers receive full refunds. Escrow holds funds until this threshold is confirmed. This also creates urgency &#8212; buyers know the raffle only proceeds if enough people join.</td></tr>
+    <tr><td><strong>Fraud allegations and trust issues</strong></td><td><span class="tag tg">Medium</span></td><td>Pre-empt with escrow, named lawyer, live draw, and full public transparency from day one. Never delete skeptical comments &#8212; answer them professionally and visibly.</td></tr>
+    <tr><td><strong>Payment gateway account frozen</strong></td><td><span class="tag tb">Low</span></td><td>Operate two gateways simultaneously (Paystack + Flutterwave). Keep direct bank transfer as backup. Have CAC registration documents ready to send to gateway compliance teams within the hour.</td></tr>
+    <tr><td><strong>Winner dispute or draw contest</strong></td><td><span class="tag tb">Low</span></td><td>Full video evidence of draw. RNG screenshot with timestamp. Independent witnesses and lawyer present throughout. All buyers agreed to T&amp;Cs at point of purchase via checkout tick-box.</td></tr>
+    <tr><td><strong>Social media account restricted or banned</strong></td><td><span class="tag tg">Medium</span></td><td>Never use the word "lottery" &#8212; always say "competition" or "raffle." Avoid "guaranteed winner" language. Maintain accounts across all major platforms so restriction of one does not halt the campaign.</td></tr>
+    <tr><td><strong>Property title issue discovered late</strong></td><td><span class="tag tb">Low</span></td><td>Conduct thorough legal due diligence in Phase 1 before any marketing or ticket sales begin. Resolve all encumbrances before launch. Do not skip or rush this step.</td></tr>
+    <tr><td><strong>Tax liability on proceeds</strong></td><td><span class="tag tg">Medium</span></td><td>Consult a tax advisor before launch. Capital gains tax and/or income tax may apply. Budget for this separately from net proceeds. File proactively with FIRS to avoid penalties.</td></tr>
+    <tr><td><strong>Winner unreachable after draw</strong></td><td><span class="tag tb">Low</span></td><td>State in T&amp;Cs: winner must respond within 7 days or next drawn ticket is selected. Draw 3 backup winner tickets on draw day and keep them sealed until needed.</td></tr>
+  </table></div>
+</section>
+<div class="div"></div>
+
+<!-- CHECKLIST -->
+<div class="ph"><span class="phn">Master Checklist</span><div class="phl"></div></div>
+<section>
+  <h2>Pre-Launch Master Checklist</h2>
+  <p style="margin-bottom:24px;color:var(--muted)">Do not sell a single ticket until every item below is completed. Print this and work through it systematically.</p>
+  <div class="g2">
+    <div class="card"><h3><span class="icon">&#9878;</span>Legal &amp; Compliance</h3><ul class="cl"><li>Property lawyer hired and briefed</li><li>Property title verified &#8212; no encumbrances confirmed</li><li>CAC business registration completed</li><li>Corporate bank account opened</li><li>Raffle structured as "competition" not "lottery"</li><li>Full Terms and Conditions drafted and reviewed by lawyer</li><li>Winner Transfer Agreement prepared and ready</li><li>Escrow agreement signed with named institution</li><li>Independent NIESV property valuation obtained</li><li>Tax consultation completed &#8212; liability estimated</li></ul></div>
+    <div class="card"><h3><span class="icon">&#128187;</span>Technical Infrastructure</h3><ul class="cl"><li>Website or landing page live, mobile-tested, and fast-loading</li><li>Paystack account KYC verified and payment link live</li><li>Flutterwave account KYC verified and payment link live</li><li>Ticket numbering and assignment system tested end-to-end</li><li>Email confirmation automation tested with real test payments</li><li>WhatsApp Business account active with business details complete</li><li>SMS provider account funded and tested</li><li>Customer support email and phone number operational</li><li>All social media accounts created, branded, and cross-linked</li><li>Property Information PDF finalised and download link live</li></ul></div>
+    <div class="card"><h3><span class="icon">&#128247;</span>Content &amp; Marketing</h3><ul class="cl"><li>Professional property photography completed and edited</li><li>10-minute property walkthrough video filmed and edited</li><li>60&#8211;90 second social media teaser video finalised</li><li>Launch post content written and scheduled for all platforms</li><li>8-week content calendar created and tasks assigned</li><li>Influencer agreements signed and content briefs delivered</li><li>Facebook/Instagram ad account funded and creatives approved</li><li>Referral programme configured and all tracking links tested</li><li>Press release written and media distribution list ready</li><li>Radio ad scripts written and airtime slots booked</li></ul></div>
+    <div class="card"><h3><span class="icon">&#128197;</span>Draw Preparation</h3><ul class="cl"><li>Draw date, time, and venue confirmed and publicly announced</li><li>Draw method decided &#8212; RNG + physical backup confirmed</li><li>Independent witnesses identified and formally invited</li><li>Professional video crew booked for draw day</li><li>Live stream setup tested on all platforms</li><li>MC booked and briefed on full draw day script</li><li>Winner contact and verification process documented</li><li>Post-draw property transfer timeline agreed with lawyer in writing</li><li>Escrow fund release conditions agreed and signed</li><li>3 backup winning tickets to be drawn and sealed on draw day</li></ul></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<section style="padding-bottom:60px">
+  <div class="card card-gold"><h3><span class="icon">&#128172;</span>The One Thing That Will Make or Break This Campaign</h3><p style="font-size:14.5px;line-height:1.9">In Nigeria's current environment, <strong style="color:var(--cream)">trust is your actual product</strong> &#8212; not the house. Nigerians have seen too many online scams to hand over &#8358;2,500 without being convinced you are legitimate. Every single trust signal in this guide is non-optional.<br><br>The escrow, the named lawyer, the live draw, the transparent daily communication &#8212; these are not extras. They are the foundation. Without them, your marketing spend will be wasted on skeptics who will not convert regardless of how good the property is.<br><br>Launch carefully and credibly. Let your first 500 buyers become vocal public advocates. Respond to every comment. Show your face. Go live at the property. Be human, transparent, and consistent. A raffle that <em>feels</em> legitimate because it <em>is</em> legitimate will sell itself.</p></div>
+</section>
+
+<div class="footer">House Raffle Master Plan &nbsp;&#183;&nbsp; Confidential Working Document &nbsp;&#183;&nbsp; &#8358;2,500 Per Ticket &nbsp;&#183;&nbsp; Target: 25,000 Tickets &nbsp;&#183;&nbsp; Gross: &#8358;62.5M &nbsp;&#183;&nbsp; Duration: 8 Weeks</div>
+</body>
+</html>

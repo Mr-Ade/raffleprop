@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>House Raffle Master Plan — Regulation-Compliant Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#C9A84C;--dark:#0D0D0D;--dark2:#141414;--dark3:#1C1C1C;--dark4:#242424;--cream:#F5F0E8;--muted:#888;--text:#D8D0C0;--danger:#E05252;--success:#52C97A;--blue:#4A90D9}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--dark);color:var(--text);font-family:'Outfit',sans-serif;font-weight:300;line-height:1.7;font-size:15px}
+.hero{background:linear-gradient(160deg,#0D0D0D 0%,#1a1408 50%,#0D0D0D 100%);border-bottom:1px solid rgba(201,168,76,.2);padding:80px 60px 70px;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;background:radial-gradient(circle,rgba(201,168,76,.08) 0%,transparent 70%);pointer-events:none}
+.htag{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);border:1px solid rgba(201,168,76,.3);padding:6px 16px;margin-bottom:32px}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(38px,5vw,64px);font-weight:900;line-height:1.1;color:var(--cream);max-width:700px;margin-bottom:24px}
+.hero h1 span{color:var(--gold)}
+.hero-sub{font-size:16px;color:var(--muted);max-width:560px;margin-bottom:48px}
+.hero-stats{display:flex;gap:48px;flex-wrap:wrap}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat-val{font-family:'Playfair Display',serif;font-size:32px;font-weight:700;color:var(--gold)}
+.stat-label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)}
+.ph{display:flex;align-items:center;gap:20px;padding:60px 60px 0;margin-bottom:8px}
+.phn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;color:var(--gold);text-transform:uppercase;white-space:nowrap}
+.phl{flex:1;height:1px;background:linear-gradient(to right,rgba(201,168,76,.4),transparent)}
+section{padding:0 60px 20px}
+section h2{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;color:var(--cream);margin-bottom:32px;padding-top:12px}
+.card{background:var(--dark3);border:1px solid rgba(255,255,255,.06);border-radius:2px;padding:28px 32px;margin-bottom:16px}
+.card-gold{border-color:rgba(201,168,76,.25);background:linear-gradient(135deg,rgba(201,168,76,.05) 0%,var(--dark3) 100%)}
+.card-blue{border-color:rgba(74,144,217,.3);background:linear-gradient(135deg,rgba(74,144,217,.05) 0%,var(--dark3) 100%)}
+.card h3{font-family:'Outfit',sans-serif;font-weight:600;font-size:16px;color:var(--cream);margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.icon{width:28px;height:28px;background:rgba(201,168,76,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.steps{display:flex;flex-direction:column}
+.step{display:grid;grid-template-columns:48px 1fr;gap:0 20px}
+.step-left{display:flex;flex-direction:column;align-items:center}
+.step-dot{width:36px;height:36px;background:var(--dark4);border:2px solid var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);flex-shrink:0}
+.step-conn{width:1px;flex:1;background:rgba(201,168,76,.2);margin:4px 0;min-height:24px}
+.step-content{padding:6px 0 32px}
+.step-content h4{font-weight:600;font-size:15px;color:var(--cream);margin-bottom:8px}
+.step-content p,.step-content li{color:var(--text);font-size:14px;line-height:1.75}
+.step-content ul{padding-left:16px;margin-top:6px}
+.step-content li{margin-bottom:4px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.tw{overflow-x:auto;margin-bottom:16px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{background:var(--dark4);color:var(--gold);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;padding:12px 16px;text-align:left;font-weight:400}
+td{padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.04);color:var(--text);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.alert{padding:16px 20px;border-left:3px solid;margin-bottom:16px;font-size:14px}
+.aw{border-color:#E0A652;background:rgba(224,166,82,.07);color:#D8B87A}
+.ad{border-color:var(--danger);background:rgba(224,82,82,.07);color:#E07A7A}
+.as{border-color:var(--success);background:rgba(82,201,122,.07);color:#7AE09A}
+.ab{border-color:var(--blue);background:rgba(74,144,217,.07);color:#7AB8E0}
+.alert strong{display:block;margin-bottom:4px}
+.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;padding:3px 10px;border-radius:2px;margin-right:6px}
+.tg{background:rgba(201,168,76,.15);color:var(--gold)}
+.tr{background:rgba(224,82,82,.15);color:#E07A7A}
+.ts{background:rgba(82,201,122,.15);color:#7AE09A}
+.tb{background:rgba(82,152,224,.15);color:#7AB0E0}
+.div{height:1px;background:linear-gradient(to right,transparent,rgba(201,168,76,.15),transparent);margin:48px 60px}
+.bt{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.3);margin-top:4px;font-family:'Playfair Display',serif;font-size:18px;color:var(--cream)}
+.cl{list-style:none}
+.cl li{padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04);display:flex;gap:12px;font-size:13.5px;align-items:flex-start}
+.cl li::before{content:'&#9633;';color:var(--gold);flex-shrink:0;font-size:14px;margin-top:1px}
+.law-ref{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1px;color:var(--blue);background:rgba(74,144,217,.08);border:1px solid rgba(74,144,217,.2);padding:2px 8px;border-radius:2px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.footer{margin-top:80px;padding:40px 60px;border-top:1px solid rgba(255,255,255,.06);background:var(--dark2);font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);letter-spacing:1px;text-align:center}
+.reg-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(74,144,217,.1);border:1px solid rgba(74,144,217,.25);padding:4px 12px;border-radius:2px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:1.5px;color:var(--blue);text-transform:uppercase;margin-bottom:8px}
+@media(max-width:700px){.hero,section,.ph{padding-left:24px;padding-right:24px}.div{margin-left:24px;margin-right:24px}.g2{grid-template-columns:1fr}.hero-stats{gap:28px}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div style="margin-bottom:12px">
+    <span class="reg-badge">&#9679; FCCPC Compliant</span>
+    <span class="reg-badge">&#9679; LSLGA Compliant</span>
+    <span class="reg-badge">&#9679; FCCPA 2018 Aligned</span>
+  </div>
+  <div class="htag">House Raffle Master Plan &#8212; v3.0 Regulation-Compliant + Calculator Edition</div>
+  <h1>Sell Your House.<br>Raise <span>&#8358;50 Million+</span><br>Via Raffle.</h1>
+  <p class="hero-sub">A complete, regulation-compliant operational guide &#8212; built against the FCCPA 2018, FCCPC Sales Promotion Guidelines, and Lagos State Lotteries &amp; Gaming Authority requirements.</p>
+  <div class="hero-stats">
+    <div class="stat"><span class="stat-val">&#8358;2,500</span><span class="stat-label">Recommended Ticket Price</span></div>
+    <div class="stat"><span class="stat-val">25,000</span><span class="stat-label">Tickets to Sell</span></div>
+    <div class="stat"><span class="stat-val">&#8358;62.5M</span><span class="stat-label">Gross Revenue Target</span></div>
+    <div class="stat"><span class="stat-val">8 Weeks</span><span class="stat-label">Campaign Duration</span></div>
+  </div>
+</div>
+
+<!-- REGULATORY OVERVIEW -->
+<div class="ph"><span class="phn">Regulatory Overview</span><div class="phl"></div></div>
+<section>
+  <h2>The Three-Layer Legal Framework</h2>
+  <div class="alert ad">
+    <strong>&#128680; This must be read before anything else</strong>
+    Running this business without approvals in place before any public advertising &#8212; including social media teasers, influencer briefings, or website launches &#8212; is a criminal offence under Nigerian law. The FCCPC can impose fines of &#8358;10,000,000 plus the full assessed promotion fee for non-registration. The LSLGA adds up to &#8358;1,000,000 or 2 years imprisonment. Do not post anything publicly until all approvals are confirmed in writing.
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px">
+    <div class="card card-blue">
+      <h3><span class="icon">&#9878;</span>Layer 1 &#8212; FCCPC (Federal)</h3>
+      <p style="font-size:13.5px">The Federal Competition and Consumer Protection Commission governs all sales promotions nationwide under the FCCPA 2018 and the Sales Promotion Regulations 2005. This is the supreme authority. No campaign can run without their written approval.</p>
+      <p style="margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">Apply &#8805; 21 days before any advertising begins</p>
+    </div>
+    <div class="card card-blue">
+      <h3><span class="icon">&#127968;</span>Layer 2 &#8212; LSLGA (Lagos State)</h3>
+      <p style="font-size:13.5px">If your property is in Lagos or your primary market is Lagos, the Lagos State Lotteries &amp; Gaming Authority requires a separate licence. The LSLGA and FCCPC are not substitutes &#8212; you need both simultaneously.</p>
+      <p style="margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">Licence fee: &#8358;500,000 + &#8358;50,000 application</p>
+    </div>
+    <div class="card card-blue">
+      <h3><span class="icon">&#128220;</span>Layer 3 &#8212; FCCPA 2018 (Conduct)</h3>
+      <p style="font-size:13.5px">Beyond approvals, the Federal Competition and Consumer Protection Act 2018 directly regulates every representation you make, every term in your ticket purchase contract, and how you treat every buyer throughout the campaign.</p>
+      <p style="margin-top:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--blue)">Applies continuously &#8212; not just at application stage</p>
+    </div>
+  </div>
+  <div class="alert aw">
+    <strong>&#9888; The Good Causes Fund &#8212; Your Most Critical Financial Question</strong>
+    The LSLGA law requires that a portion of funds generated from promotions in Lagos be allocated to state causes: 20% infrastructure, 20% education, 20% environment, 20% social/health. Before setting any pricing or financial targets, obtain a formal written legal opinion on whether this applies to your gross ticket revenue, net revenue, or net profit. This question must be resolved before a single ticket is priced. If it applies to gross revenue on a &#8358;62.5M campaign, the financial model changes fundamentally.
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PRICING -->
+<div class="ph"><span class="phn">Pricing Strategy</span><div class="phl"></div></div>
+<section>
+  <h2>Ticket Pricing &#8212; With Regulatory Costs Factored In</h2>
+  <div class="alert ab">
+    <strong>&#128203; FCCPC Monitoring Fee Structure</strong>
+    Your FCCPC promotion fee is calculated on the total value of the prize (the property). For a &#8358;50M property: application fee &#8358;150,000 + monitoring fee of 5.2% = &#8358;2,600,000 + &#8358;25,000 per draw attendance. Total per campaign: approximately &#8358;2,775,000. For a &#8358;100M property the rate drops to 4.5%. These fees are a mandatory operating cost per campaign and must be built into your financial model before setting ticket prices.
+  </div>
+  <div class="tw"><table>
+    <tr><th>Ticket Price</th><th>Tickets for &#8358;62.5M</th><th>Less Reg. Costs (~&#8358;10.5M total)</th><th>Net to Owner</th><th>Verdict</th></tr>
+    <tr><td>&#8358;1,000</td><td>62,500</td><td>&#8358;52,000,000</td><td>&#8358;52,000,000</td><td><span class="tag tr">Too many tickets &#8212; unfeasible</span></td></tr>
+    <tr><td>&#8358;2,500</td><td>25,000</td><td>Deduct ~&#8358;10.5M</td><td><strong style="color:var(--gold)">&#8358;52,000,000+</strong></td><td><span class="tag ts">Best Choice</span></td></tr>
+    <tr><td>&#8358;5,000</td><td>12,500</td><td>Deduct ~&#8358;10.5M</td><td>&#8358;52,000,000+</td><td><span class="tag tg">Good Alternative</span></td></tr>
+  </table></div>
+  <div class="g2">
+    <div class="card card-gold">
+      <h3><span class="icon">&#127942;</span>Revised Financial Target</h3>
+      <p>Gross: <strong style="color:var(--cream)">&#8358;62.5M</strong> (25,000 &#215; &#8358;2,500)<br>
+      FCCPC fee (~5.2% of prize value): &#8212; &#8358;2,775,000<br>
+      LSLGA licence: &#8212; &#8358;575,000<br>
+      Marketing + Legal + Operations: &#8212; &#8358;7,150,000<br>
+      <strong style="color:var(--success)">Estimated Net: &#8776; &#8358;52,000,000</strong><br>
+      <em style="font-size:12px;color:var(--muted)">Subject to legal opinion on Good Causes Fund</em></p>
+    </div>
+    <div class="card">
+      <h3><span class="icon">&#128161;</span>Bundle Pricing</h3>
+      <p>Drive higher per-buyer revenue:<br><br>
+      1 ticket &#8212; &#8358;2,500<br>
+      5 tickets &#8212; &#8358;10,000<br>
+      10 tickets &#8212; &#8358;18,000<br>
+      20 tickets &#8212; &#8358;32,000<br><br>
+      <span style="font-size:12.5px;color:var(--muted)">All bundle prices must be clearly displayed alongside the individual price before payment. Section 115, FCCPA 2018 requires transparent price display.</span></p>
+    </div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 0: PRE-LEGAL (NEW) -->
+<div class="ph"><span class="phn">Phase 00 &#8212; Before Legal Applications</span><div class="phl"></div></div>
+<section>
+  <h2>Pre-Application Groundwork</h2>
+  <p style="margin-bottom:24px;color:var(--muted)">These steps must be completed before you can even submit regulatory applications. They are the foundation everything else rests on.</p>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">A</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Incorporate a Limited Liability Company with the CAC <span class="law-ref">FCCPC Guidelines &#167;4(a)</span></h4>
+      <p>The FCCPC application form (Form CPC A) requires proof of CAC incorporation as the very first document. A business name registration alone is insufficient for a business of this nature and scale. Register a Limited Liability Company. Use a company name that reflects the platform&#8217;s long-term commercial identity &#8212; this entity will run all future campaigns, so name it accordingly. Cost: &#8358;30,000&#8211;&#8358;100,000. Timeline: 1&#8211;2 weeks. After incorporation, open a dedicated corporate bank account. Never receive ticket payments into a personal account.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">B</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Obtain a Written Legal Opinion on the LSLGA Good Causes Fund <span class="law-ref">LSLGA Guidelines &#167;Good Causes</span></h4>
+      <p>Before setting your financial model, ticket price, or minimum threshold, commission a formal written legal opinion from your property lawyer on this specific question: does the LSLGA Good Causes Fund apply to gross ticket revenue, net revenue after prize cost, or net profit after all costs? This single question determines whether the business model is viable in Lagos. Do not proceed without a written answer on your file.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">C</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Obtain Independent Property Valuation <span class="law-ref">FCCPA 2018 &#167;123(1)(d)</span></h4>
+      <p>Section 123(1)(d) of the FCCPA 2018 prohibits making any warranty or guarantee about goods or services unless based on an adequate and proper test, with the burden of proof on the promoter. Your stated property value in every advertisement is a legal representation. Commission a NIESV-registered estate valuer to produce a formal valuation report before any price is advertised. This report is simultaneously: your legal substantiation, your FCCPC application document, and your most powerful trust signal. Estimated cost: &#8358;50,000&#8211;&#8358;200,000.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">D</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Verify and Clear Property Title <span class="law-ref">FCCPC Guidelines &#167;4(d)</span></h4>
+      <p>The FCCPC requires an undertaking to run a free and transparent promotion, and evidence that the prize item is available and genuine before the promotion commences. Your property lawyer must verify the Certificate of Occupancy or equivalent title document, confirm there are no encumbrances, disputes, mortgages, or liens, and confirm the property is legally available for transfer. Do not submit a regulatory application until a clean title is confirmed in writing by your lawyer. Any undisclosed encumbrance discovered after launch could constitute a false representation under Section 125 of the FCCPA 2018, attracting liability for damages to all buyers.</p>
+    </div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 1: REGULATORY APPROVALS (EXPANDED) -->
+<div class="ph"><span class="phn">Phase 01 &#8212; Regulatory Approvals</span><div class="phl"></div></div>
+<section>
+  <h2>Obtaining All Required Approvals</h2>
+  <div class="alert ad">
+    <strong>&#128680; Critical Sequence &#8212; Apply in This Order</strong>
+    You must have written approval from the FCCPC before any public advertisement, social media activity, influencer briefing, or ticket sale. The promotion legally begins at the moment of first public communication &#8212; not the first ticket sale. A teaser post on Instagram without FCCPC approval is already a violation.
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">01</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Submit FCCPC Application (Form CPC A) &#8212; Minimum 6 Weeks Before Planned Launch <span class="law-ref">FCCPC Guidelines Part 3</span></h4>
+      <p>Submit to the FCCPC at least 21 days before the promotion starts, but budget 6 weeks to allow for their 10 working-day review, any Request for Further Evidence (RFE), and resolution time. The FCCPC offers a 48-hour emergency premium service for an additional &#8358;500,000 &#8212; this should be a last resort, not a plan.</p>
+      <p style="margin-top:8px"><strong style="color:var(--cream)">Documents required with your application:</strong></p>
+      <ul>
+        <li>CAC Certificate of Incorporation (mandatory &#8212; no exceptions)</li>
+        <li>Proof of the property&#8217;s existence and acquisition &#8212; title documents, C of O or equivalent</li>
+        <li>NIESV independent valuation report confirming property value</li>
+        <li>Evidence the property is available for inspection before the promotion commences</li>
+        <li>Detailed description of how the promotion works: ticket price, cap, how winner is selected</li>
+        <li>Sell-in-time (campaign duration &#8212; must not exceed 1 year)</li>
+        <li>Location(s) of the promotion</li>
+        <li>Samples of all proposed advertising materials: social media content, video scripts, flyer designs</li>
+        <li>Undertaking to conduct a free and transparent promotion exercise</li>
+        <li>Draw date(s), draw method, and how the draw will be conducted</li>
+        <li>Eligibility criteria and any age restrictions or exclusions</li>
+        <li>Whether multiple entries are permitted and how many (yes &#8212; your bundle model)</li>
+        <li>Winning odds per ticket (total tickets &#247; 1 winner = stated odds ratio)</li>
+        <li>How winners will be selected, announced, and contacted</li>
+        <li>Closing date for entries</li>
+        <li>Whether winners will be used in post-event publicity (and their consent mechanism)</li>
+        <li>Contact details of your designated company representative</li>
+        <li>Any other regulatory approvals obtained or pending (e.g. LSLGA)</li>
+      </ul>
+      <p style="margin-top:8px;font-size:13px;color:var(--muted)">The FCCPC will conduct an initial review within 3 working days and issue a decision within 7 working days of a complete application. They may issue a Request for Further Evidence &#8212; respond immediately as the clock restarts.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">02</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Pay FCCPC Assessed Fees After Receiving Notice to Pay <span class="law-ref">FCCPC Schedule 3</span></h4>
+      <p>Do not pay fees before receiving the Commission&#8217;s Notice of Decision (NOD) approving your application &#8212; the total promotion fee less the application fee is paid after approval. Fee structure:</p>
+      <div class="tw" style="margin-top:10px"><table>
+        <tr><th>Property Prize Value</th><th>Monitoring Rate</th><th>Application Fee</th><th>Draw Fee</th></tr>
+        <tr><td>&#8358;50M &#8211; &#8358;99.9M</td><td>5.2% of prize value</td><td>&#8358;150,000</td><td>&#8358;25,000/draw</td></tr>
+        <tr><td>&#8358;100M &#8211; &#8358;499.9M</td><td>4.5% of prize value</td><td>&#8358;200,000</td><td>&#8358;25,000/draw</td></tr>
+        <tr><td>Above &#8358;500M</td><td>3.0% of prize value</td><td>&#8358;250,000</td><td>&#8358;25,000/draw</td></tr>
+      </table></div>
+      <p style="color:var(--danger);font-size:13px">Running a promotion without registration: &#8358;10,000,000 + full assessed fee. Starting without approval after registration: &#8358;5,000,000 + full assessed fee. Not including FCCPC approval notice in every advert: &#8358;1,000,000 per instance.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">03</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>FCCPC Approval &#8212; The Notice of Decision (NOD) <span class="law-ref">FCCPC Guidelines Part 5</span></h4>
+      <p>Once you receive the written NOD approving your promotion, it will include: your approval reference number, any conditions attached to the approval, and payment instructions for the total promotion fee. File this NOD safely &#8212; it is your legal authority to operate. Any change to the terms of your promotion after this point requires the FCCPC&#8217;s prior written approval before implementation. If you change ticket prices, extend the campaign, or alter the draw date without approval, this is a violation carrying up to &#8358;5,000,000 in penalties.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">04</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Apply to the LSLGA &#8212; Concurrent with FCCPC Application <span class="law-ref">LSLGA Guidelines &#167;Application</span></h4>
+      <p>If your property is in Lagos or your primary audience is Lagos-based, apply to the Lagos State Lotteries and Gaming Authority simultaneously with your FCCPC application. The LSLGA process requires: 3 copies of competition rules, 3 copies of the prize structure, eligibility conditions, and proposed draw dates and intervals. The Board determines fees from submitted documents.</p>
+      <p style="margin-top:8px"><strong style="color:var(--cream)">LSLGA Fees:</strong></p>
+      <ul>
+        <li>Application fee: &#8358;50,000</li>
+        <li>Licence fee: &#8358;500,000 (per campaign cycle)</li>
+        <li>Lottery levy: &#8358;25,000 per draw interval</li>
+      </ul>
+      <p style="margin-top:8px;font-size:13px;color:var(--muted)">The LSLGA Code of Conduct requires that all competitions give equally favourable chances to all participants. Your ticket system must ensure each ticket has an identical, mathematically equal chance of winning.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">05</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Structure the Competition Correctly &#8212; Not a Lottery <span class="law-ref">LSLGA Guidelines &#167;1 &amp; FCCPC Act</span></h4>
+      <p>Your lawyer must structure the promotion as a <strong>promotional competition</strong>, not a lottery. The mechanism that achieves this is a genuine skill element that forms part of the entry process. This cannot be a decorative checkbox &#8212; it must be a real, documented eligibility condition. The question must be answered correctly as a condition of valid entry (even if trivially easy). Your lawyer must draft this formally and it must appear on every entry form, ticket purchase screen, and in the FCCPC application. Document the skill element explicitly in your T&amp;Cs and your regulatory submissions.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">06</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Embed Escrow Arrangement Before Launch <span class="law-ref">FCCPC Guidelines &#167;4(d) &#8212; Transparency Undertaking</span></h4>
+      <p>Arrange escrow with a named Nigerian bank (GTBank, Zenith Bank, First Bank, or Stanbic IBTC) or a licensed escrow provider before any tickets go on sale. All ticket proceeds must flow into escrow, not your operational account. Funds are released to you only after draw completion and winner verification. This is simultaneously: your legal protection, your buyer protection, and your single most powerful trust signal. Refer to it prominently and specifically in all marketing &#8212; name the bank holding the funds.</p>
+    </div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 2: PROPERTY -->
+<div class="ph"><span class="phn">Phase 02 &#8212; Property &amp; Prize Preparation</span><div class="phl"></div></div>
+<section>
+  <h2>Property Documentation &amp; Presentation</h2>
+  <div class="alert ab">
+    <strong>&#128203; FCCPC Requirement: Prize Must Be Real, Available &amp; Inspectable</strong>
+    The FCCPC application requires evidence of the prize&#8217;s existence, proof it has been acquired, and confirmation it is available for inspection before the promotion commences. For property, this means: confirmed clean title, no encumbrances, and the property must be physically accessible. You must also be able to state in your application where the &#8220;prize is kept&#8221; &#8212; for property this means providing the full address and title reference.
+  </div>
+  <div class="g2">
+    <div class="card"><h3><span class="icon">&#128203;</span>Mandatory Documents</h3><ul class="cl">
+      <li>Certificate of Occupancy or equivalent title &#8212; verified clean by lawyer</li>
+      <li>Deed of Assignment (if applicable)</li>
+      <li>Current stamped survey plan</li>
+      <li>Independent NIESV valuation report &#8212; required for FCCPC application</li>
+      <li>Building plan approval (if applicable)</li>
+      <li>Utility receipts showing active connections</li>
+      <li>Property tax receipts (land use charge or tenement rates)</li>
+      <li>Structural/engineering inspection report if available</li>
+      <li>Written confirmation from lawyer of clean title (no encumbrances)</li>
+    </ul></div>
+    <div class="card"><h3><span class="icon">&#128247;</span>Visual Assets for FCCPC Submission &amp; Marketing</h3><ul class="cl">
+      <li>Professional photography &#8212; required as &#8220;evidence of prize&#8221; in FCCPC application</li>
+      <li>Drone/aerial footage of property and surroundings</li>
+      <li>10-minute walkthrough video tour, professionally edited</li>
+      <li>60&#8211;90 second teaser video &#8212; submitted as sample advertising to FCCPC</li>
+      <li>3D virtual tour or floor plan diagram</li>
+      <li>Location photos &#8212; proximity to roads, markets, amenities</li>
+      <li>Before/after photos if renovations were done</li>
+    </ul></div>
+  </div>
+  <div class="card card-gold"><h3><span class="icon">&#128196;</span>Property Information Pack &#8212; Legal Representation Requirements</h3>
+  <p>Every claim in your Property Information Pack is a legal representation under Section 123 of the FCCPA 2018. Claims must be accurate, substantiated, and not misleading in any material respect. Specifically: the property value stated must match your NIESV valuation report; the title status stated must be confirmed by your lawyer; no claim may be made about the property&#8217;s condition that has not been independently verified. The burden of proof for all representations lies on you as the promoter. Publish the valuation report as a downloadable document &#8212; this simultaneously fulfils your transparency obligation and substantiates your value claims.</p></div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 3: T&Cs -->
+<div class="ph"><span class="phn">Phase 03 &#8212; Legal Documents</span><div class="phl"></div></div>
+<section>
+  <h2>Terms &amp; Conditions &#8212; FCCPA-Compliant Drafting</h2>
+  <div class="alert ab">
+    <strong>&#128203; Sections 127&#8211;129, FCCPA 2018 &#8212; Prohibited Contract Terms</strong>
+    Your T&amp;Cs are a contract with every ticket buyer. The FCCPA 2018 prohibits contract terms that are unfair, unreasonable, or unjust. A term is unlawful if: it is excessively one-sided in your favour; any limitation of your liability was not drawn to the buyer&#8217;s attention conspicuously before purchase; or a buyer was not given adequate opportunity to comprehend the terms before payment. Buried terms or pre-ticked boxes that wave important rights are unenforceable and may constitute violations. Your lawyer must draft the T&amp;Cs and they must be reviewed and approved as part of the FCCPC application.
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">1</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Mandatory T&amp;C Contents <span class="law-ref">FCCPC Guidelines &#167;4 &amp; FCCPA 2018 &#167;114</span></h4>
+      <p>All documents presented to consumers must be in plain language under Section 114 of the FCCPA 2018 &#8212; language that an ordinary consumer with average literacy can understand without undue effort. Your T&amp;Cs must include:</p>
+      <ul>
+        <li>Full company name, CAC registration number, and registered address</li>
+        <li>FCCPC approval reference number and date of approval</li>
+        <li>LSLGA licence number (if applicable)</li>
+        <li>Full property description: address, size, title type, title reference number, NIESV valuation</li>
+        <li>Ticket price, total cap, and bundle pricing structure</li>
+        <li>Sell-in-time: campaign open date, campaign close date (not to exceed 12 months from FCCPC approval)</li>
+        <li>Draw date, time, location, and method &#8212; must match what was submitted to FCCPC</li>
+        <li>Minimum ticket threshold &#8212; and exact refund process if not met</li>
+        <li>Skill question &#8212; stated as a genuine eligibility condition for entry</li>
+        <li>Winning odds per ticket (expressed as a ratio e.g. 1 in 25,000)</li>
+        <li>Escrow bank name and confirmation that funds are held in escrow until draw</li>
+        <li>Winner verification requirements: ID, BVN, NIN, and timeline to respond</li>
+        <li>Property transfer process and timeline after winner verification</li>
+        <li>Refund policy &#8212; conspicuously drawn to buyer&#8217;s attention before payment</li>
+        <li>Tax obligations of the winner &#8212; clearly stated</li>
+        <li>How results will be announced and how winners will be contacted</li>
+        <li>Whether winners may be used in post-event publicity and the opt-out mechanism</li>
+        <li>Dispute resolution process and governing law (Federal Republic of Nigeria)</li>
+        <li>The statement: &#8220;This promotion has been approved by the Federal Competition and Consumer Protection Commission&#8221; &#8212; mandatory in all documents per FCCPC Guidelines</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">2</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>How T&amp;Cs Must Be Presented at Purchase <span class="law-ref">FCCPA 2018 &#167;128</span></h4>
+      <p>Section 128 of the FCCPA 2018 requires that any notice limiting your liability or imposing obligations on the buyer must be drawn to their attention &#8220;in a conspicuous manner and form that is likely to attract the attention of an ordinarily alert consumer.&#8221; Section 128(2) requires that the buyer is given adequate opportunity to receive and comprehend the terms before they are required to pay.</p>
+      <ul>
+        <li>T&amp;Cs must be displayed in full and be readable before the payment button is active &#8212; not a pop-up that disappears</li>
+        <li>The T&amp;C acceptance checkbox must be un-ticked by default &#8212; pre-ticked boxes violate both FCCPA 2018 and NDPR</li>
+        <li>Any limitation of liability clause must appear in bold or otherwise visually prominent &#8212; not buried in small print</li>
+        <li>The refund policy must be specifically highlighted on the purchase screen, not only in the full T&amp;C document</li>
+        <li>The FCCPC approval statement must appear on the purchase screen above the payment button</li>
+        <li>Your system must store the timestamp of T&amp;C acceptance for every transaction as a permanent legal record</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">3</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Any Change to Approved Terms Requires FCCPC Prior Approval <span class="law-ref">FCCPC Guidelines &#167;4(l)</span></h4>
+      <p>Once the FCCPC has approved your promotion, any change to the approved terms &#8212; ticket price, closing date, draw date, prize description, minimum threshold, or any other material term &#8212; requires the FCCPC&#8217;s prior written approval before implementation. Making changes without approval carries a penalty of up to &#8358;5,000,000. Build a formal change-request process into your admin workflow. Your campaign management system must not allow changes to live campaign parameters without an admin confirmation that FCCPC approval has been obtained.</p>
+    </div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 4: PAYMENT & TICKETING -->
+<div class="ph"><span class="phn">Phase 04 &#8212; Payment &amp; Ticketing</span><div class="phl"></div></div>
+<section>
+  <h2>Payment Systems &amp; Transaction Records</h2>
+  <div class="alert ab">
+    <strong>&#128203; Section 118, FCCPA 2018 &#8212; Written Transaction Record Required for Every Purchase</strong>
+    Section 118 of the FCCPA 2018 requires that a written record of every transaction be provided to the consumer. This record must include: your full company name, your registered business address, the date of the transaction, a description of goods/services (ticket number and campaign name), the unit price, quantity, and total price including any applicable taxes. Your ticket confirmation system is a legal document, not just a courtesy. Every email, SMS, and WhatsApp confirmation must contain all these elements.
+  </div>
+  <div class="g2">
+    <div class="card"><h3><span class="icon">&#128179;</span>Payment Gateways &#8212; Minimum Two</h3>
+    <ul style="list-style:none;margin-top:0">
+      <li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)"><strong style="color:var(--cream)">Paystack</strong> &#8212; Primary. Register at paystack.com/ng. Complete business KYC with CAC certificate. Accepts card, bank transfer, USSD. Server-side API integration only.</li>
+      <li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)"><strong style="color:var(--cream)">Flutterwave</strong> &#8212; Secondary/failover. Register at flutterwave.com. Handles international cards for diaspora buyers. Server-side API integration only.</li>
+      <li style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,.04)"><strong style="color:var(--cream)">Direct Bank Transfer</strong> &#8212; Backup. Publish corporate account number. Buyer references their name and phone. Confirm manually or via bank webhook.</li>
+      <li style="padding:8px 0"><strong style="color:var(--cream)">Opay/Moniepoint/Kuda</strong> &#8212; Digital wallets for buyers without traditional bank accounts.</li>
+    </ul>
+    <p style="margin-top:12px;font-size:12.5px;color:var(--muted)">Never store card numbers or CVV codes. All card data is handled exclusively by the payment gateways. You store only gateway transaction references.</p></div>
+    <div class="card"><h3><span class="icon">&#127914;</span>Ticket Numbering &amp; Confirmation</h3>
+    <p style="font-size:13.5px">Every buyer must receive a unique ticket number plus a written confirmation containing all FCCPA Section 118 required fields. Set up three parallel confirmation channels:</p>
+    <ul style="margin-top:8px">
+      <li><strong style="color:var(--cream)">Email:</strong> Automated via Mailchimp or Brevo. Must include: company name, address, date, ticket number(s), campaign name, unit price, quantity, total paid, FCCPC approval reference.</li>
+      <li style="margin-top:6px"><strong style="color:var(--cream)">WhatsApp:</strong> Via WhatsApp Business API (Twilio, Vonage). Shorter summary with ticket number and draw date.</li>
+      <li style="margin-top:6px"><strong style="color:var(--cream)">SMS:</strong> Via Termii or Africa&#8217;s Talking. Ticket number, campaign name, draw date, and FCCPC approval reference.</li>
+    </ul></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 5: MARKETING -->
+<div class="ph"><span class="phn">Phase 05 &#8212; Marketing</span><div class="phl"></div></div>
+<section>
+  <h2>Marketing &#8212; FCCPA-Compliant Advertising</h2>
+  <div class="alert ad">
+    <strong>&#128680; Every Advertisement Must Carry the FCCPC Approval Statement <span class="law-ref">FCCPC Guidelines &#167;4(h) &#8212; &#8358;1,000,000 Penalty</span></strong>
+    All visual and audio advertising, all social media posts, all influencer content, all video content, all printed materials, and all website pages related to the promotion must include the statement: &#8220;This promotion has been approved by the Federal Competition and Consumer Protection Commission.&#8221; Failure to include this statement in any single piece of advertising is a &#8358;1,000,000 fine. Build this into every creative template as a non-removable element before briefing any influencer or publishing any content.
+  </div>
+  <div class="alert ab">
+    <strong>&#128203; Sections 123&#8211;126, FCCPA 2018 &#8212; Advertising Representation Standards</strong>
+    Every claim in your marketing is a legal representation. You cannot: make any claim about the property that is false, misleading, or deceptive in any material respect; use testimonials without written consent from the person giving them; make performance guarantees about the draw that you cannot honour; or claim a property value without substantiation from your NIESV valuation report. The burden of proof lies on you. Your marketing team and all influencers must be briefed on these restrictions in writing before they produce any content.
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">1</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Submit All Advertising Samples to FCCPC Before Publication <span class="law-ref">FCCPC Guidelines &#167;4(b)</span></h4>
+      <p>The FCCPC application requires samples of all proposed advertising materials &#8212; print, electronic, social media, and other media &#8212; before the promotion begins. Do not finalise your launch content until you know what the FCCPC has reviewed and approved. Any advertising material that differs materially from what was submitted requires notification to and approval from the FCCPC before publication.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">2</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Instagram &amp; Facebook <span class="law-ref">FCCPA 2018 &#167;123 &#8212; No False Representations</span></h4>
+      <ul>
+        <li>All posts must include the FCCPC approval statement &#8212; include it in the caption or as a graphic overlay</li>
+        <li>Property value claims must match the NIESV valuation exactly &#8212; do not round up or add aspirational figures</li>
+        <li>Do not use the word &#8220;lottery&#8221; in any post &#8212; always &#8220;competition&#8221; or &#8220;promotional competition&#8221;</li>
+        <li>Do not describe winning as &#8220;guaranteed&#8221; or make any representation that suggests predetermined outcomes</li>
+        <li>Run paid ads targeting Nigerian adults 25&#8211;55. Budget: &#8358;30,000&#8211;&#8358;80,000/week</li>
+        <li>Retargeting ads to website visitors who did not complete purchase</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">3</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>WhatsApp Marketing <span class="law-ref">FCCPA 2018 &#167;124 &#8212; No Pressure Tactics</span></h4>
+      <ul>
+        <li>All WhatsApp messages promoting the competition must include the FCCPC approval reference</li>
+        <li>Section 124 of the FCCPA 2018 prohibits undue influence, pressure, or harassment in marketing. Do not send repeated unsolicited messages to individuals who have not opted in</li>
+        <li>WhatsApp Broadcast Lists must only include opted-in contacts &#8212; NDPR requires explicit opt-in for marketing communications</li>
+        <li>Your WhatsApp Business account must display your company name, CAC number, and physical address</li>
+        <li>Public WhatsApp Community or Channel for updates &#8212; clearly labelled as a promotional competition approved by the FCCPC</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">4</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Influencer Partnerships <span class="law-ref">FCCPA 2018 &#167;125&#8211;126 &#8212; Third-Party Representations</span></h4>
+      <p>Under Section 125(2)(a) of the FCCPA 2018, a person acting on behalf of a supplier cannot falsely represent that they have any sponsorship, approval or affiliation that they do not have. All influencer content about your promotion is a legal representation made on your behalf. You are liable for representations made by influencers promoting your competition.</p>
+      <ul>
+        <li>Provide every influencer with a written content brief stating: exact property value, FCCPC approval statement to include, prohibited words (&#8220;lottery&#8221;, &#8220;guaranteed win&#8221;, exaggerated value claims), and mandatory disclosures</li>
+        <li>All influencer content must include the FCCPC approval statement</li>
+        <li>All influencer content must disclose the commercial relationship (paid partnership)</li>
+        <li>Review all influencer content before it goes live &#8212; you cannot approve and forget; you are responsible for what they publish</li>
+        <li>Keep a copy of all influencer agreements and all approved content on file</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">5</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Referral Programme <span class="law-ref">FCCPA 2018 &#167;123 &#8212; Material Representations</span></h4>
+      <ul>
+        <li>Referral rewards must be clearly stated and exactly honoured &#8212; any promise to reward referrers that is not fulfilled is a breach of Section 123 (misleading representation about the promotion)</li>
+        <li>Referral programme terms must be included in the main T&amp;Cs submitted to the FCCPC &#8212; if you add a referral programme after approval, notify the FCCPC first</li>
+        <li>Cash referral commissions paid after the draw must be documented and paid to the timeline promised</li>
+        <li>Free tickets earned through referral count toward the total ticket cap &#8212; your system must account for this</li>
+        <li>Anti-fraud: self-referral prevention, same-device detection, and payment-verified-only referral crediting</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">6</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Diaspora Marketing</h4>
+      <ul>
+        <li>Facebook/Instagram targeting: Nigerians in UK, US, Canada, EU &#8212; high-value buyers for whom &#8358;2,500 (&#8776; &#163;1.50) is a trivial amount</li>
+        <li>Ensure Paystack and Flutterwave are configured to accept international cards &#8212; both gateways support this</li>
+        <li>Show NGN price prominently. GBP/USD equivalent may be displayed alongside but NGN must be the primary currency displayed (Section 115 FCCPA 2018 &#8212; prices must be expressed in Nigerian currency)</li>
+        <li>Post in Nigerian diaspora Facebook groups and WhatsApp communities</li>
+        <li>All diaspora-targeted advertising must include the FCCPC approval statement</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">7</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>TikTok, YouTube &amp; Press</h4>
+      <ul>
+        <li>All TikTok and YouTube content must carry FCCPC approval statement (text overlay or verbal statement in video)</li>
+        <li>Press release distributed to Punch, Vanguard, Guardian, BusinessDay, Nairametrics &#8212; must state FCCPC approval reference</li>
+        <li>Radio advertising scripts must be submitted to FCCPC if materially different from approved samples</li>
+        <li>Offline flyers and banners must carry FCCPC approval statement and your CAC registration number</li>
+      </ul>
+    </div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 6: TIMELINE -->
+<div class="ph"><span class="phn">Phase 06 &#8212; Campaign Timeline</span><div class="phl"></div></div>
+<section>
+  <h2>Regulation-Compliant 8-Week Campaign Roadmap</h2>
+  <div class="tw"><table>
+    <tr><th>Period</th><th>Phase</th><th>Key Activities</th><th>Regulatory Action</th><th>Ticket Target</th></tr>
+    <tr><td><strong style="color:var(--gold)">Week -6 to -4</strong></td><td>Pre-application</td><td>CAC incorporation, property title clearance, NIESV valuation, Good Causes legal opinion, escrow arrangement, T&amp;Cs drafted, all advertising samples prepared</td><td>None yet &#8212; preparation only. No public communication.</td><td>0</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week -3</strong></td><td>FCCPC &amp; LSLGA Submission</td><td>Submit FCCPC Form CPC A and LSLGA application simultaneously with all required documents and samples</td><td>Applications submitted. Pay application fees. Await FCCPC initial review (3 working days) and decision (7 working days).</td><td>0</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week -2 to -1</strong></td><td>Await Approval</td><td>Respond to any FCCPC Request for Further Evidence immediately. Brief influencers (no public content yet). Finalise website.</td><td>Receive FCCPC Notice of Decision and LSLGA Licence. Pay assessed promotion fee. Receive approval reference numbers.</td><td>0</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 1</strong></td><td>Launch &#8212; Post-Approval Only</td><td>Big coordinated launch. All content carries FCCPC approval statement. Influencer posts live. Press release distributed. Ads activated. WhatsApp broadcast to network.</td><td>FCCPC approval statement mandatory on ALL content from this moment forward.</td><td>2,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 2</strong></td><td>Momentum</td><td>Daily content, first property live tour, Q&amp;A session, referral programme activated, radio ads begin, offline distribution</td><td>Confirm all radio scripts and offline materials carry FCCPC approval statement.</td><td>6,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 3</strong></td><td>Growth</td><td>Second influencer wave, mini-prize draw (phones/laptops) via live video to build trust, media coverage</td><td>If conducting a mini-prize draw, notify FCCPC at least 14 days in advance. This counts as a draw under your approved promotion.</td><td>10,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 4</strong></td><td>Mid-Campaign</td><td>Announce 10,000 sold milestone, retargeting ads, bundle promotions, referral leaderboard</td><td>Any change to bundle pricing or promotional terms requires FCCPC prior approval before announcement.</td><td>14,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 5</strong></td><td>Expansion</td><td>Diaspora marketing, new influencer partnerships, updated referral leaderboard, second radio wave</td><td>All new influencer content reviewed before publication. All new ads include FCCPC statement.</td><td>18,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 6</strong></td><td>Final Third</td><td>Final 2-week announcement, urgency messaging, increase ad spend, final press push</td><td>Send formal draw invitation to FCCPC &#8212; minimum 14 days before draw date. <strong style="color:var(--danger)">This is a hard legal deadline.</strong></td><td>21,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 7</strong></td><td>Countdown</td><td>Daily countdown content, last-chance bundles, referral final push</td><td>Confirm FCCPC has received and acknowledged draw invitation. Confirm LSLGA draw notification if applicable.</td><td>24,000</td></tr>
+    <tr><td><strong style="color:var(--gold)">Week 8</strong></td><td>Draw Week</td><td>Sales close, draw announcement, prepare logistics, live stream setup</td><td>Ticket sales must close on the approved campaign close date &#8212; no extensions without FCCPC prior approval.</td><td>25,000</td></tr>
+  </table></div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 7: DRAW -->
+<div class="ph"><span class="phn">Phase 07 &#8212; Draw Day</span><div class="phl"></div></div>
+<section>
+  <h2>Conducting the Draw &#8212; Full Regulatory Compliance</h2>
+  <div class="alert ad">
+    <strong>&#128680; FCCPC Must Be Notified at Least 14 Days Before Every Draw <span class="law-ref">FCCPC Guidelines Part 8(a) &#8212; &#8358;100,000 Penalty for Late Notice</span></strong>
+    Invitations to the FCCPC to monitor draws must be received not less than 14 days before the scheduled draw. This is a hard legal deadline. Build it into your calendar as a non-negotiable task at the end of Week 6.
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-left"><div class="step-dot">1</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Send Draw Invitation to FCCPC &#8212; 14+ Days in Advance <span class="law-ref">FCCPC Guidelines Part 8(a)</span></h4>
+      <p>Send a formal written invitation to the FCCPC stating: draw date, time, and venue; draw method (RNG + physical); full address; contact person and phone number on the day. Also notify the LSLGA with draw date and interval details. Keep written acknowledgement from both bodies on file. Having FCCPC representation at your draw is simultaneously a legal obligation and your most powerful trust signal &#8212; mention their presence in all draw-day marketing.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">2</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Draw Method &#8212; Use Both Digital and Physical <span class="law-ref">LSLGA &#167;7 &#8212; Equal Chances Required</span></h4>
+      <ul>
+        <li><strong style="color:var(--cream)">Digital RNG:</strong> Use Random.org &#8212; publicly verifiable, internationally trusted. Screen-record the entire session. Screenshot the result with timestamp. This is your primary legal evidence.</li>
+        <li><strong style="color:var(--cream)">Physical Draw:</strong> Print all ticket numbers, seal in a transparent drum, and have an independent witness (notary public, lawyer, or commissioner for oaths) draw a ticket on camera</li>
+        <li>Both methods must produce the same winning number to be valid &#8212; in practice, use RNG to produce the number, then have the physical draw locate that printed number from the drum to confirm it exists</li>
+        <li>The draw must comply with the LSLGA requirement that chances are equally favourable to all participants &#8212; your ticket numbering system must be sequential, non-duplicable, and cover the full range stated</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">3</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Draw Day Logistics</h4>
+      <ul>
+        <li>Venue: the property itself (most credible) or a hotel event room</li>
+        <li>Present: your property lawyer, a notary public or commissioner for oaths, a bank representative from your escrow institution, FCCPC monitor, LSLGA monitor (if Lagos), at least 2 independent community witnesses</li>
+        <li>Professional video crew recording the full event start to finish</li>
+        <li>Simultaneous live streams on Facebook, YouTube, and Instagram &#8212; publicised 48 hours in advance</li>
+        <li>MC to explain each step of the draw process clearly on camera</li>
+        <li>Display the full locked ticket registry on screen for public verification</li>
+        <li>Draw 3 backup winning tickets (2nd and 3rd place) on the day &#8212; seal them and keep in admin records in case primary winner cannot be verified</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">4</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Post-Draw: Submit Winner List to FCCPC Within 3 Days <span class="law-ref">FCCPC Guidelines Part 8(b) &#8212; Hard Deadline</span></h4>
+      <p>Within 3 days of the draw, submit to the FCCPC: the full list of winners (in this case, the 1 winner plus 2 backup winners) with their full names, phone numbers, detailed addresses, and prize details. This is not optional &#8212; it is a mandatory post-draw filing. Keep a copy of your submission on file.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">5</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Winner Verification &amp; Property Transfer</h4>
+      <ul>
+        <li>Contact winner immediately via phone, WhatsApp, email, and SMS simultaneously</li>
+        <li>Winner has 48&#8211;72 hours to respond &#8212; state this in T&amp;Cs and announce publicly at draw</li>
+        <li>Winner submits: government-issued ID, BVN for banking verification, NIN, and proof of ticket purchase</li>
+        <li>Your lawyer prepares the Deed of Assignment transferring property to winner</li>
+        <li>Both parties sign before a notary public</li>
+        <li>File for Governor&#8217;s Consent at State Land Bureau if required</li>
+        <li>Hand over all original title documents, keys, survey plan, and formal handover letter</li>
+        <li>Record and publish the entire handover on video &#8212; this is your most powerful future marketing asset</li>
+      </ul>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">6</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Submit End of Promotion Report Within 21 Days <span class="law-ref">FCCPC Form CPC B &#8212; Mandatory Filing</span></h4>
+      <p>Within 21 days of the promotion&#8217;s completion (the later of: draw date, or winner property transfer completion), file Form CPC B (End of Sales Promotion Report) with the FCCPC. This must include: number of draws conducted, draw dates, how draws were conducted, number of winners, categories of winners, whether all prizes have been redeemed, and contact details for all winners. This filing closes out the campaign from a regulatory perspective. File it on time &#8212; non-compliance attracts sanctions.</p>
+    </div></div>
+    <div class="step"><div class="step-left"><div class="step-dot">7</div><div class="step-conn"></div></div><div class="step-content">
+      <h4>Minimum Threshold Not Met &#8212; Refund Process <span class="law-ref">FCCPA 2018 &#167;123 &#8212; Honoring Representations</span></h4>
+      <p>If you stated in your T&amp;Cs that a full refund will be issued if the minimum threshold is not reached, that promise is a legal representation under Section 123 of the FCCPA 2018 and must be honoured exactly. Failure to issue promised refunds would constitute a false, misleading, or deceptive representation and expose you to liability for damages to all buyers. Your refund system must be able to execute within the timeline stated in the T&amp;Cs.</p>
+      <ul>
+        <li>Paystack refund API: call for each transaction reference</li>
+        <li>Flutterwave refund API: call for each transaction reference</li>
+        <li>Bank transfers: manual refunds from corporate account with documentation</li>
+        <li>Notify every buyer via email, SMS, and WhatsApp on the day refunds are initiated</li>
+        <li>File Form CPC B with the FCCPC noting the promotion did not proceed to draw</li>
+      </ul>
+    </div></div>
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- PHASE 8: FINANCIALS -->
+<div class="ph"><span class="phn">Phase 08 &#8212; Financial Projections</span><div class="phl"></div></div>
+<section>
+  <h2>Regulation-Adjusted Budget &amp; Revenue</h2>
+  <div class="g2">
+    <div>
+      <p style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Revenue Scenarios</p>
+      <div class="tw"><table>
+        <tr><th>Scenario</th><th>Tickets Sold</th><th>Gross Revenue</th></tr>
+        <tr><td>Minimum Viable</td><td>20,000</td><td style="color:var(--gold)">&#8358;50,000,000</td></tr>
+        <tr><td>Target</td><td>25,000</td><td style="color:var(--gold)">&#8358;62,500,000</td></tr>
+        <tr><td>Stretch</td><td>30,000</td><td style="color:var(--gold)">&#8358;75,000,000</td></tr>
+      </table></div>
+    </div>
+    <div>
+      <p style="font-family:'DM Mono',monospace;font-size:11px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px">Cost Breakdown &#8212; Target Scenario (&#8358;50M property)</p>
+      <div class="tw"><table>
+        <tr><th>Cost Item</th><th>Regulatory Basis</th><th>Amount</th></tr>
+        <tr><td>FCCPC application fee</td><td>FCCPC Schedule 3</td><td>&#8358;150,000</td></tr>
+        <tr><td>FCCPC promotion monitoring fee (5.2% &#215; &#8358;50M)</td><td>FCCPC Schedule 3</td><td>&#8358;2,600,000</td></tr>
+        <tr><td>FCCPC draw attendance fee</td><td>FCCPC Schedule 3</td><td>&#8358;25,000</td></tr>
+        <tr><td>LSLGA application fee</td><td>LSLGA Guidelines &#167;3(i)</td><td>&#8358;50,000</td></tr>
+        <tr><td>LSLGA licence fee</td><td>LSLGA Guidelines &#167;3(ii)</td><td>&#8358;500,000</td></tr>
+        <tr><td>LSLGA lottery levy (1 draw)</td><td>LSLGA Guidelines &#167;3(iii)</td><td>&#8358;25,000</td></tr>
+        <tr><td>Legal fees (lawyer + notary + title transfer)</td><td>Compliance requirement</td><td>&#8358;500,000</td></tr>
+        <tr><td>NIESV valuation report</td><td>FCCPC &#167;4(c) + FCCPA &#167;123</td><td>&#8358;100,000</td></tr>
+        <tr><td>Website development</td><td>Operations</td><td>&#8358;150,000</td></tr>
+        <tr><td>Professional property photos + video</td><td>FCCPC &#167;4 &#8212; prize evidence</td><td>&#8358;200,000</td></tr>
+        <tr><td>Payment gateway fees (~2%)</td><td>Operations</td><td>&#8358;1,250,000</td></tr>
+        <tr><td>Social media ads (8 weeks)</td><td>Operations</td><td>&#8358;1,600,000</td></tr>
+        <tr><td>Influencer fees</td><td>Operations</td><td>&#8358;800,000</td></tr>
+        <tr><td>Referral commissions (estimated)</td><td>Operations</td><td>&#8358;1,500,000</td></tr>
+        <tr><td>Radio, print, offline marketing</td><td>Operations</td><td>&#8358;500,000</td></tr>
+        <tr><td>Draw event + video crew</td><td>FCCPC &#167;8 &#8212; monitored draw</td><td>&#8358;300,000</td></tr>
+        <tr><td>SMS/email comms tools</td><td>FCCPA &#167;118 &#8212; transaction records</td><td>&#8358;100,000</td></tr>
+        <tr><td>Tax consultation (FIRS)</td><td>Tax compliance</td><td>&#8358;150,000</td></tr>
+        <tr><td>Contingency</td><td>&#8212;</td><td>&#8358;500,000</td></tr>
+      </table>
+      <div class="bt"><span>Total Estimated Costs</span><span style="color:var(--gold)">~&#8358;10,500,000</span></div>
+      <div class="bt" style="margin-top:8px;border-color:var(--success);background:rgba(82,201,122,.07)"><span>Estimated Net (pre-Good Causes)</span><span style="color:var(--success)">~&#8358;52,000,000</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="alert aw" style="margin-top:16px">
+    <strong>&#9888; Good Causes Fund &#8212; Not Yet Deducted</strong>
+    The LSLGA Good Causes Fund allocation has not been deducted from the net figure above because the applicable basis (gross/net/profit) must first be determined by legal opinion. If applicable to gross revenue, the deduction could be substantial. Resolve this before committing to any financial targets or investor commitments.
+  </div>
+</section>
+<div class="div"></div>
+
+<!-- RISK MANAGEMENT -->
+<div class="ph"><span class="phn">Phase 09 &#8212; Risk Management</span><div class="phl"></div></div>
+<section>
+  <h2>Risk Mitigation Plan &#8212; Regulatory Edition</h2>
+  <div class="tw"><table>
+    <tr><th>Risk</th><th>Level</th><th>Regulatory Basis</th><th>Mitigation</th></tr>
+    <tr><td><strong>Operating without FCCPC approval</strong></td><td><span class="tag tr">Critical</span></td><td>FCCPC Guidelines &#167;10 + Schedule 4</td><td>Submit application 6 weeks before planned launch. Never publish any public communication before written approval is received. &#8358;10M + assessed fee penalty.</td></tr>
+    <tr><td><strong>Failing to include FCCPC approval statement in adverts</strong></td><td><span class="tag tr">Critical</span></td><td>FCCPC Guidelines &#167;4(h)</td><td>Build the statement into every creative template as a mandatory, non-removable element. Brief all influencers in writing. &#8358;1M per instance.</td></tr>
+    <tr><td><strong>Misleading property value claims</strong></td><td><span class="tag tr">Critical</span></td><td>FCCPA 2018 &#167;123&#8211;125</td><td>All value claims must exactly match NIESV valuation report. Publish the report as downloadable evidence. Burden of proof lies on you.</td></tr>
+    <tr><td><strong>Changing campaign terms without FCCPC approval</strong></td><td><span class="tag tg">High</span></td><td>FCCPC Guidelines &#167;4(l)</td><td>No campaign parameter (price, date, terms, draw method) may change after FCCPC approval without their prior written consent. Build admin-level approval gate into workflow. Up to &#8358;5M penalty.</td></tr>
+    <tr><td><strong>Missing the 14-day draw notification deadline</strong></td><td><span class="tag tg">High</span></td><td>FCCPC Guidelines Part 8(a)</td><td>Set a calendar reminder at the end of Week 6 (or 14 days before any draw). Send written invitation to FCCPC and retain their acknowledgement. &#8358;100,000 fine for late notice.</td></tr>
+    <tr><td><strong>Good Causes Fund misinterpretation</strong></td><td><span class="tag tg">High</span></td><td>LSLGA Guidelines &#167;Good Causes</td><td>Obtain formal written legal opinion before any financial planning. Do not launch without clarity on this question.</td></tr>
+    <tr><td><strong>Unfair or ambiguous T&amp;C terms</strong></td><td><span class="tag tg">High</span></td><td>FCCPA 2018 &#167;127&#8211;129</td><td>Lawyer to draft T&amp;Cs specifically against FCCPA requirements. All limitations on liability must be conspicuously displayed before payment. No pre-ticked boxes.</td></tr>
+    <tr><td><strong>Failure to refund if minimum not reached</strong></td><td><span class="tag tg">High</span></td><td>FCCPA 2018 &#167;123 + 125</td><td>Escrow ensures funds are available. Automated refund system via gateway APIs. Refund timeline stated in T&amp;Cs must be honoured exactly. Liability for damages to all buyers if not honoured.</td></tr>
+    <tr><td><strong>Missing 3-day post-draw winner submission</strong></td><td><span class="tag tg">High</span></td><td>FCCPC Guidelines Part 8(b)</td><td>Build post-draw FCCPC filing as a mandatory admin step within the draw management workflow. File within 3 days of draw date.</td></tr>
+    <tr><td><strong>Payment gateway account frozen</strong></td><td><span class="tag tb">Medium</span></td><td>Operations risk</td><td>Two gateways simultaneously active. Bank transfer as backup. CAC docs and FCCPC approval ready to send to gateway compliance teams immediately.</td></tr>
+    <tr><td><strong>Influencer makes prohibited representation</strong></td><td><span class="tag tg">High</span></td><td>FCCPA 2018 &#167;125(2)</td><td>Written content brief to every influencer. Review all content before publication. You are liable for third-party representations made on your behalf.</td></tr>
+    <tr><td><strong>Tax liability on proceeds</strong></td><td><span class="tag tg">High</span></td><td>FIRS requirements</td><td>Consult tax advisor before launch. Capital gains and income tax may apply. Budget separately. File proactively with FIRS to avoid penalties.</td></tr>
+  </table></div>
+</section>
+<div class="div"></div>
+
+<!-- PRE-LAUNCH CHECKLIST -->
+<div class="ph"><span class="phn">Master Checklist</span><div class="phl"></div></div>
+<section>
+  <h2>Pre-Launch Compliance Checklist</h2>
+  <p style="margin-bottom:20px;color:var(--muted)">Do not sell any ticket or publish any public content until every item in the Regulatory section is complete.</p>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+    <div class="card card-blue"><h3><span class="icon">&#9878;</span>Regulatory Approvals &#8212; Must Complete First</h3><ul class="cl">
+      <li>LLC incorporated with CAC &#8212; certificate obtained</li>
+      <li>Corporate bank account opened in company name</li>
+      <li>Formal legal opinion on LSLGA Good Causes Fund received in writing</li>
+      <li>Property title verified clean &#8212; no encumbrances confirmed by lawyer in writing</li>
+      <li>NIESV valuation report obtained and on file</li>
+      <li>FCCPC application (Form CPC A) submitted with all documents</li>
+      <li>LSLGA application submitted (if Lagos property)</li>
+      <li>FCCPC Notice of Decision (approval) received in writing</li>
+      <li>LSLGA Licence received in writing</li>
+      <li>FCCPC promotion fee paid after receiving NOD</li>
+      <li>Escrow arrangement signed with named bank &#8212; account open and confirmed</li>
+      <li>FCCPC approval reference number embedded in all marketing templates</li>
+    </ul></div>
+    <div class="card"><h3><span class="icon">&#128220;</span>Legal Documents</h3><ul class="cl">
+      <li>Terms &amp; Conditions drafted and reviewed by lawyer against FCCPA 2018</li>
+      <li>T&amp;Cs submitted to FCCPC as part of application and approved</li>
+      <li>Winner Transfer Agreement prepared by lawyer</li>
+      <li>Influencer content brief prepared with mandatory FCCPC disclosure</li>
+      <li>Influencer written agreements signed</li>
+      <li>Privacy Policy drafted and NDPR compliant</li>
+      <li>Tax consultation completed &#8212; FIRS liability estimated</li>
+      <li>All T&amp;C acceptance stored with timestamps at checkout &#8212; system tested</li>
+    </ul></div>
+    <div class="card"><h3><span class="icon">&#128247;</span>Content &amp; Marketing</h3><ul class="cl">
+      <li>All advertising samples submitted to FCCPC with application</li>
+      <li>FCCPC approval statement in every creative template &#8212; non-removable</li>
+      <li>Property value claims match NIESV valuation exactly</li>
+      <li>No use of word &#8220;lottery&#8221; in any content &#8212; only &#8220;competition&#8221;</li>
+      <li>No &#8220;guaranteed win&#8221; or predetermined outcome language anywhere</li>
+      <li>Property photos + video completed and approved as prize evidence</li>
+      <li>NIESV valuation report downloadable from website</li>
+      <li>All influencer content reviewed and approved before going live</li>
+      <li>Radio ad scripts match approved advertising samples</li>
+    </ul></div>
+    <div class="card"><h3><span class="icon">&#128197;</span>Draw Compliance</h3><ul class="cl">
+      <li>Draw notification to FCCPC scheduled at 14 days before draw &#8212; in calendar</li>
+      <li>Draw notification to LSLGA scheduled &#8212; in calendar</li>
+      <li>FCCPC monitor attendance confirmed for draw day</li>
+      <li>LSLGA monitor attendance confirmed (if Lagos)</li>
+      <li>Notary public or commissioner for oaths booked for draw day</li>
+      <li>Independent witnesses confirmed and formally invited</li>
+      <li>Professional video crew booked for draw day</li>
+      <li>Live stream setup tested across all platforms</li>
+      <li>Post-draw FCCPC winner submission (3-day deadline) &#8212; in calendar</li>
+      <li>Form CPC B (End of Promotion Report) deadline (21 days) &#8212; in calendar</li>
+    </ul></div>
+  </div>
+</section>
+<div class="div"></div>
+
+
+<div class="div"></div>
+
+<!-- CALCULATOR PHASE -->
+<div class="ph"><span class="phn">Campaign Profit Calculator</span><div class="phl"></div></div>
+<section>
+  <h2>Enter Property Value &#8594; Get Ticket Price, Totals &amp; Full Cost Breakdown</h2>
+  <p style="margin-bottom:20px;color:var(--muted)">This calculator uses the exact fee schedules from the FCCPC (Schedule 3), LSLGA Guidelines, and FCCPA 2018 compliance costs to reverse-engineer the optimal ticket price, total ticket count, and minimum threshold for any property value you input. All figures are regulation-grounded. The Good Causes Fund impact can be modelled across scenarios until your legal opinion is received.</p>
+
+  <div class="alert ab">
+    <strong>&#128203; How to Use This Calculator</strong>
+    Enter the NIESV-verified property value. Adjust your profit target, marketing budget, and referral commission using the sliders. The calculator will recommend the ticket price, total tickets, and minimum threshold, and show a full itemised cost breakdown with the regulatory basis for each line. Use this output directly in your FCCPC application (Form CPC A) for prize value, ticket price, total entries, and winning odds.
+  </div>
+
+  <div id="calc-wrap" style="background:var(--dark2);border:1px solid rgba(255,255,255,.06);border-radius:2px;overflow:hidden;margin-bottom:16px">
+
+    <!-- INPUTS ROW -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid rgba(255,255,255,.06)">
+      
+      <!-- LEFT INPUTS -->
+      <div style="padding:28px 32px;border-right:1px solid rgba(255,255,255,.06)">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px">Inputs<div style="flex:1;height:1px;background:rgba(201,168,76,.2)"></div></div>
+        
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:12.5px;font-weight:500;color:var(--cream);margin-bottom:6px">Property Market Value (NIESV Verified) <span style="color:var(--muted);font-weight:300">&#8358;</span></label>
+          <div style="position:relative">
+            <span style="position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--gold);font-family:'DM Mono',monospace;font-size:13px;pointer-events:none">&#8358;</span>
+            <input id="c_propVal" type="number" value="50000000" min="5000000" step="500000" oninput="cCalc()"
+              style="width:100%;background:var(--dark3);border:1px solid rgba(255,255,255,.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px 10px 30px;outline:none;box-sizing:border-box">
+          </div>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:12.5px;font-weight:500;color:var(--cream);margin-bottom:6px">Property State</label>
+          <select id="c_state" onchange="cCalc()"
+            style="width:100%;background:var(--dark3);border:1px solid rgba(255,255,255,.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px;outline:none;cursor:pointer">
+            <option value="lagos">Lagos (FCCPC + LSLGA)</option>
+            <option value="other">Other State (FCCPC only)</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <label style="display:block;font-size:12.5px;font-weight:500;color:var(--cream);margin-bottom:6px">Good Causes Fund Basis</label>
+          <select id="c_gc" onchange="cCalc()"
+            style="width:100%;background:var(--dark3);border:1px solid rgba(255,255,255,.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px;outline:none;cursor:pointer">
+            <option value="none">Pending legal opinion (excluded)</option>
+            <option value="gross">On gross revenue &#8212; worst case</option>
+            <option value="net">On net profit &#8212; best case</option>
+          </select>
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <label style="font-size:12.5px;font-weight:500;color:var(--cream)">Profit Target</label>
+            <span id="c_profitLbl" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">30%</span>
+          </div>
+          <input type="range" id="c_profit" min="10" max="60" value="30" step="5" oninput="document.getElementById('c_profitLbl').textContent=this.value+'%';cCalc()"
+            style="width:100%;appearance:none;height:3px;background:rgba(255,255,255,.1);outline:none;border-radius:2px;cursor:pointer">
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <label style="font-size:12.5px;font-weight:500;color:var(--cream)">Marketing Budget</label>
+            <span id="c_mktLbl" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">12%</span>
+          </div>
+          <input type="range" id="c_mkt" min="5" max="25" value="12" step="1" oninput="document.getElementById('c_mktLbl').textContent=this.value+'%';cCalc()"
+            style="width:100%;appearance:none;height:3px;background:rgba(255,255,255,.1);outline:none;border-radius:2px;cursor:pointer">
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <label style="font-size:12.5px;font-weight:500;color:var(--cream)">Referral Commissions</label>
+            <span id="c_refLbl" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">4%</span>
+          </div>
+          <input type="range" id="c_ref" min="0" max="10" value="4" step="1" oninput="document.getElementById('c_refLbl').textContent=this.value+'%';cCalc()"
+            style="width:100%;appearance:none;height:3px;background:rgba(255,255,255,.1);outline:none;border-radius:2px;cursor:pointer">
+        </div>
+
+        <div style="margin-bottom:16px">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <label style="font-size:12.5px;font-weight:500;color:var(--cream)">Minimum Threshold</label>
+            <span id="c_minLbl" style="font-family:'DM Mono',monospace;font-size:13px;color:var(--gold)">80%</span>
+          </div>
+          <input type="range" id="c_min" min="50" max="95" value="80" step="5" oninput="document.getElementById('c_minLbl').textContent=this.value+'%';cCalc()"
+            style="width:100%;appearance:none;height:3px;background:rgba(255,255,255,.1);outline:none;border-radius:2px;cursor:pointer">
+        </div>
+
+        <div style="margin-bottom:0">
+          <label style="display:block;font-size:12.5px;font-weight:500;color:var(--cream);margin-bottom:6px">FIRS Income Tax on Profit (%)</label>
+          <div style="position:relative">
+            <input id="c_tax" type="number" value="0" min="0" max="30" step="5" oninput="cCalc()"
+              style="width:100%;background:var(--dark3);border:1px solid rgba(255,255,255,.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px;outline:none;box-sizing:border-box">
+          </div>
+        </div>
+      </div>
+
+      <!-- RIGHT: RECOMMENDATIONS -->
+      <div style="padding:28px 32px">
+        <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:20px;display:flex;align-items:center;gap:10px">Recommendations<div style="flex:1;height:1px;background:rgba(201,168,76,.2)"></div></div>
+        
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:20px">
+          <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),var(--dark3));border:1px solid rgba(201,168,76,.3);padding:16px;border-radius:2px;text-align:center">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Ticket Price</div>
+            <div id="c_ticketPrice" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)">&#8358;2,500</div>
+            <div id="c_ticketSub" style="font-size:10.5px;color:var(--muted);margin-top:4px">&#8212;</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),var(--dark3));border:1px solid rgba(201,168,76,.3);padding:16px;border-radius:2px;text-align:center">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Total Tickets</div>
+            <div id="c_totalTickets" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)">25,000</div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Hard cap</div>
+          </div>
+          <div style="background:linear-gradient(135deg,rgba(201,168,76,.08),var(--dark3));border:1px solid rgba(201,168,76,.3);padding:16px;border-radius:2px;text-align:center">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:6px">Min. Threshold</div>
+            <div id="c_minThresh" style="font-family:'Playfair Display',serif;font-size:20px;font-weight:700;color:var(--gold)">20,000</div>
+            <div style="font-size:10.5px;color:var(--muted);margin-top:4px">Refund trigger below this</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+          <div id="c_grossCard" style="background:var(--dark3);border:1px solid rgba(82,201,122,.25);background:rgba(82,201,122,.07);padding:14px;border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Gross Revenue</div>
+            <div id="c_gross" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#52C97A">&#8358;0</div>
+            <div id="c_grossSub" style="font-size:11px;color:var(--muted);margin-top:3px">&#8212;</div>
+          </div>
+          <div id="c_profitCard" style="background:rgba(82,201,122,.07);border:1px solid rgba(82,201,122,.25);padding:14px;border-radius:2px">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:4px">Net Owner Profit</div>
+            <div id="c_profit" style="font-family:'Playfair Display',serif;font-size:18px;font-weight:700;color:#52C97A">&#8358;0</div>
+            <div id="c_profitSub" style="font-size:11px;color:var(--muted);margin-top:3px">&#8212;</div>
+          </div>
+        </div>
+
+        <div id="c_alerts" style="margin-bottom:16px"></div>
+
+        <!-- MINI BREAKDOWN -->
+        <div style="background:var(--dark3);border:1px solid rgba(255,255,255,.06);padding:14px 16px">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:10px">Cost Summary</div>
+          <div id="c_breakdown"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FULL BREAKDOWN ROW -->
+    <div style="padding:24px 32px;border-top:1px solid rgba(255,255,255,.06)">
+      <div style="font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:16px;display:flex;align-items:center;gap:10px">Full Itemised Regulatory Cost Breakdown<div style="flex:1;height:1px;background:rgba(201,168,76,.2)"></div></div>
+      <div id="c_fullBreakdown" style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px"></div>
+      <div style="height:1px;background:rgba(201,168,76,.2);margin:16px 0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Break-Even Tickets</div>
+          <div id="c_breakeven" style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream)">0</div>
+          <div style="font-size:11px;color:var(--muted)">Tickets needed to cover all fixed costs at zero profit</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Revenue at Min. Threshold</div>
+          <div id="c_threshRev" style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream)">&#8358;0</div>
+          <div style="font-size:11px;color:var(--muted)">If only minimum threshold tickets sell</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--muted)">Winning Odds (for FCCPC Form)</div>
+          <div id="c_odds" style="font-family:'Playfair Display',serif;font-size:20px;color:var(--cream)">1 in 0</div>
+          <div style="font-size:11px;color:var(--muted)">State this ratio on your FCCPC application</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+(function(){
+const $ = id => document.getElementById(id);
+const fmt = v => '&#8358;' + Math.round(v).toLocaleString('en-NG');
+const fmtN = v => Math.round(v).toLocaleString('en-NG');
+
+function fccpcFee(pv){
+  if(pv<2e6)     return {rate:0.12,app:25000};
+  if(pv<10e6)    return {rate:0.10,app:50000};
+  if(pv<30e6)    return {rate:0.085,app:75000};
+  if(pv<50e6)    return {rate:0.06,app:100000};
+  if(pv<100e6)   return {rate:0.052,app:150000};
+  if(pv<500e6)   return {rate:0.045,app:200000};
+  return          {rate:0.03,app:250000};
+}
+
+function feeRow(name,ref,amt){
+  return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.04);gap:12px">
+    <div><div style="font-size:12.5px;color:var(--text)">${name}</div><div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted)">${ref}</div></div>
+    <div style="font-family:'DM Mono',monospace;font-size:12px;color:#E07A7A;white-space:nowrap">${fmt(amt)}</div></div>`;
+}
+function alertBox(type,title,msg){
+  const cols={warn:{bc:'#E0A652',bg:'rgba(224,166,82,.07)',tc:'#D8B87A'},danger:{bc:'#E05252',bg:'rgba(224,82,82,.08)',tc:'#E07A7A'},info:{bc:'#4A90D9',bg:'rgba(74,144,217,.08)',tc:'#7AB8E0'},good:{bc:'#52C97A',bg:'rgba(82,201,122,.08)',tc:'#7AE09A'}};
+  const c=cols[type];
+  return `<div style="border-left:3px solid ${c.bc};background:${c.bg};padding:10px 14px;margin-bottom:8px;font-size:12.5px;color:${c.tc}"><strong style="display:block;margin-bottom:2px">${title}</strong>${msg}</div>`;
+}
+
+window.cCalc = function(){
+  const pv    = parseFloat($('c_propVal').value)||0;
+  const lagos = $('c_state').value==='lagos';
+  const gc    = $('c_gc').value;
+  const prof  = parseFloat($('c_profit').value)/100;
+  const mkt   = parseFloat($('c_mkt').value)/100;
+  const ref   = parseFloat($('c_ref').value)/100;
+  const minP  = parseFloat($('c_min').value)/100;
+  const tax   = parseFloat($('c_tax').value)/100;
+  if(!pv) return;
+
+  const f = fccpcFee(pv);
+  const fccpc_mon = pv*f.rate, fccpc_app=f.app, fccpc_draw=25000;
+  const lslga = lagos ? 575000 : 0;
+  const legal=500000, niesv=Math.min(200000,Math.max(50000,pv*0.002));
+  const photo=200000,draw=300000,sms=100000,taxC=150000,web=150000,cont=500000;
+  const fixed = fccpc_mon+fccpc_app+fccpc_draw+lslga+legal+niesv+photo+draw+sms+taxC+web+cont;
+
+  const gw=0.02;
+  const varPct = gw+mkt+ref;
+  const gcGrossRate = (gc==='gross'&&lagos)?0.80:0;
+  const totalDeduct = varPct+prof+gcGrossRate+(tax*prof);
+  if(totalDeduct>=1){
+    $('c_alerts').innerHTML = alertBox('danger','Configuration Invalid','Variable costs + profit target + Good Causes ≥ 100% of revenue. Reduce sliders or change Good Causes basis.');
+    return;
+  }
+  const grossNeeded = fixed/(1-totalDeduct);
+
+  // Recommended ticket price targeting ~25k tickets
+  const rawP = grossNeeded/25000;
+  const recP = Math.ceil(rawP/500)*500;
+  const recT = Math.ceil(grossNeeded/recP/1000)*1000;
+  const recG = recT*recP;
+  const recMin = Math.ceil(recT*minP/100)*100;
+
+  // Actuals
+  const gwCost=recG*gw, mktCost=recG*mkt, refCost=recG*ref;
+  const gcGross=(gc==='gross'&&lagos)?recG*0.80:0;
+  const totalCosts=fixed+gwCost+mktCost+refCost+gcGross;
+  const profBT=recG-totalCosts;
+  const taxAmt=profBT*tax;
+  const netP=profBT-taxAmt;
+  const gcNet=(gc==='net'&&lagos)?netP*0.80:0;
+  const finalP=netP-gcNet;
+  const pctP=(recG>0?(finalP/recG*100):0).toFixed(1);
+  const breakEven=Math.ceil(fixed/(recP*(1-varPct)));
+
+  $('c_ticketPrice').innerHTML='&#8358;'+recP.toLocaleString();
+  $('c_ticketSub').textContent='Targets ~'+recT.toLocaleString()+' tickets';
+  $('c_totalTickets').textContent=recT.toLocaleString();
+  $('c_minThresh').textContent=recMin.toLocaleString();
+  $('c_gross').innerHTML=fmt(recG);
+  $('c_grossSub').textContent=recT.toLocaleString()+' x &#8358;'+recP.toLocaleString();
+  $('c_profit').innerHTML=fmt(finalP);
+  $('c_profit').style.color=finalP>0?'#52C97A':'#E05252';
+  $('c_profitSub').textContent=pctP+'% of gross';
+  $('c_breakeven').textContent=fmtN(breakEven)+' tickets';
+  $('c_threshRev').innerHTML=fmt(recMin*recP);
+  $('c_odds').textContent='1 in '+recT.toLocaleString();
+
+  // Mini breakdown
+  $('c_breakdown').innerHTML=`
+    ${[['FCCPC fees',fccpc_mon+fccpc_app+fccpc_draw],['LSLGA fees',lslga],['Legal + admin',legal+niesv+photo+draw+sms+taxC+web+cont],['Gateway ('+Math.round(gw*100)+'%)',gwCost],['Marketing ('+Math.round(mkt*100)+'%)',mktCost],['Referrals ('+Math.round(ref*100)+'%)',refCost],...(gcGross>0?[['Good Causes (gross)',gcGross]]:[]),...(taxAmt>0?[['FIRS Tax',taxAmt]]:[]),...(gcNet>0?[['Good Causes (net)',gcNet]]:[])].map(([n,v])=>`
+      <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:12px">
+        <span style="color:var(--text)">${n}</span><span style="font-family:'DM Mono',monospace;color:#E07A7A">${fmt(v)}</span></div>`).join('')}
+    <div style="display:flex;justify-content:space-between;padding:8px 0 0;font-size:13px;font-weight:600">
+      <span style="color:var(--cream)">Net to Owner</span><span style="font-family:'DM Mono',monospace;color:${finalP>0?'#52C97A':'#E05252'}">${fmt(finalP)}</span></div>`;
+
+  // Full breakdown
+  $('c_fullBreakdown').innerHTML=`<div>
+    ${feeRow('FCCPC Monitoring Fee','FCCPC Schedule 3 &#8212; '+((f.rate*100).toFixed(1))+'% of property value',fccpc_mon)}
+    ${feeRow('FCCPC Application Fee','FCCPC Schedule 3',fccpc_app)}
+    ${feeRow('FCCPC Draw Attendance','FCCPC Schedule 3 &#8212; &#8358;25,000/draw',fccpc_draw)}
+    ${lagos?feeRow('LSLGA Application Fee','LSLGA Guidelines &#167;3(i)',50000):''}
+    ${lagos?feeRow('LSLGA Licence Fee','LSLGA Guidelines &#167;3(ii)',500000):''}
+    ${lagos?feeRow('LSLGA Lottery Levy','LSLGA Guidelines &#167;3(iii)',25000):''}
+    ${feeRow('Legal Fees','Lawyer + notary + title transfer + T&Cs',legal)}
+    ${feeRow('NIESV Valuation Report','FCCPA 2018 &#167;123 &#8212; substantiates value claims',niesv)}
+    </div><div>
+    ${feeRow('Property Photography + Video','FCCPC &#167;4 &#8212; prize evidence required',photo)}
+    ${feeRow('Draw Event + Video Crew','FCCPC monitored draw requirement',draw)}
+    ${feeRow('SMS/Email Communications','FCCPA &#167;118 &#8212; transaction records mandatory',sms)}
+    ${feeRow('Tax Consultation (FIRS)','Pre-campaign tax planning',taxC)}
+    ${feeRow('Website Development','Compliance-grade platform',web)}
+    ${feeRow('Contingency Reserve','Operational buffer',cont)}
+    ${feeRow('Payment Gateway Fees','Paystack + Flutterwave &#8212; ~2% of gross',gwCost)}
+    ${feeRow('Marketing Budget',(Math.round(mkt*100))+'% of gross &#8212; ads, radio, influencers, print',mktCost)}
+    ${feeRow('Referral Commissions',(Math.round(ref*100))+'% of gross &#8212; FCCPA &#167;123 promise must be honoured',refCost)}
+    ${gcGross>0?feeRow('Good Causes Fund (gross)','LSLGA &#8212; 80% of gross revenue (worst case)',gcGross):''}
+    ${taxAmt>0?feeRow('FIRS Income Tax',(Math.round(tax*100))+'% on profit',taxAmt):''}
+    ${gcNet>0?feeRow('Good Causes Fund (net)','LSLGA &#8212; 80% of net profit (best case)',gcNet):''}
+    </div>`;
+
+  // Alerts
+  let alerts='';
+  if(lagos&&gc==='none') alerts+=alertBox('warn','Good Causes Fund &#8212; Action Required','LSLGA requires funds from Lagos promotions be allocated to state causes (80%). Until your legal opinion is received on whether this applies to gross revenue or net profit, the figures above exclude this deduction. Model both scenarios using the dropdown.');
+  if(gc==='gross'&&lagos) alerts+=alertBox('danger','Good Causes (Gross) &#8212; Viability Warning','At 80% of gross revenue deducted to the Good Causes Fund, your net profit is severely compressed. This scenario may make the business unviable. Obtain your legal opinion urgently.');
+  if(gc==='net'&&lagos) alerts+=alertBox('info','Good Causes (Net) &#8212; Best Case','If Good Causes applies to net profit only, an additional '+fmt(gcNet)+' would be deducted. Final owner profit: '+fmt(finalP)+'. Confirm this basis with your lawyer.');
+  if(tax>0) alerts+=alertBox('info','FIRS Tax Included','Estimated FIRS income tax of '+fmt(taxAmt)+' at '+Math.round(tax*100)+'% on profit is included. Consult your tax advisor to confirm the applicable rate, structure, and whether CGT or income tax applies to this transaction.');
+  if(recT>40000) alerts+=alertBox('warn','High Ticket Count','At '+recT.toLocaleString()+' tickets, this campaign may be difficult to sell out. Consider raising the ticket price or reducing the profit target to reduce the required ticket volume.');
+  if(breakEven>recMin) alerts+=alertBox('danger','Break-Even Exceeds Minimum Threshold','Your break-even point of '+fmtN(breakEven)+' tickets is higher than your minimum threshold of '+recMin.toLocaleString()+'. If only the threshold sells, you will not cover fixed costs. Increase the minimum threshold above '+fmtN(breakEven)+'.');
+  else alerts+=alertBox('good','Minimum Threshold is Safe','Your minimum threshold of '+recMin.toLocaleString()+' tickets is above the break-even point of '+fmtN(breakEven)+'. If the threshold is reached, all fixed costs are covered before the draw proceeds.');
+  $('c_alerts').innerHTML=alerts;
+};
+window.cCalc();
+})();
+</script>
+
+<style>
+#c_propVal,#c_tax{width:100%;background:var(--dark3);border:1px solid rgba(255,255,255,.08);color:var(--cream);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px;outline:none;box-sizing:border-box}
+#c_propVal:focus,#c_tax:focus{border-color:rgba(201,168,76,.4)}
+input[type=range]{width:100%;-webkit-appearance:none;height:3px;background:rgba(255,255,255,.1);outline:none;border-radius:2px;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;background:var(--gold);border-radius:50%;cursor:pointer}
+</style>
+
+<section style="padding-bottom:60px">
+  <div class="card card-gold"><h3><span class="icon">&#128172;</span>The Fundamental Principle</h3>
+  <p style="font-size:14.5px;line-height:1.9">
+    The FCCPA 2018 was enacted to eliminate &#8220;misleading, unfair, deceptive or unconscionable marketing, trading and business practices&#8221; (Section 17(g)). Every requirement in this guide &#8212; the approvals, the disclosed T&amp;Cs, the NIESV valuation, the escrow, the FCCPC monitoring at draws &#8212; exists to protect your buyers.<br><br>
+    Run this business with that principle as your foundation, not as an obstacle. A promoter who genuinely complies &#8212; who obtains approvals, publishes documents, holds funds in escrow, invites regulators to their draws, and transfers property to winners within the stated timeline &#8212; is a promoter whose buyers become advocates. In Nigeria&#8217;s market, that advocacy is more valuable than any advertising budget.<br><br>
+    Compliance is not the cost of doing business. <strong style="color:var(--cream)">It is your competitive advantage.</strong>
+  </p></div>
+</section>
+
+<div class="footer">House Raffle Master Plan v3.0 &#183; Regulation-Compliant + Calculator Edition &#183; FCCPA 2018 &#183; FCCPC Guidelines &#183; LSLGA Guidelines &#183; &#8358;2,500/ticket &#183; 25,000 Tickets &#183; 8 Weeks</div>
+</body>
+</html>

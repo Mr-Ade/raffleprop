@@ -1,0 +1,15 @@
+-- AlterTable
+ALTER TABLE "campaigns" ADD COLUMN     "bathrooms" INTEGER,
+ADD COLUMN     "bedrooms" INTEGER,
+ADD COLUMN     "buildingArea" INTEGER,
+ADD COLUMN     "cOfOConfirmed" BOOLEAN DEFAULT false,
+ADD COLUMN     "cacRegNumber" TEXT,
+ADD COLUMN     "description" TEXT,
+ADD COLUMN     "fccpcApprovalDate" TIMESTAMP(3),
+ADD COLUMN     "landArea" INTEGER,
+ADD COLUMN     "parkingSpaces" INTEGER,
+ADD COLUMN     "propertyFeatures" TEXT[],
+ADD COLUMN     "propertyLawyer" TEXT,
+ADD COLUMN     "subtitle" TEXT,
+ADD COLUMN     "valuationFirm" TEXT,
+ADD COLUMN     "valuationRef" TEXT;

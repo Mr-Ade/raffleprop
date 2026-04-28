@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FAQ | RaffleProp</title>
+  <meta name="description" content="Frequently asked questions about RaffleProp property raffles — legality, payments, refunds, draws, and winners.">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+</head>
+<body>
+<a href="#main-content" class="skip-link">Skip to main content</a>
+<div id="nav-placeholder"></div>
+<main id="main-content">
+
+<div style="background:linear-gradient(135deg,var(--green-primary),#0a3a1e);padding:4.5rem 0 3.5rem;margin-top:65px;">
+  <div class="container" style="text-align:center;">
+    <h1 style="font-size:2.5rem;font-weight:900;color:#fff;letter-spacing:-0.02em;">Frequently Asked Questions</h1>
+    <p style="color:rgba(255,255,255,0.7);margin-top:0.875rem;max-width:520px;margin-left:auto;margin-right:auto;">Got a question? We believe in complete transparency. If you don't find your answer here, <a href="contact.html" style="color:var(--gold-light);font-weight:600;">contact us directly</a>.</p>
+    <!-- Search -->
+    <div style="max-width:480px;margin:1.75rem auto 0;position:relative;">
+      <i class="fa-solid fa-search" style="position:absolute;left:1rem;top:50%;transform:translateY(-50%);color:var(--text-muted);"></i>
+      <input type="text" id="faq-search" aria-label="Search frequently asked questions" placeholder="Search questions..." style="width:100%;padding:0.875rem 1rem 0.875rem 2.75rem;border-radius:10px;border:none;font-size:0.9375rem;outline:none;background:#fff;">
+    </div>
+  </div>
+</div>
+
+<section style="padding:4rem 0 5rem;">
+  <div class="container" style="max-width:800px;">
+
+    <!-- Category filters -->
+    <div id="faq-cats" style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:2.5rem;justify-content:center;">
+      <button class="cat-btn active" data-cat="all" onclick="filterFaq('all',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--green-primary);background:var(--green-primary);color:#fff;cursor:pointer;transition:all 0.2s;">All Topics</button>
+      <button class="cat-btn" data-cat="legal" onclick="filterFaq('legal',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-scale-balanced"></i> Legal</button>
+      <button class="cat-btn" data-cat="payment" onclick="filterFaq('payment',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-credit-card"></i> Payments</button>
+      <button class="cat-btn" data-cat="tickets" onclick="filterFaq('tickets',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-ticket"></i> Tickets</button>
+      <button class="cat-btn" data-cat="draw" onclick="filterFaq('draw',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-dice"></i> Draw</button>
+      <button class="cat-btn" data-cat="refund" onclick="filterFaq('refund',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-rotate-left"></i> Refunds</button>
+      <button class="cat-btn" data-cat="winner" onclick="filterFaq('winner',this)" style="padding:0.5rem 1.25rem;border-radius:100px;font-size:0.875rem;font-weight:600;border:2px solid var(--border);background:#fff;color:var(--text-secondary);cursor:pointer;transition:all 0.2s;"><i class="fa-solid fa-trophy"></i> Winning</button>
+    </div>
+
+    <div id="faq-list"></div>
+
+    <div id="faq-empty" style="display:none;text-align:center;padding:3rem 0;color:var(--text-muted);">
+      <i class="fa-solid fa-search" style="font-size:2.5rem;margin-bottom:1rem;"></i>
+      <p>No questions match your search. <a href="contact.html" style="color:var(--green-primary);font-weight:600;">Ask us directly →</a></p>
+    </div>
+
+    <!-- Still have questions -->
+    <div style="margin-top:3rem;background:var(--green-50);border:1px solid var(--green-100);border-radius:16px;padding:2rem;text-align:center;">
+      <i class="fa-solid fa-headset" style="font-size:2.5rem;color:var(--green-primary);margin-bottom:1rem;"></i>
+      <h3 style="font-size:1.25rem;font-weight:700;margin-bottom:0.5rem;">Still Have Questions?</h3>
+      <p style="color:var(--text-muted);margin-bottom:1.25rem;">Our team responds within 24 hours. You can also reach us on WhatsApp for faster response.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:center;flex-wrap:wrap;">
+        <a href="contact.html" class="btn btn-primary"><i class="fa-solid fa-envelope"></i> Send Message</a>
+        <a href="https://wa.me/2349012345678?text=Hello%20RaffleProp,%20I%20have%20a%20question" class="btn btn-sm" style="background:#25D366;color:#fff;padding:0.75rem 1.5rem;" target="_blank"><i class="fab fa-whatsapp"></i> WhatsApp Us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+<div id="footer-placeholder"></div>
+<script defer src="js/main.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  renderFaqs(MOCK_DATA.faqs);
+
+  const search = document.getElementById('faq-search');
+  if (search) search.addEventListener('input', Utils.debounce(() => {
+    const q = search.value.toLowerCase();
+    const filtered = MOCK_DATA.faqs.filter(f => f.q.toLowerCase().includes(q) || f.a.toLowerCase().includes(q));
+    renderFaqs(filtered);
+    document.getElementById('faq-empty').style.display = filtered.length === 0 ? 'block' : 'none';
+  }, 300));
+});
+
+function renderFaqs(items) {
+  const list = document.getElementById('faq-list');
+  if (!list) return;
+  list.innerHTML = items.map(f => `
+    <div class="faq-item" data-cat="${f.cat}">
+      <button class="faq-question">${f.q}<i class="fa-solid fa-chevron-down faq-icon"></i></button>
+      <div class="faq-answer"><div class="faq-answer-inner">${f.a}</div></div>
+    </div>`).join('');
+  initFaqAccordion();
+}
+
+function filterFaq(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => {
+    b.style.background = '#fff'; b.style.color = 'var(--text-secondary)'; b.style.borderColor = 'var(--border)';
+  });
+  btn.style.background = 'var(--green-primary)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--green-primary)';
+
+  const items = cat === 'all' ? MOCK_DATA.faqs : MOCK_DATA.faqs.filter(f => f.cat === cat);
+  renderFaqs(items);
+  document.getElementById('faq-empty').style.display = items.length === 0 ? 'block' : 'none';
+}
+</script>
+</body>
+</html>
