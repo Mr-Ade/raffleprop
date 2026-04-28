@@ -1,9 +1,14 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getAccessToken } from '@/lib/session';
-import AdminDashboardCharts from '@/components/AdminDashboardCharts';
+import dynamic from 'next/dynamic';
 import AdminLiveFeed from '@/components/AdminLiveFeed';
 import AdminRefreshButton from '@/components/AdminRefreshButton';
+
+const AdminDashboardCharts = dynamic(
+  () => import('@/components/AdminDashboardCharts'),
+  { ssr: false },
+);
 
 export const metadata: Metadata = { title: 'Admin Dashboard — RaffleProp' };
 

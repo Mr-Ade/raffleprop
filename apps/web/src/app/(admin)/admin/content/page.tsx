@@ -8,25 +8,27 @@ export const metadata: Metadata = { title: 'Content Management — Admin' };
 const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 
 async function fetchAllContent(token: string) {
-  const res = await fetch(`${API_BASE}/api/admin/content`, {
-    headers: { Authorization: `Bearer ${token}` },
-    cache: 'no-store',
-  });
-  if (!res.ok) return null;
-  const json = await res.json() as {
-    success: boolean;
-    data: {
-      settings: Record<string, unknown>;
-      faqs: unknown[];
-      testimonials: unknown[];
-      winners: unknown[];
-      trustBadges: unknown[];
-      howItWorksSteps: unknown[];
-      team: unknown[];
-      milestones: unknown[];
+  try {
+    const res = await fetch(`${API_BASE}/api/admin/content`, {
+      headers: { Authorization: `Bearer ${token}` },
+      cache: 'no-store',
+    });
+    if (!res.ok) return null;
+    const json = await res.json() as {
+      success: boolean;
+      data: {
+        settings: Record<string, unknown>;
+        faqs: unknown[];
+        testimonials: unknown[];
+        winners: unknown[];
+        trustBadges: unknown[];
+        howItWorksSteps: unknown[];
+        team: unknown[];
+        milestones: unknown[];
+      };
     };
-  };
-  return json.success ? json.data : null;
+    return json.success ? json.data : null;
+  } catch { return null; }
 }
 
 export default async function AdminContentPage() {
