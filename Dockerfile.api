@@ -1,0 +1,25 @@
+FROM node:20-alpine
+
+RUN npm install -g pnpm@9
+
+WORKDIR /app
+
+# Copy workspace manifests first (for layer caching)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/db/package.json      ./packages/db/
+COPY packages/shared/package.json  ./packages/shared/
+COPY packages/api/package.json     ./packages/api/
+
+RUN pnpm install --frozen-lockfile
+
+# Copy source
+COPY packages/db      ./packages/db
+COPY packages/shared  ./packages/shared
+COPY packages/api     ./packages/api
+
+# Build api and its local workspace dependencies
+RUN pnpm --filter @raffleprop/api... build
+
+EXPOSE 3001
+
+CMD ["node", "packages/api/dist/server.js"]

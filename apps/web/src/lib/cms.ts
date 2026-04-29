@@ -134,9 +134,29 @@ export interface CmsPage {
   slug: string;
   title: string;
   content: unknown;
+  topic?: string | null;
+  heroImage?: string | null;
   metaTitle?: string | null;
   metaDesc?: string | null;
   updatedAt: string;
+}
+
+export interface CmsPageMeta {
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+export interface CmsPageList {
+  data: Omit<CmsPage, 'content'>[];
+  meta: CmsPageMeta;
+}
+
+export interface CmsTopic {
+  icon: string;
+  label: string;
+  count: number;
 }
 
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
@@ -151,6 +171,16 @@ async function fetchCms<T>(path: string, revalidate = 300): Promise<T | null> {
 async function fetchCmsArray<T>(path: string, revalidate = 300): Promise<T[]> {
   const result = await fetchCms<T[]>(path, revalidate);
   return result ?? [];
+}
+
+// The /pages list endpoint returns { success, data: [...], meta: {...} } at the top level.
+// fetchCms extracts only json.data, so we need a dedicated helper that reads the full envelope.
+async function fetchCmsPageList(path: string, revalidate = 60): Promise<CmsPageList | null> {
+  const res = await fetch(`${BASE}${path}`, { next: { revalidate } } as RequestInit & { next: { revalidate: number } });
+  if (!res.ok) return null;
+  const json = (await res.json()) as { success: boolean; data: Omit<CmsPage, 'content'>[]; meta: CmsPageMeta };
+  if (!json.success) return null;
+  return { data: json.data ?? [], meta: json.meta };
 }
 
 // ─── Public API ───────────────────────────────────────────────────────────────
@@ -176,5 +206,19 @@ export const cms = {
   getPage: (slug: string) =>
     fetchCms<CmsPage>(`/pages/${encodeURIComponent(slug)}`, 600).catch(() => null),
 
-  getPages: () => fetchCmsArray<Omit<CmsPage, 'content'>>('/pages', 600).catch(() => []),
+  getPages: () => fetchCmsArray<Omit<CmsPage, 'content'>>('/pages', 60).catch(() => []),
+
+  getPagesPaginated: (opts: { topic?: string; page?: number; limit?: number } = {}) => {
+    const params = new URLSearchParams();
+    if (opts.topic)  params.set('topic',  opts.topic);
+    if (opts.page)   params.set('page',   String(opts.page));
+    if (opts.limit)  params.set('limit',  String(opts.limit));
+    const qs = params.toString();
+    return fetchCmsPageList(`/pages${qs ? `?${qs}` : ''}`).catch(() => null);
+  },
+
+  getFeaturedPages: (count = 3) =>
+    fetchCmsPageList(`/pages?featured=${count}`).catch(() => null),
+
+  getTopics: () => fetchCmsArray<CmsTopic>('/topics', 120).catch(() => []),
 };

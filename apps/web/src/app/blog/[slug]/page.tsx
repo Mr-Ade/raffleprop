@@ -1,13 +1,19 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
-import { cms } from '@/lib/cms';
+import { cms, type CmsPage } from '@/lib/cms';
 import DOMPurify from 'isomorphic-dompurify';
 
 export const revalidate = 600;
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
-  const page = await cms.getPage(params.slug);
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const page = await cms.getPage(slug);
   if (!page) return { title: 'Not Found — RaffleProp' };
   return {
     title: page.metaTitle ?? `${page.title} — RaffleProp Blog`,
@@ -15,55 +21,123 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function BlogPostPage({ params }: { params: { slug: string } }) {
-  const page = await cms.getPage(params.slug);
+function extractFirstImage(html: string): { src: string; alt: string } | null {
+  const match = html.match(/<img[^>]+src="([^"]+)"(?:[^>]+alt="([^"]*)")?/);
+  if (!match?.[1]) return null;
+  return { src: match[1], alt: match[2] ?? '' };
+}
+
+function stripFirstImage(html: string): string {
+  return html.replace(/<img[^>]+>/, '');
+}
+
+export default async function BlogPostPage({ params }: Props) {
+  const { slug } = await params;
+  const [page, allPages] = await Promise.all([
+    cms.getPage(slug),
+    cms.getPages().catch(() => [] as Omit<CmsPage, 'content'>[]),
+  ]);
+
   if (!page) notFound();
 
-  const html = typeof page.content === 'string'
-    ? DOMPurify.sanitize(page.content)
-    : '';
+  const rawHtml = typeof page.content === 'string' ? page.content : '';
+  const heroImg = extractFirstImage(rawHtml);
+  const bodyHtml = DOMPurify.sanitize(heroImg ? stripFirstImage(rawHtml) : rawHtml);
 
   const dateStr = new Date(page.updatedAt).toLocaleDateString('en-NG', {
     year: 'numeric', month: 'long', day: 'numeric',
   });
 
+  const related = allPages
+    .filter((p) => p.slug !== page.slug)
+    .slice(0, 3);
+
   return (
     <main id="main-content">
+
       {/* Hero */}
-      <div style={{ background: 'linear-gradient(135deg, #0a3a1e 0%, #0D5E30 100%)', padding: '3rem 1.5rem 2.5rem', paddingTop: 'calc(3rem + 65px)' }}>
-        <div className="container" style={{ maxWidth: 800 }}>
-          <Link href="/blog" style={{ color: 'rgba(255,255,255,0.6)', fontSize: '0.8125rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.375rem', marginBottom: '1rem' }}>
-            <i className="fa-solid fa-arrow-left" style={{ fontSize: '0.75rem' }} /> Blog
+      <div className="blog-post-hero">
+        <div className="container blog-post-hero-container">
+          <Link href="/blog" className="blog-post-back">
+            <i className="fa-solid fa-arrow-left" /> All Articles
           </Link>
-          <h1 style={{ fontSize: 'clamp(1.5rem, 3vw, 2.25rem)', fontWeight: 900, color: '#fff', margin: '0 0 0.75rem', letterSpacing: '-0.03em' }}>
-            {page.title}
-          </h1>
-          <p style={{ color: 'rgba(255,255,255,0.55)', fontSize: '0.875rem' }}>
-            <i className="fa-regular fa-calendar" style={{ marginRight: '0.375rem' }} />
+          <h1 className="blog-post-title">{page.title}</h1>
+          {page.metaDesc && (
+            <p className="blog-post-desc">{page.metaDesc}</p>
+          )}
+          <p className="blog-post-date">
+            <i className="fa-regular fa-calendar" />
             Updated {dateStr}
           </p>
         </div>
       </div>
 
-      {/* Content */}
-      <section style={{ padding: '3rem 1.5rem 5rem' }}>
-        <div className="container" style={{ maxWidth: 800 }}>
+      {/* Hero image */}
+      {heroImg && (
+        <div className="blog-post-img-wrap">
+          <div className="container blog-post-img-container">
+            <div className="blog-post-img-inner">
+              <Image
+                src={heroImg.src}
+                alt={heroImg.alt || page.title}
+                fill
+                priority
+                sizes="(max-width: 860px) 100vw, 820px"
+                className="blog-fill-img"
+              />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Article body */}
+      <section className="blog-post-body-section">
+        <div className="container blog-post-body-container">
           <div
             className="blog-body"
-            dangerouslySetInnerHTML={{ __html: html }}
+            dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
-          <div style={{ borderTop: '1px solid var(--border-light)', paddingTop: '2rem', marginTop: '3rem', display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+          <div className="blog-post-footer">
             <Link href="/blog" className="btn btn-outline btn-sm">
-              <i className="fa-solid fa-arrow-left" style={{ marginRight: '0.375rem' }} />
-              All Articles
+              <i className="fa-solid fa-arrow-left" /> All Articles
             </Link>
             <Link href="/campaigns" className="btn btn-primary btn-sm">
-              <i className="fa-solid fa-ticket" style={{ marginRight: '0.375rem' }} />
-              Browse Campaigns
+              <i className="fa-solid fa-ticket" /> Browse Campaigns
             </Link>
           </div>
         </div>
       </section>
+
+      {/* Related articles */}
+      {related.length > 0 && (
+        <section className="blog-related-section">
+          <div className="container blog-related-container">
+            <p className="blog-related-label">More Articles</p>
+            <div className="blog-related-grid">
+              {related.map((r) => (
+                <Link key={r.id} href={`/blog/${r.slug}`} className="related-card">
+                  {r.heroImage && (
+                    <div className="related-card-img">
+                      <Image
+                        src={r.heroImage}
+                        alt={r.title}
+                        fill
+                        sizes="260px"
+                        className="blog-fill-img"
+                      />
+                    </div>
+                  )}
+                  <p className="related-card-title">{r.title}</p>
+                  <p className="related-card-cta">
+                    Read <i className="fa-solid fa-arrow-right" />
+                  </p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
     </main>
   );
 }

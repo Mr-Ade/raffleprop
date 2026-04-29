@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+RUN npm install -g pnpm@9
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY packages/db/package.json      ./packages/db/
+COPY packages/shared/package.json  ./packages/shared/
+COPY packages/api/package.json     ./packages/api/
+
+RUN pnpm install --frozen-lockfile
+
+COPY packages/db      ./packages/db
+COPY packages/shared  ./packages/shared
+COPY packages/api     ./packages/api
+
+RUN pnpm --filter @raffleprop/api... build
+
+CMD ["node", "packages/api/dist/worker.js"]

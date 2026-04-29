@@ -176,17 +176,91 @@ publicContentRouter.get('/milestones', async (_req: Request, res: Response, next
 
 // ─── CMS Pages ────────────────────────────────────────────────────────────────
 
-publicContentRouter.get('/pages', async (_req: Request, res: Response, next: NextFunction) => {
+function extractHeroImage(content: unknown): string | null {
+  if (typeof content !== 'string') return null;
+  const match = content.match(/<img[^>]+src="([^"]+)"/);
+  return match?.[1] ?? null;
+}
+
+// GET /api/content/pages?topic=X&page=1&limit=6&featured=3
+publicContentRouter.get('/pages', async (req: Request, res: Response, next: NextFunction) => {
   try {
-    res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=120');
-    const pages = await prisma.contentPage.findMany({
-      where: { status: 'PUBLISHED' },
-      select: { id: true, slug: true, title: true, metaTitle: true, metaDesc: true, updatedAt: true },
-      orderBy: { updatedAt: 'desc' },
+    res.setHeader('Cache-Control', 'public, s-maxage=60, stale-while-revalidate=30');
+    const topic    = typeof req.query['topic']    === 'string' ? req.query['topic']    : undefined;
+    const page     = Math.max(1, parseInt(typeof req.query['page']     === 'string' ? req.query['page']     : '1',  10) || 1);
+    const limit    = Math.min(50, parseInt(typeof req.query['limit']   === 'string' ? req.query['limit']   : '20', 10) || 20);
+    const featured = parseInt(typeof req.query['featured'] === 'string' ? req.query['featured'] : '0', 10) || 0;
+
+    const where = {
+      status: 'PUBLISHED' as const,
+      ...(topic ? { topic } : {}),
+    };
+    const select = { id: true, slug: true, title: true, topic: true, metaTitle: true, metaDesc: true, updatedAt: true, content: true };
+
+    // Featured mode: return first N without pagination meta
+    if (featured > 0) {
+      const rows = await (prisma.contentPage as any).findMany({
+        where,
+        select,
+        orderBy: { updatedAt: 'desc' as const },
+        take: featured,
+      }) as Array<{ content: unknown; [key: string]: unknown }>;
+      const result = rows.map(({ content, ...rest }) => ({ ...rest, heroImage: extractHeroImage(content) }));
+      return res.json({ success: true, data: result, meta: { total: result.length, page: 1, limit: featured, totalPages: 1 } });
+    }
+
+    const [total, rows] = await Promise.all([
+      (prisma.contentPage as any).count({ where }),
+      (prisma.contentPage as any).findMany({
+        where,
+        select,
+        orderBy: { updatedAt: 'desc' as const },
+        skip: (page - 1) * limit,
+        take: limit,
+      }) as Promise<Array<{ content: unknown; [key: string]: unknown }>>,
+    ]);
+
+    const result = (rows as Array<{ content: unknown; [key: string]: unknown }>).map(({ content, ...rest }) => ({
+      ...rest,
+      heroImage: extractHeroImage(content),
+    }));
+
+    res.json({
+      success: true,
+      data: result,
+      meta: { total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)) },
     });
-    res.json({ success: true, data: pages });
   } catch (err) {
     next(err instanceof AppError ? err : new AppError(500, 'Failed to load pages'));
+  }
+});
+
+// GET /api/content/topics — topics from settings + post count per topic
+publicContentRouter.get('/topics', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.setHeader('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=60');
+    const settings = await prisma.siteSettings.findUnique({ where: { id: 'global' }, select: { blogTopics: true } });
+    const rawTopics = (settings?.blogTopics ?? []) as Array<{ icon?: string; label?: string }>;
+
+    // Count published posts per topic in one query
+    const counts = await (prisma.contentPage as any).groupBy({
+      by: ['topic'],
+      where: { status: 'PUBLISHED', topic: { not: null } },
+      _count: { _all: true },
+    }) as Array<{ topic: string | null; _count: { _all: number } }>;
+
+    const countMap: Record<string, number> = {};
+    for (const row of counts) {
+      if (row.topic) countMap[row.topic] = row._count._all;
+    }
+
+    const topics = rawTopics
+      .filter((t) => t.label)
+      .map((t) => ({ icon: t.icon ?? '', label: t.label!, count: countMap[t.label!] ?? 0 }));
+
+    res.json({ success: true, data: topics });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to load topics'));
   }
 });
 
@@ -194,9 +268,9 @@ publicContentRouter.get('/pages/:slug', async (req: Request, res: Response, next
   try {
     res.setHeader('Cache-Control', 'public, s-maxage=600, stale-while-revalidate=120');
     const slug = req.params['slug'] as string;
-    const page = await prisma.contentPage.findFirst({
+    const page = await (prisma.contentPage as any).findFirst({
       where: { slug, status: 'PUBLISHED' },
-      select: { id: true, slug: true, title: true, content: true, metaTitle: true, metaDesc: true, updatedAt: true },
+      select: { id: true, slug: true, title: true, topic: true, content: true, metaTitle: true, metaDesc: true, updatedAt: true },
     });
     if (!page) {
       res.status(404).json({ success: false, error: 'Page not found' });

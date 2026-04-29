@@ -656,6 +656,7 @@ model ContentPage {
   slug        String   @unique
   title       String
   content     Json     // structured content blocks
+  topic       String?  // matches a label from SiteSettings.blogTopics
   metaTitle   String?
   metaDesc    String?
   status      String   @default("DRAFT") // "DRAFT" | "PUBLISHED"
@@ -665,5 +666,6 @@ model ContentPage {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  @@index([topic])
   @@map("content_pages")
 }
