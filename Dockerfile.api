@@ -12,7 +12,8 @@ COPY packages/api/package.json     ./packages/api/
 
 RUN pnpm install --frozen-lockfile
 
-# Copy source
+# Copy source (include root tsconfig.base.json that all packages extend)
+COPY tsconfig.base.json ./
 COPY packages/db      ./packages/db
 COPY packages/shared  ./packages/shared
 COPY packages/api     ./packages/api
