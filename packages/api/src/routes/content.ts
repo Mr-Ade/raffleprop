@@ -206,7 +206,8 @@ publicContentRouter.get('/pages', async (req: Request, res: Response, next: Next
         take: featured,
       }) as Array<{ content: unknown; [key: string]: unknown }>;
       const result = rows.map(({ content, ...rest }) => ({ ...rest, heroImage: extractHeroImage(content) }));
-      return res.json({ success: true, data: result, meta: { total: result.length, page: 1, limit: featured, totalPages: 1 } });
+      res.json({ success: true, data: result, meta: { total: result.length, page: 1, limit: featured, totalPages: 1 } });
+      return;
     }
 
     const [total, rows] = await Promise.all([

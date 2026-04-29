@@ -18,6 +18,9 @@ COPY packages/db      ./packages/db
 COPY packages/shared  ./packages/shared
 COPY packages/api     ./packages/api
 
+# Generate Prisma client types before TypeScript compilation
+RUN pnpm --filter @raffleprop/db generate
+
 # Build api and its local workspace dependencies
 RUN pnpm --filter @raffleprop/api... build
 
