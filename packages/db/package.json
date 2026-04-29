@@ -2,8 +2,9 @@
   "name": "@raffleprop/db",
   "version": "1.0.0",
   "private": true,
-  "main": "./src/index.ts",
+  "main": "./dist/index.js",
   "scripts": {
+    "build": "tsc",
     "generate": "dotenv -e ../../.env -- prisma generate",
     "migrate": "dotenv -e ../../.env -- prisma migrate dev --name init",
     "migrate:deploy": "dotenv -e ../../.env -- prisma migrate deploy",

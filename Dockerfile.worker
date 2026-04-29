@@ -16,7 +16,6 @@ COPY packages/db      ./packages/db
 COPY packages/shared  ./packages/shared
 COPY packages/api     ./packages/api
 
-RUN pnpm --filter @raffleprop/db generate
-RUN pnpm --filter @raffleprop/api... build
+RUN pnpm --filter @raffleprop/db generate && pnpm --filter @raffleprop/api... build
 
 CMD ["node", "packages/api/dist/worker.js"]
