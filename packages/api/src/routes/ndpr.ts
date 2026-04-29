@@ -292,7 +292,7 @@ ndprRouter.post('/requests/:id/complete', authenticate, async (req: Request, res
         where: { id: request.userId },
         data: {
           fullName: '[Deleted User]',
-          phone: null,
+          phone: `deleted-${request.userId}`,
           email: `deleted-${request.userId}@deleted.invalid`,
         },
       }),

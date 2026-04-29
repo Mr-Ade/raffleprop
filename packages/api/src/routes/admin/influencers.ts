@@ -134,9 +134,11 @@ adminInfluencersRouter.patch(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const body = req.body as z.infer<typeof patchCampaignLinkSchema>;
+      // Strip undefined so exactOptionalPropertyTypes doesn't conflict with Prisma's update input
+      const data = Object.fromEntries(Object.entries(body).filter(([, v]) => v !== undefined));
       const link = await prisma.influencerCampaign.update({
         where: { id: req.params['linkId'] as string },
-        data: body,
+        data: data as Parameters<typeof prisma.influencerCampaign.update>[0]['data'],
       });
       res.json({ success: true, data: link });
     } catch (err: unknown) {
