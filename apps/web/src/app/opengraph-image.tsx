@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const size = { width: 1200, height: 630 };
 export const contentType = 'image/png';
-export const alt = 'RaffleProp — Win a Property in Nigeria From ₦2,500';
+export const alt = 'RaffleProp — Win a Property in Nigeria From NGN 2,500';
 
 export default function OgImage() {
   return new ImageResponse(
@@ -86,33 +86,42 @@ export default function OgImage() {
         {/* Headline */}
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'baseline',
             fontSize: 58,
             fontWeight: 900,
             color: '#fff',
             letterSpacing: '-2px',
-            textAlign: 'center',
             lineHeight: 1.1,
             maxWidth: 900,
             marginBottom: 24,
+            gap: 12,
           }}
         >
-          Win a Property.{' '}
-          <span style={{ color: '#F0C040' }}>From ₦2,500.</span>
+          <span>Win a Property.</span>
+          <span style={{ color: '#F0C040' }}>From NGN 2,500.</span>
         </div>
 
         {/* Subheading */}
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
             fontSize: 24,
             color: 'rgba(255,255,255,0.7)',
             textAlign: 'center',
             maxWidth: 700,
             lineHeight: 1.5,
             marginBottom: 44,
+            gap: 4,
           }}
         >
-          Nigeria&apos;s first FCCPC-regulated property raffle platform.
-          CAC registered · Escrow protected · Live draws on YouTube.
+          <span>Nigeria&apos;s first FCCPC-regulated property raffle platform.</span>
+          <span>CAC registered · Escrow protected · Live draws on YouTube.</span>
         </div>
 
         {/* Trust badges row */}
