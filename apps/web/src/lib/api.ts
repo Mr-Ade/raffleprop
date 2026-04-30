@@ -3,7 +3,9 @@
  * Used by both Server Components (server-side fetch) and Client Components.
  */
 
-const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
+// API_URL (non-public) is used server-side on Vercel — bypasses custom domain DNS propagation.
+// NEXT_PUBLIC_API_URL is used client-side in the browser.
+const API_BASE = process.env['API_URL'] ?? process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 
 interface FetchOptions extends RequestInit {
   token?: string;
