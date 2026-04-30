@@ -89,7 +89,7 @@ export default function CampaignStatusBar({ campaignId, status, fccpcRef, token 
           {preSeedCommitment}
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <CopyButton value={preSeedCommitment} label="Copy Commitment" />
+          <CopyButton text={preSeedCommitment} />
           <button
             type="button"
             className="btn btn-primary btn-sm"
