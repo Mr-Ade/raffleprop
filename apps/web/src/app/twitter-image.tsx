@@ -2,7 +2,7 @@ import { ImageResponse } from 'next/og';
 
 export const size = { width: 1200, height: 600 };
 export const contentType = 'image/png';
-export const alt = 'RaffleProp — Win a Property in Nigeria From ₦2,500';
+export const alt = 'RaffleProp — Win a Property in Nigeria From NGN 2,500';
 
 export default function TwitterImage() {
   return new ImageResponse(
@@ -59,36 +59,42 @@ export default function TwitterImage() {
           >
             RP
           </div>
-          <span style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-1px' }}>
-            Raffle<span style={{ color: '#F0C040' }}>Prop</span>
-          </span>
+          <div style={{ display: 'flex', fontSize: 36, fontWeight: 800, letterSpacing: '-1px' }}>
+            <span style={{ color: '#fff' }}>Raffle</span>
+            <span style={{ color: '#F0C040' }}>Prop</span>
+          </div>
         </div>
 
         <div
           style={{
+            display: 'flex',
+            flexDirection: 'row',
+            flexWrap: 'wrap',
+            justifyContent: 'center',
+            alignItems: 'baseline',
             fontSize: 52,
             fontWeight: 900,
-            color: '#fff',
             letterSpacing: '-2px',
-            textAlign: 'center',
             lineHeight: 1.1,
             maxWidth: 860,
             marginBottom: 20,
+            gap: 12,
           }}
         >
-          Win a Property.{' '}
-          <span style={{ color: '#F0C040' }}>From ₦2,500.</span>
+          <span style={{ color: '#fff' }}>Win a Property.</span>
+          <span style={{ color: '#F0C040' }}>From NGN 2,500.</span>
         </div>
 
         <div
           style={{
+            display: 'flex',
             fontSize: 22,
             color: 'rgba(255,255,255,0.7)',
             textAlign: 'center',
             maxWidth: 660,
           }}
         >
-          Nigeria&apos;s first FCCPC-regulated property raffle. raffleprop.com
+          <span>Nigeria&apos;s first FCCPC-regulated property raffle. raffleprop.com</span>
         </div>
 
         <div
