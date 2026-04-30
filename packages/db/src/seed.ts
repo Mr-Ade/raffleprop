@@ -1,4 +1,4 @@
-import { PrismaClient, CampaignStatus, PropertyType, DrawMethod, Role } from '@prisma/client';
+import { PrismaClient, CampaignStatus, PropertyType, DrawMethod, Role, PaymentGateway } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { customAlphabet } from 'nanoid';
 
@@ -82,7 +82,7 @@ async function main() {
       ],
       drawDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       drawMethod: DrawMethod.RANDOM,
-      allowedGateways: ['PAYSTACK', 'FLUTTERWAVE', 'BANK_TRANSFER'],
+      allowedGateways: [PaymentGateway.PAYSTACK, PaymentGateway.FLUTTERWAVE, PaymentGateway.BANK_TRANSFER],
       galleryKeys: [],
       documentKeys: {},
       createdBy: admin.id,
@@ -117,7 +117,7 @@ async function main() {
       ],
       drawDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000),
       drawMethod: DrawMethod.RANDOM,
-      allowedGateways: ['PAYSTACK', 'FLUTTERWAVE', 'BANK_TRANSFER'],
+      allowedGateways: [PaymentGateway.PAYSTACK, PaymentGateway.FLUTTERWAVE, PaymentGateway.BANK_TRANSFER],
       galleryKeys: [],
       documentKeys: {},
       createdBy: admin.id,
@@ -152,7 +152,7 @@ async function main() {
       ],
       drawDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000),
       drawMethod: DrawMethod.RANDOM_ORG_VERIFIED,
-      allowedGateways: ['PAYSTACK', 'FLUTTERWAVE', 'BANK_TRANSFER'],
+      allowedGateways: [PaymentGateway.PAYSTACK, PaymentGateway.FLUTTERWAVE, PaymentGateway.BANK_TRANSFER],
       galleryKeys: [],
       documentKeys: {},
       createdBy: admin.id,
