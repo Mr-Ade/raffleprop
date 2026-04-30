@@ -1,5 +1,5 @@
 {
   "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
-  "buildCommand": "pnpm build",
+  "buildCommand": "cd ../.. && pnpm --filter @raffleprop/shared build && pnpm --filter @raffleprop/web build",
   "outputDirectory": ".next"
 }
