@@ -9,7 +9,6 @@
  * The drawSeed was committed (sha256) before this worker runs, so the result is
  * verifiable by anyone with the seed and the ticket list.
  */
-import 'dotenv/config';
 import Redis from 'ioredis';
 import { Worker, Job } from 'bullmq';
 import { prisma, CampaignStatus, DrawStatus, PaymentStatus } from '@raffleprop/db';
