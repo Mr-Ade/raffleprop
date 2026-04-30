@@ -59,6 +59,7 @@ const allowedOrigins = [
   process.env['FRONTEND_URL'] ?? 'http://localhost:3000',
   process.env['ADMIN_URL'] ?? 'http://localhost:3002',
   // Always allow the canonical production domains
+  'http://raffleprop.com',
   'https://raffleprop.com',
   'https://www.raffleprop.com',
   'https://raffleprop.vercel.app',
