@@ -8,6 +8,7 @@
     "worker": "dotenv -e ../../.env -- ts-node-dev --respawn --transpile-only src/worker.ts",
     "build": "tsc",
     "start": "node dist/server.js",
+    "start:prod": "npx prisma migrate deploy && node dist/server.js",
     "start:worker": "node dist/worker.js",
     "typecheck": "tsc --noEmit",
     "lint": "eslint src --ext .ts",
