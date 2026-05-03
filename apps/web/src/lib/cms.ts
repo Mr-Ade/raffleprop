@@ -6,7 +6,9 @@
  * takes down the public site — callers fall back to hardcoded defaults.
  */
 
-const API_URL = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
+// On the server (Vercel), prefer API_URL (Railway direct URL) to bypass custom-domain DNS.
+// On the client, API_URL is undefined (not NEXT_PUBLIC_*), so fall back to NEXT_PUBLIC_API_URL.
+const API_URL = process.env['API_URL'] ?? process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 const BASE = `${API_URL}/api/content`;
 
 // ─── Types ────────────────────────────────────────────────────────────────────

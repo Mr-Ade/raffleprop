@@ -129,7 +129,7 @@ export default async function CampaignDetailPage({ params }: Props) {
   try {
     campaign = await api.getCampaign(slug) as Campaign & { ticketsSold?: number };
   } catch {
-    notFound();
+    return notFound();
   }
 
   const [ticketCountData, relatedResponse] = await Promise.all([
@@ -185,7 +185,7 @@ export default async function CampaignDetailPage({ params }: Props) {
       <CampaignHeroCarousel
         images={[
           ...(campaign.featuredImageKey ? [campaign.featuredImageKey] : []),
-          ...campaign.galleryKeys,
+          ...(campaign.galleryKeys ?? []),
         ]}
         title={campaign.title}
       >

@@ -1,6 +1,5 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { cms, type CmsPage } from '@/lib/cms';
 import DOMPurify from 'isomorphic-dompurify';
@@ -38,11 +37,16 @@ export default async function BlogPostPage({ params }: Props) {
     cms.getPages().catch(() => [] as Omit<CmsPage, 'content'>[]),
   ]);
 
-  if (!page) notFound();
+  if (!page) return notFound();
 
   const rawHtml = typeof page.content === 'string' ? page.content : '';
   const heroImg = extractFirstImage(rawHtml);
-  const bodyHtml = DOMPurify.sanitize(heroImg ? stripFirstImage(rawHtml) : rawHtml);
+  let bodyHtml = '';
+  try {
+    bodyHtml = DOMPurify.sanitize(heroImg ? stripFirstImage(rawHtml) : rawHtml);
+  } catch {
+    bodyHtml = heroImg ? stripFirstImage(rawHtml) : rawHtml;
+  }
 
   const dateStr = new Date(page.updatedAt).toLocaleDateString('en-NG', {
     year: 'numeric', month: 'long', day: 'numeric',
@@ -72,18 +76,18 @@ export default async function BlogPostPage({ params }: Props) {
         </div>
       </div>
 
-      {/* Hero image */}
+      {/* Hero image — use plain <img> because the src may be a relative /blog/images/... path
+          or a data: URL, neither of which works reliably with next/image fill mode. */}
       {heroImg && (
         <div className="blog-post-img-wrap">
           <div className="container blog-post-img-container">
             <div className="blog-post-img-inner">
-              <Image
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
                 src={heroImg.src}
                 alt={heroImg.alt || page.title}
-                fill
-                priority
-                sizes="(max-width: 860px) 100vw, 820px"
-                className="blog-fill-img"
+                loading="eager"
+                className="blog-fill-img blog-hero-img-native"
               />
             </div>
           </div>
@@ -118,13 +122,8 @@ export default async function BlogPostPage({ params }: Props) {
                 <Link key={r.id} href={`/blog/${r.slug}`} className="related-card">
                   {r.heroImage && (
                     <div className="related-card-img">
-                      <Image
-                        src={r.heroImage}
-                        alt={r.title}
-                        fill
-                        sizes="260px"
-                        className="blog-fill-img"
-                      />
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={r.heroImage} alt={r.title} className="blog-fill-img blog-hero-img-native" />
                     </div>
                   )}
                   <p className="related-card-title">{r.title}</p>

@@ -12,13 +12,14 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 
 type Tab =
   | 'settings' | 'faqs' | 'testimonials' | 'winners'
-  | 'homepage' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages';
+  | 'homepage' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages' | 'topics';
 
 interface ContentPage {
   id: string;
   slug: string;
   title: string;
   content: unknown;
+  topic?: string | null;
   metaTitle?: string | null;
   metaDesc?: string | null;
   status: 'DRAFT' | 'PUBLISHED';
@@ -264,7 +265,7 @@ function FaqsPanel({ faqs: initial, api }: { faqs: Faq[]; api: ReturnType<typeof
         <SectionCard title={editing.id ? 'Edit FAQ' : 'New FAQ'}>
           <Field label="Question"><Input value={editing.question ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, question: e.target.value }))} /></Field>
           <Field label="Answer">
-            <RichTextEditor value={editing.answer ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, answer: html }))} placeholder="Write the answer…" minHeight={120} />
+            <RichTextEditor key={editing.id ?? 'new'} value={editing.answer ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, answer: html }))} placeholder="Write the answer…" minHeight={120} />
           </Field>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 80px', gap: '0.75rem' }}>
             <Field label="Category">
@@ -367,7 +368,7 @@ function TestimonialsPanel({ testimonials: initial, api, token, apiUrl }: { test
             <Field label="Order"><Input type="number" value={editing.order ?? 0} onChange={(e) => setEditing((p) => ({ ...p!, order: parseInt(e.target.value) }))} /></Field>
           </div>
           <Field label="Review Text">
-            <RichTextEditor value={editing.body ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, body: html }))} placeholder="Write the review…" minHeight={100} />
+            <RichTextEditor key={editing.id ?? 'new'} value={editing.body ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, body: html }))} placeholder="Write the review…" minHeight={100} />
           </Field>
           <Field label="Avatar Photo">
             <ContentImageUpload
@@ -736,7 +737,7 @@ function HowItWorksPanel({ steps: initial, api }: { steps: HowItWorksStep[]; api
             <Field label="Order"><Input type="number" value={editing.order ?? 0} onChange={(e) => setEditing((p) => ({ ...p!, order: parseInt(e.target.value) }))} /></Field>
           </div>
           <Field label="Description">
-            <RichTextEditor value={editing.description ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, description: html }))} placeholder="Describe this step…" minHeight={100} />
+            <RichTextEditor key={editing.id ?? 'new'} value={editing.description ?? ''} onChange={(html) => setEditing((p) => ({ ...p!, description: html }))} placeholder="Describe this step…" minHeight={100} />
           </Field>
           <Field label="Icon (optional FA class)"><Input placeholder="fa-house" value={editing.icon ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, icon: e.target.value || null }))} /></Field>
           <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem', marginBottom: '1rem' }}>
@@ -1011,14 +1012,124 @@ function FooterPanel({ settings: initial, api }: { settings: SiteSettings; api: 
   );
 }
 
+// ─── Blog Topics Panel ────────────────────────────────────────────────────────
+
+const DEFAULT_TOPICS = [
+  { icon: 'fa-house-chimney',     label: 'Lagos Property Market' },
+  { icon: 'fa-map-location-dot',  label: 'Abuja Property Market' },
+  { icon: 'fa-piggy-bank',        label: 'Property Investment Tips' },
+  { icon: 'fa-building-columns',  label: 'Land Titles & Legal' },
+  { icon: 'fa-file-contract',     label: 'Deed of Assignment' },
+  { icon: 'fa-scale-balanced',    label: 'FCCPA & Consumer Rights' },
+  { icon: 'fa-trophy',            label: 'Winner Stories' },
+  { icon: 'fa-globe-africa',      label: 'Diaspora Property' },
+  { icon: 'fa-building',          label: 'Off-Plan Buying Guide' },
+  { icon: 'fa-landmark',          label: 'Property Finance & Mortgages' },
+  { icon: 'fa-ticket',            label: 'How Raffles Work' },
+  { icon: 'fa-city',              label: 'Port Harcourt Market' },
+];
+
+function BlogTopicsPanel({ settings: initial, api }: { settings: SiteSettings; api: ReturnType<typeof useApi> }) {
+  const [topics, setTopics] = useState<Array<{ icon: string; label: string }>>(
+    () => (initial.blogTopics ?? []).map((t) => ({ icon: t.icon ?? '', label: t.label ?? '' }))
+  );
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const save = async () => {
+    setSaving(true); setMsg('');
+    try {
+      await api('/settings', 'PUT', { blogTopics: topics.filter((t) => t.label.trim()) });
+      setMsg('Topics saved!');
+    } catch (e) { setMsg(`Error: ${(e as Error).message}`); }
+    setSaving(false);
+  };
+
+  const seed = () => setTopics(DEFAULT_TOPICS.map((t) => ({ icon: t.icon, label: t.label })));
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <div>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 800, marginBottom: '0.25rem' }}>Blog Topics</h2>
+          <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>Topics appear on the blog page. Assign them to posts from the CMS Pages tab.</p>
+        </div>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <StatusMsg msg={msg} />
+          <SaveBtn saving={saving} onClick={save} />
+        </div>
+      </div>
+
+      <SectionCard title="Manage Topics">
+        <div style={{ marginBottom: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+          <button type="button" className="btn btn-outline btn-xs" onClick={() => setTopics((p) => [...p, { icon: 'fa-tag', label: '' }])}>+ Add Topic</button>
+          {topics.length === 0 && (
+            <button type="button" className="btn btn-outline btn-xs" onClick={seed}>Seed 12 Default Topics</button>
+          )}
+        </div>
+        {topics.map((t, i) => (
+          <div key={i} style={{ display: 'grid', gridTemplateColumns: '160px 1fr auto', gap: '0.75rem', marginBottom: '0.625rem', alignItems: 'end' }}>
+            <Field label={i === 0 ? 'FA Icon class' : ''}>
+              <div style={{ position: 'relative' }}>
+                <Input placeholder="fa-house-chimney" value={t.icon} onChange={(e) => setTopics((p) => p.map((x, j) => j === i ? { ...x, icon: e.target.value } : x))} />
+                {t.icon && <i className={`fa-solid ${t.icon}`} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--green-primary)', pointerEvents: 'none' }} />}
+              </div>
+            </Field>
+            <Field label={i === 0 ? 'Topic label (used to tag posts)' : ''}>
+              <Input placeholder="Lagos Property Market" value={t.label} onChange={(e) => setTopics((p) => p.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+            </Field>
+            <button type="button" className="btn btn-danger btn-xs" style={{ marginBottom: '0.3rem' }} onClick={() => setTopics((p) => p.filter((_, j) => j !== i))}>×</button>
+          </div>
+        ))}
+        {topics.length === 0 && (
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>No topics yet. Add one above or seed the defaults.</p>
+        )}
+      </SectionCard>
+
+      <SectionCard title="Preview">
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          {topics.filter((t) => t.label).map((t, i) => (
+            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.35rem 0.75rem', background: 'var(--green-50)', border: '1px solid var(--green-100)', borderRadius: 100, fontSize: '0.8125rem', fontWeight: 600, color: 'var(--green-primary)' }}>
+              <i className={`fa-solid ${t.icon || 'fa-tag'}`} style={{ fontSize: '0.7rem' }} />
+              {t.label}
+            </span>
+          ))}
+          {topics.filter((t) => t.label).length === 0 && <p style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>Save topics above to see the preview.</p>}
+        </div>
+      </SectionCard>
+    </div>
+  );
+}
+
 // ─── CMS Pages Panel ──────────────────────────────────────────────────────────
 
-function PagesPanel({ api }: { api: ReturnType<typeof useApi> }) {
+const R2_PUBLIC_URL = process.env['NEXT_PUBLIC_R2_PUBLIC_URL'] ?? '';
+
+function PagesPanel({ settings, api, token, apiUrl }: { settings: SiteSettings; api: ReturnType<typeof useApi>; token: string; apiUrl: string }) {
   const [pages, setPages] = useState<ContentPage[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState<Partial<ContentPage> | null>(null);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState('');
+
+  const availableTopics = (settings.blogTopics ?? []).map((t) => t.label ?? '').filter(Boolean);
+
+  const imageUploadHandler = useCallback(async (file: File): Promise<string> => {
+    const entityId = editing?.id ?? 'new';
+    const presignRes = await fetch(`${apiUrl}/api/admin/storage/presign`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ purpose: 'content_media', entityId, mimeType: file.type }),
+    });
+    if (!presignRes.ok) {
+      const err = (await presignRes.json().catch(() => ({}))) as { error?: string };
+      throw new Error(err.error ?? `Presign failed (${presignRes.status})`);
+    }
+    const { data: { uploadUrl, key } } = (await presignRes.json()) as { data: { uploadUrl: string; key: string } };
+    const uploadRes = await fetch(uploadUrl, { method: 'PUT', body: file, headers: { 'Content-Type': file.type } });
+    if (!uploadRes.ok) throw new Error(`Upload failed (${uploadRes.status})`);
+    return `${R2_PUBLIC_URL}/${key}`;
+  }, [apiUrl, token, editing?.id]);
 
   const load = useCallback(async () => {
     try { const r = await api('/pages') as { success: boolean; data: ContentPage[] }; setPages(r.data as ContentPage[]); setLoaded(true); }
@@ -1034,6 +1145,7 @@ function PagesPanel({ api }: { api: ReturnType<typeof useApi> }) {
       slug: editing.slug,
       title: editing.title,
       content: typeof editing.content === 'string' ? editing.content : '',
+      topic: editing.topic || null,
       metaTitle: editing.metaTitle || null,
       metaDesc: editing.metaDesc || null,
       status: editing.status ?? 'DRAFT',
@@ -1070,8 +1182,14 @@ function PagesPanel({ api }: { api: ReturnType<typeof useApi> }) {
         <SectionCard title={editing.id ? 'Edit Page' : 'New Page'}>
           <Field label="Slug (URL path)"><Input placeholder="about-us" value={editing.slug ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '-') }))} /></Field>
           <Field label="Title"><Input value={editing.title ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, title: e.target.value }))} /></Field>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem' }}>
             <Field label="Meta Title"><Input value={editing.metaTitle ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, metaTitle: e.target.value }))} /></Field>
+            <Field label="Topic">
+              <select className="admin-input" value={editing.topic ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, topic: e.target.value || null }))}>
+                <option value="">— No topic —</option>
+                {availableTopics.map((t) => <option key={t} value={t}>{t}</option>)}
+              </select>
+            </Field>
             <Field label="Status">
               <select className="admin-input" value={editing.status ?? 'DRAFT'} onChange={(e) => setEditing((p) => ({ ...p!, status: e.target.value as 'DRAFT' | 'PUBLISHED' }))}>
                 <option value="DRAFT">Draft</option>
@@ -1082,10 +1200,12 @@ function PagesPanel({ api }: { api: ReturnType<typeof useApi> }) {
           <Field label="Meta Description"><Textarea rows={2} value={editing.metaDesc ?? ''} onChange={(e) => setEditing((p) => ({ ...p!, metaDesc: e.target.value }))} /></Field>
           <Field label="Content">
             <RichTextEditor
+              key={editing.id ?? 'new'}
               value={typeof editing.content === 'string' ? editing.content : ''}
               onChange={(html) => setEditing((p) => ({ ...p!, content: html }))}
               placeholder="Write blog post content…"
               minHeight={320}
+              imageUploadHandler={imageUploadHandler}
             />
           </Field>
           <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}><SaveBtn saving={saving} onClick={save} /><button type="button" className="btn btn-outline btn-sm" onClick={() => setEditing(null)}>Cancel</button></div>
@@ -1096,7 +1216,10 @@ function PagesPanel({ api }: { api: ReturnType<typeof useApi> }) {
           <div key={p.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--card-bg)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius)', padding: '0.875rem 1rem' }}>
             <div>
               <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{p.title} <span style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--text-muted)' }}>/{p.slug}</span></div>
-              <span style={{ padding: '0.125rem 0.5rem', borderRadius: 100, fontSize: '0.75rem', background: p.status === 'PUBLISHED' ? 'var(--green-50)' : 'var(--bg)', border: '1px solid', borderColor: p.status === 'PUBLISHED' ? 'var(--green-100)' : 'var(--border-light)', color: p.status === 'PUBLISHED' ? 'var(--green-primary)' : 'var(--text-muted)' }}>{p.status}</span>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                <span style={{ padding: '0.125rem 0.5rem', borderRadius: 100, fontSize: '0.75rem', background: p.status === 'PUBLISHED' ? 'var(--green-50)' : 'var(--bg)', border: '1px solid', borderColor: p.status === 'PUBLISHED' ? 'var(--green-100)' : 'var(--border-light)', color: p.status === 'PUBLISHED' ? 'var(--green-primary)' : 'var(--text-muted)' }}>{p.status}</span>
+                {p.topic && <span style={{ padding: '0.125rem 0.5rem', borderRadius: 100, fontSize: '0.75rem', background: '#ede9fe', color: '#6d28d9', border: '1px solid #ddd6fe' }}>{p.topic}</span>}
+              </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button type="button" className="btn btn-outline btn-xs" onClick={() => setEditing({ ...p, content: typeof p.content === 'string' ? p.content : '' })}>Edit</button>
@@ -1238,6 +1361,7 @@ const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'footer',       label: 'Footer & Nav',        icon: 'fa-newspaper' },
   { id: 'vault',        label: 'Document Vault',      icon: 'fa-folder-open' },
   { id: 'pages',        label: 'CMS Pages',           icon: 'fa-file-lines' },
+  { id: 'topics',       label: 'Blog Topics',         icon: 'fa-tags' },
 ];
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
@@ -1322,7 +1446,8 @@ export function ContentManager({
         {activeTab === 'about'        && <AboutPanel settings={initialSettings} team={initialTeam} milestones={initialMilestones} api={api} token={token} apiUrl={apiUrl} />}
         {activeTab === 'footer'       && <FooterPanel settings={initialSettings} api={api} />}
         {activeTab === 'vault'        && <DocumentVaultPanel settings={initialSettings} api={api} token={token} apiUrl={apiUrl} />}
-        {activeTab === 'pages'        && <PagesPanel api={api} />}
+        {activeTab === 'pages'        && <PagesPanel settings={initialSettings} api={api} token={token} apiUrl={apiUrl} />}
+        {activeTab === 'topics'       && <BlogTopicsPanel settings={initialSettings} api={api} />}
       </div>
     </div>
   );
