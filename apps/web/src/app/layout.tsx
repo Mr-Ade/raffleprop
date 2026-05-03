@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { SiteShell } from '@/components/SiteShell';
+import { SentryInit } from '@/components/SentryInit';
 import { cms } from '@/lib/cms';
 
 export const metadata: Metadata = {
@@ -51,6 +52,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
         <link rel="stylesheet" href="/fa/css/all.min.css" />
       </head>
       <body suppressHydrationWarning>
+        <SentryInit />
         <a href="#main-content" className="skip-link">Skip to main content</a>
         {banner && (
           <div role="alert" style={{
