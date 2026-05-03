@@ -6,6 +6,7 @@ import { CampaignCard } from '@/components/CampaignCard';
 import { StatCounter } from '@/components/StatCounter';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { CountdownTimer } from '@/components/CountdownTimer';
+import { TestimonialSubmitForm } from '@/components/TestimonialSubmitForm';
 import type { Campaign } from '@raffleprop/shared';
 
 export const revalidate = 60;
@@ -676,6 +677,7 @@ export default async function HomePage() {
               );
             })}
           </div>
+          <TestimonialSubmitForm />
         </div>
       </section>
 

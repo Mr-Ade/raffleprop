@@ -76,6 +76,20 @@ export const campaignListRateLimit = rateLimit({
   keyGenerator: (req) => req.ip ?? 'unknown',
 });
 
+// Testimonial submission: 3 per hour per IP (prevent spam)
+export const testimonialSubmitRateLimit = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 3,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:testimonial:',
+  }),
+  message: { success: false, error: 'You have submitted too many reviews. Please try again later.' },
+  keyGenerator: (req) => req.ip ?? 'unknown',
+});
+
 // OTP: 3 per 10 minutes per phone
 export const otpRateLimit = rateLimit({
   windowMs: 10 * 60 * 1000,

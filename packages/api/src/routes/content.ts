@@ -7,6 +7,7 @@ import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '@raffleprop/db';
 import { AppError } from '../middleware/errorHandler';
 import { authenticate } from '../middleware/auth';
+import { testimonialSubmitRateLimit } from '../middleware/rateLimit';
 
 export const publicContentRouter: Router = Router();
 
@@ -281,6 +282,36 @@ publicContentRouter.get('/pages/:slug', async (req: Request, res: Response, next
     res.json({ success: true, data: page });
   } catch (err) {
     next(err instanceof AppError ? err : new AppError(500, 'Failed to load page'));
+  }
+});
+
+// ─── Testimonial Submission (public, rate-limited) ───────────────────────────
+
+publicContentRouter.post('/testimonials', testimonialSubmitRateLimit, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const authorName = typeof req.body['authorName'] === 'string' ? req.body['authorName'].trim() : '';
+    const authorTitle = typeof req.body['authorTitle'] === 'string' ? req.body['authorTitle'].trim() : '';
+    const body = typeof req.body['body'] === 'string' ? req.body['body'].trim() : '';
+    const rating = Number(req.body['rating']);
+
+    if (!authorName || authorName.length > 100) throw new AppError(400, 'Name is required (max 100 characters)');
+    if (!body || body.length < 10 || body.length > 500) throw new AppError(400, 'Review must be between 10 and 500 characters');
+    if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw new AppError(400, 'Rating must be between 1 and 5');
+
+    await prisma.testimonial.create({
+      data: {
+        authorName,
+        authorTitle: authorTitle || null,
+        body,
+        rating,
+        published: false, // awaits admin approval
+        featured: false,
+        order: 0,
+      },
+    });
+    res.status(201).json({ success: true, data: { message: 'Thank you! Your review has been submitted for approval.' } });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to submit review'));
   }
 });
 
