@@ -8,5 +8,6 @@ if (process.env['SENTRY_DSN']) {
     integrations: [nodeProfilingIntegration()],
     tracesSampleRate: process.env['NODE_ENV'] === 'production' ? 0.1 : 0,
     profilesSampleRate: process.env['NODE_ENV'] === 'production' ? 0.1 : 0,
+    enableLogs: true,
   });
 }
