@@ -2,7 +2,6 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cms, type CmsPage } from '@/lib/cms';
-import DOMPurify from 'isomorphic-dompurify';
 
 export const revalidate = 600;
 
@@ -41,16 +40,16 @@ export default async function BlogPostPage({ params }: Props) {
 
   const rawHtml = typeof page.content === 'string' ? page.content : '';
   const heroImg = extractFirstImage(rawHtml);
-  let bodyHtml = '';
-  try {
-    bodyHtml = DOMPurify.sanitize(heroImg ? stripFirstImage(rawHtml) : rawHtml);
-  } catch {
-    bodyHtml = heroImg ? stripFirstImage(rawHtml) : rawHtml;
-  }
+  const bodyHtml = heroImg ? stripFirstImage(rawHtml) : rawHtml;
 
-  const dateStr = new Date(page.updatedAt).toLocaleDateString('en-NG', {
-    year: 'numeric', month: 'long', day: 'numeric',
-  });
+  let dateStr = '';
+  try {
+    dateStr = new Date(page.updatedAt).toLocaleDateString('en-NG', {
+      year: 'numeric', month: 'long', day: 'numeric',
+    });
+  } catch {
+    dateStr = page.updatedAt ? String(page.updatedAt).slice(0, 10) : '';
+  }
 
   const related = allPages
     .filter((p) => p.slug !== page.slug)
