@@ -212,8 +212,9 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
   const [bundles, setBundles]           = useState<Bundle[]>(initialData?.bundles ?? DEFAULT_BUNDLES);
 
   // ── Dates ─────────────────────────────────────────────────────────────────────
-  const toDateInput = (d?: string | null) => d ? d.slice(0, 10) : '';
-  const [drawDate, setDrawDate]         = useState(toDateInput(initialData?.drawDate));
+  const toDateInput   = (d?: string | null) => d ? d.slice(0, 10) : '';
+  const toDateTimeInput = (d?: string | null) => d ? new Date(d).toISOString().slice(0, 16) : '';
+  const [drawDate, setDrawDate]         = useState(toDateTimeInput(initialData?.drawDate));
 
   // ── Images / video ────────────────────────────────────────────────────────────
   const [imageUrlInput, setImageUrlInput] = useState('');
@@ -728,8 +729,8 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
       {/* Draw date */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
         <div className="form-group" style={{ marginBottom: 0 }}>
-          <label className="form-label">Draw Date</label>
-          <input type="date" className="form-input" value={drawDate} onChange={e => setDrawDate(e.target.value)} disabled={!canEdit} />
+          <label className="form-label">Draw Date &amp; Time</label>
+          <input type="datetime-local" className="form-input" value={drawDate} onChange={e => setDrawDate(e.target.value)} disabled={!canEdit} />
         </div>
       </div>
 
