@@ -1,3 +1,4 @@
+import './instrument'; // must be first — Sentry requires early initialisation
 import { app } from './app';
 import { prisma } from '@raffleprop/db';
 import { redis } from './lib/redis';

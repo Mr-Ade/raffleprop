@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import * as Sentry from '@sentry/node';
 
 export class AppError extends Error {
   constructor(
@@ -38,7 +39,8 @@ export function errorHandler(
     return;
   }
 
-  // Unknown error — don't leak internals in production
+  // Unknown error — capture to Sentry and don't leak internals in production
+  Sentry.captureException(err);
   const isDev = process.env['NODE_ENV'] !== 'production';
   console.error('Unhandled error:', err);
   res.status(500).json({

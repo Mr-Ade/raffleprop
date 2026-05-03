@@ -25,6 +25,7 @@ import { adminCommsRouter } from './routes/admin/comms';
 import { publicContentRouter } from './routes/content';
 import { drawsRouter } from './routes/draws';
 import { errorHandler } from './middleware/errorHandler';
+import * as Sentry from '@sentry/node';
 
 const app: import('express').Express = express();
 
@@ -126,6 +127,9 @@ app.use('/api/admin/comms', adminCommsRouter);
 app.use((_req, res) => {
   res.status(404).json({ success: false, error: 'Route not found' });
 });
+
+// ─── Sentry error handler (must be before custom error handler) ───────────────
+Sentry.setupExpressErrorHandler(app);
 
 // ─── Error Handler ────────────────────────────────────────────────────────────
 app.use(errorHandler);

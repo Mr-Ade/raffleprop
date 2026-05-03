@@ -19,6 +19,8 @@
     "@prisma/client": "^5.12.0",
     "@raffleprop/db": "workspace:*",
     "@raffleprop/shared": "workspace:*",
+    "@sentry/node": "^10.51.0",
+    "@sentry/profiling-node": "^10.51.0",
     "bcryptjs": "^2.4.3",
     "bullmq": "^5.4.0",
     "compression": "^1.7.4",
@@ -47,8 +49,11 @@
     "@types/multer": "^1.4.11",
     "@types/pdfkit": "^0.17.6",
     "@types/speakeasy": "^2.0.10",
+    "@types/supertest": "^7.2.0",
     "dotenv-cli": "^7.4.2",
+    "supertest": "^7.2.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.1.5"
   }
 }
