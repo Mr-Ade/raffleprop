@@ -6,6 +6,7 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { prisma } from '@raffleprop/db';
 import { AppError } from '../middleware/errorHandler';
+import { authenticate } from '../middleware/auth';
 
 export const publicContentRouter: Router = Router();
 
@@ -280,5 +281,89 @@ publicContentRouter.get('/pages/:slug', async (req: Request, res: Response, next
     res.json({ success: true, data: page });
   } catch (err) {
     next(err instanceof AppError ? err : new AppError(500, 'Failed to load page'));
+  }
+});
+
+// ─── Blog Comments ────────────────────────────────────────────────────────────
+
+// GET /api/content/pages/:slug/comments — public, no auth
+publicContentRouter.get('/pages/:slug/comments', async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.setHeader('Cache-Control', 'no-store');
+    const slug = req.params['slug'] as string;
+    const comments = await (prisma.blogComment as any).findMany({
+      where: { pageSlug: slug, approved: true, parentId: null },
+      orderBy: { createdAt: 'desc' as const },
+      select: {
+        id: true,
+        body: true,
+        createdAt: true,
+        user: { select: { id: true, fullName: true } },
+        replies: {
+          where: { approved: true },
+          orderBy: { createdAt: 'asc' as const },
+          select: {
+            id: true,
+            body: true,
+            createdAt: true,
+            user: { select: { id: true, fullName: true } },
+          },
+        },
+      },
+    });
+    res.json({ success: true, data: comments });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to load comments'));
+  }
+});
+
+// POST /api/content/pages/:slug/comments — authenticated users only
+publicContentRouter.post('/pages/:slug/comments', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const slug = req.params['slug'] as string;
+    const body = typeof req.body['body'] === 'string' ? req.body['body'].trim() : '';
+    if (!body || body.length > 2000) {
+      throw new AppError(400, 'Comment body must be between 1 and 2000 characters');
+    }
+    const page = await (prisma.contentPage as any).findFirst({ where: { slug, status: 'PUBLISHED' }, select: { slug: true } });
+    if (!page) throw new AppError(404, 'Blog post not found');
+
+    const comment = await (prisma.blogComment as any).create({
+      data: { pageSlug: slug, userId: req.user!.sub, body },
+      select: {
+        id: true, body: true, createdAt: true,
+        user: { select: { id: true, fullName: true } },
+        replies: true,
+      },
+    });
+    res.status(201).json({ success: true, data: comment });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to post comment'));
+  }
+});
+
+// POST /api/content/comments/:id/reply — authenticated users only
+publicContentRouter.post('/comments/:id/reply', authenticate, async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const parentId = req.params['id'] as string;
+    const body = typeof req.body['body'] === 'string' ? req.body['body'].trim() : '';
+    if (!body || body.length > 2000) {
+      throw new AppError(400, 'Reply body must be between 1 and 2000 characters');
+    }
+    const parent = await (prisma.blogComment as any).findUnique({ where: { id: parentId }, select: { id: true, pageSlug: true, parentId: true } });
+    if (!parent) throw new AppError(404, 'Comment not found');
+    // Only allow one level of nesting
+    if (parent.parentId) throw new AppError(400, 'Cannot reply to a reply');
+
+    const reply = await (prisma.blogComment as any).create({
+      data: { pageSlug: parent.pageSlug, userId: req.user!.sub, body, parentId },
+      select: {
+        id: true, body: true, createdAt: true,
+        user: { select: { id: true, fullName: true } },
+      },
+    });
+    res.status(201).json({ success: true, data: reply });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to post reply'));
   }
 });

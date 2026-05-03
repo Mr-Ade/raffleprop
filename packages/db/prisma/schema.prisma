@@ -141,6 +141,7 @@ model User {
   refunds       Refund[]
   ndprRequests  NdprRequest[]
   adminSessions AdminSession[]
+  blogComments  BlogComment[]  @relation("BlogComments")
 
   @@index([email])
   @@index([phone])
@@ -650,6 +651,25 @@ model WinnerStory {
 }
 
 // ─── CMS Content Pages ───────────────────────────────────────────────────────
+
+// ─── Blog Comments ───────────────────────────────────────────────────────────
+
+model BlogComment {
+  id        String    @id @default(uuid())
+  pageSlug  String
+  userId    String
+  user      User      @relation("BlogComments", fields: [userId], references: [id], onDelete: Cascade)
+  body      String    @db.Text
+  parentId  String?
+  parent    BlogComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   BlogComment[] @relation("CommentReplies")
+  approved  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+
+  @@index([pageSlug])
+  @@index([userId])
+  @@map("blog_comments")
+}
 
 model ContentPage {
   id          String   @id @default(uuid())

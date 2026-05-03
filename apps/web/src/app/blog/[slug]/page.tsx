@@ -2,8 +2,13 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cms, type CmsPage } from '@/lib/cms';
+import { getServerSession } from '@/lib/session';
+import { ShareWidget } from '@/components/ShareWidget';
+import { BlogCommentsSection } from '@/components/BlogCommentsSection';
 
 export const revalidate = 600;
+
+const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://raffleprop.com';
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -29,11 +34,18 @@ function stripFirstImage(html: string): string {
   return html.replace(/<img[^>]+>/, '');
 }
 
+function readingTime(html: string): number {
+  const text = html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const words = text ? text.split(' ').length : 0;
+  return Math.max(1, Math.ceil(words / 200));
+}
+
 export default async function BlogPostPage({ params }: Props) {
   const { slug } = await params;
-  const [page, allPages] = await Promise.all([
+  const [page, allPages, sessionUser] = await Promise.all([
     cms.getPage(slug),
     cms.getPages().catch(() => [] as Omit<CmsPage, 'content'>[]),
+    getServerSession(),
   ]);
 
   if (!page) return notFound();
@@ -41,6 +53,7 @@ export default async function BlogPostPage({ params }: Props) {
   const rawHtml = typeof page.content === 'string' ? page.content : '';
   const heroImg = extractFirstImage(rawHtml);
   const bodyHtml = heroImg ? stripFirstImage(rawHtml) : rawHtml;
+  const readMins = readingTime(rawHtml);
 
   let dateStr = '';
   try {
@@ -55,6 +68,9 @@ export default async function BlogPostPage({ params }: Props) {
     .filter((p) => p.slug !== page.slug)
     .slice(0, 3);
 
+  const pageUrl = `${SITE_URL}/blog/${slug}`;
+  const currentUser = sessionUser ? { id: sessionUser.id, fullName: sessionUser.fullName } : null;
+
   return (
     <main id="main-content">
 
@@ -68,10 +84,16 @@ export default async function BlogPostPage({ params }: Props) {
           {page.metaDesc && (
             <p className="blog-post-desc">{page.metaDesc}</p>
           )}
-          <p className="blog-post-date">
-            <i className="fa-regular fa-calendar" />
-            Updated {dateStr}
-          </p>
+          <div className="blog-post-meta-row">
+            <span className="blog-post-date">
+              <i className="fa-regular fa-calendar" />
+              Updated {dateStr}
+            </span>
+            <span className="blog-post-read-time">
+              <i className="fa-regular fa-clock" />
+              {readMins} min read
+            </span>
+          </div>
         </div>
       </div>
 
@@ -100,6 +122,15 @@ export default async function BlogPostPage({ params }: Props) {
             className="blog-body"
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
+
+          {/* Share bar */}
+          <div className="blog-share-bar">
+            <span className="blog-share-label">
+              <i className="fa-solid fa-share-nodes" /> Share this article
+            </span>
+            <ShareWidget title={page.title} url={pageUrl} />
+          </div>
+
           <div className="blog-post-footer">
             <Link href="/blog" className="btn btn-outline btn-sm">
               <i className="fa-solid fa-arrow-left" /> All Articles
@@ -108,6 +139,13 @@ export default async function BlogPostPage({ params }: Props) {
               <i className="fa-solid fa-ticket" /> Browse Campaigns
             </Link>
           </div>
+
+          {/* Comments */}
+          <BlogCommentsSection
+            pageSlug={slug}
+            initialComments={[]}
+            currentUser={currentUser}
+          />
         </div>
       </section>
 

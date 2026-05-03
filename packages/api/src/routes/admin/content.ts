@@ -430,6 +430,41 @@ adminContentRouter.delete('/pages/:id', async (req: Request, res: Response) => {
   res.json({ success: true });
 });
 
+// ─── Blog Comment Moderation ──────────────────────────────────────────────────
+
+adminContentRouter.get('/comments', async (req: Request, res: Response) => {
+  const slug = typeof req.query['slug'] === 'string' ? req.query['slug'] : undefined;
+  const comments = await (prisma.blogComment as any).findMany({
+    where: slug ? { pageSlug: slug } : {},
+    orderBy: { createdAt: 'desc' as const },
+    select: {
+      id: true, pageSlug: true, body: true, approved: true, createdAt: true,
+      user: { select: { id: true, fullName: true, email: true } },
+      parentId: true,
+    },
+  });
+  res.json({ success: true, data: comments });
+});
+
+adminContentRouter.patch('/comments/:id', async (req: Request, res: Response) => {
+  const approved = req.body['approved'];
+  if (typeof approved !== 'boolean') {
+    res.status(400).json({ success: false, error: 'approved must be boolean' });
+    return;
+  }
+  const comment = await (prisma.blogComment as any).update({
+    where: { id: req.params['id'] as string },
+    data: { approved },
+    select: { id: true, approved: true },
+  });
+  res.json({ success: true, data: comment });
+});
+
+adminContentRouter.delete('/comments/:id', async (req: Request, res: Response) => {
+  await (prisma.blogComment as any).delete({ where: { id: req.params['id'] as string } });
+  res.json({ success: true });
+});
+
 // ─── Aggregate GET — returns everything in one request for page load ──────────
 
 adminContentRouter.get('/', async (_req: Request, res: Response) => {
