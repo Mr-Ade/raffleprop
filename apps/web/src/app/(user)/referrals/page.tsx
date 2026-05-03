@@ -75,7 +75,7 @@ export default async function ReferralsPage() {
       </div>
 
       {/* Stats row */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
           { label: 'Total Referrals', value: referralCount, color: 'var(--green-primary)', icon: 'fa-users' },
           { label: 'Free Tickets Earned', value: freeTicketsEarned, color: 'var(--gold)', icon: 'fa-ticket' },
@@ -169,7 +169,7 @@ export default async function ReferralsPage() {
           <i className="fa-solid fa-circle-info" style={{ marginRight: '0.5rem', color: 'var(--green-primary)' }} />
           How the Programme Works
         </h2>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
           {HOW_IT_WORKS.map((step) => (
             <div key={step.step} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
               <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg, var(--green-primary), var(--green-light))', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: '0.8rem', flexShrink: 0 }}>

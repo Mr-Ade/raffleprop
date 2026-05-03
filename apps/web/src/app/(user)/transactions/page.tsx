@@ -113,7 +113,7 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
       </div>
 
       {/* Summary stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(145px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
           { label: 'Total Transactions', value: txData.total, icon: 'fa-file-invoice', color: 'var(--text-primary)' },
           { label: 'Total Paid', value: `₦${(txData.totalPaid ?? 0).toLocaleString()}`, icon: 'fa-naira-sign', color: 'var(--green-primary)' },

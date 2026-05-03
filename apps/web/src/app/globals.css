@@ -678,7 +678,7 @@ h1, h2, h3, h4, h5, h6, p, li, td, th {
   flex-shrink: 0;
   padding: 1.5rem 0.75rem;
 }
-.portal-main { flex: 1; padding: 2rem; max-width: 960px; min-width: 0; }
+.portal-main { flex: 1; padding: 2rem; max-width: 960px; min-width: 0; overflow-x: hidden; }
 .portal-nav-item {
   display: flex;
   align-items: center;
