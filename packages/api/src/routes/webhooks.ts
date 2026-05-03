@@ -23,9 +23,11 @@ webhooksRouter.post('/paystack', async (req: Request, res: Response) => {
     return;
   }
 
-  // Verify HMAC-SHA512
+  // Verify HMAC-SHA512.
+  // Paystack signs webhooks with the Secret Key (sk_test/sk_live), NOT a
+  // separate webhook secret. Use PAYSTACK_SECRET_KEY for verification.
   const expected = crypto
-    .createHmac('sha512', process.env['PAYSTACK_WEBHOOK_SECRET']!)
+    .createHmac('sha512', process.env['PAYSTACK_SECRET_KEY']!)
     .update(rawBody)
     .digest('hex');
 
