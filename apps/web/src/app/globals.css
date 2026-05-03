@@ -678,7 +678,7 @@ h1, h2, h3, h4, h5, h6, p, li, td, th {
   flex-shrink: 0;
   padding: 1.5rem 0.75rem;
 }
-.portal-main { flex: 1; padding: 2rem; max-width: 960px; }
+.portal-main { flex: 1; padding: 2rem; max-width: 960px; min-width: 0; }
 .portal-nav-item {
   display: flex;
   align-items: center;
@@ -770,6 +770,11 @@ h1, h2, h3, h4, h5, h6, p, li, td, th {
   .portal-bottom-nav { display: flex; }
   .portal-main { padding: 1.25rem 1.25rem 90px; }
   .portal-mobile-header { display: flex; }
+}
+@media (max-width: 480px) {
+  .portal-main { padding: 1rem 1rem 88px; }
+  .portal-page-title { font-size: 1.25rem; }
+  .portal-page-subtitle { font-size: 0.8rem; }
 }
 
 /* ── Admin Sidebar ── */

@@ -173,52 +173,49 @@ export default async function TransactionsPage({ searchParams }: PageProps) {
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem' }}>
+            <table className="data-table data-table-responsive" style={{ fontSize: '0.85rem' }}>
               <thead>
-                <tr style={{ borderBottom: '1px solid var(--border-light)', background: 'var(--bg-secondary)' }}>
+                <tr style={{ background: 'var(--bg-secondary)' }}>
                   {['Date', 'Campaign', 'Ticket #', 'Receipt #', 'Qty', 'Amount', 'Gateway', 'Status', 'Refund'].map((h) => (
-                    <th key={h} style={{ padding: '0.75rem 1rem', textAlign: 'left', fontWeight: 600, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.775rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
+                    <th key={h} style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {transactions.map((tx, idx) => {
+                {transactions.map((tx) => {
                   const st = STATUS_STYLES[tx.paymentStatus] ?? STATUS_STYLES['PENDING']!;
                   return (
-                    <tr
-                      key={tx.id}
-                      style={{ borderBottom: idx < transactions.length - 1 ? '1px solid var(--border-light)' : 'none', transition: 'background 0.15s' }}
-                    >
-                      <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
+                    <tr key={tx.id}>
+                      <td data-label="Date" style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.8rem' }}>
                         {formatDate(tx.purchasedAt)}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', maxWidth: '200px' }}>
+                      <td data-label="Campaign" style={{ maxWidth: '200px' }}>
                         <Link href={`/campaigns/${tx.campaign.slug}`} style={{ color: 'var(--green-primary)', fontWeight: 600, fontSize: '0.825rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', display: 'block' }}>
                           {tx.campaign.title}
                         </Link>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.775rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      <td data-label="Ticket #" style={{ fontFamily: 'monospace', fontSize: '0.775rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                         {tx.ticketNumber}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontFamily: 'monospace', fontSize: '0.775rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      <td data-label="Receipt #" style={{ fontFamily: 'monospace', fontSize: '0.775rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
                         {tx.receiptNumber}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', textAlign: 'center', fontWeight: 600 }}>
+                      <td data-label="Qty" style={{ textAlign: 'center', fontWeight: 600 }}>
                         {tx.quantity}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', fontWeight: 700, color: 'var(--green-primary)', whiteSpace: 'nowrap' }}>
+                      <td data-label="Amount" style={{ fontWeight: 700, color: 'var(--green-primary)', whiteSpace: 'nowrap' }}>
                         ₦{Number(tx.totalAmount).toLocaleString()}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
+                      <td data-label="Gateway" style={{ color: 'var(--text-muted)', fontSize: '0.8rem', whiteSpace: 'nowrap' }}>
                         <i className="fa-solid fa-credit-card" style={{ marginRight: '0.25rem', fontSize: '0.75rem' }} />
                         {tx.paymentGateway}
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                      <td data-label="Status" style={{ whiteSpace: 'nowrap' }}>
                         <span style={{ padding: '0.2rem 0.6rem', borderRadius: 99, background: st.bg, color: st.color, fontSize: '0.75rem', fontWeight: 700 }}>
                           {st.label}
                         </span>
                       </td>
-                      <td style={{ padding: '0.75rem 1rem', whiteSpace: 'nowrap' }}>
+                      <td data-label="Refund" style={{ whiteSpace: 'nowrap' }}>
                         {tx.refund ? (
                           <span style={{ padding: '0.2rem 0.6rem', borderRadius: 99, background: (REFUND_STATUS_STYLES[tx.refund.status] ?? REFUND_STATUS_STYLES['PENDING']!).bg, color: (REFUND_STATUS_STYLES[tx.refund.status] ?? REFUND_STATUS_STYLES['PENDING']!).color, fontSize: '0.75rem', fontWeight: 700 }}>
                             {tx.refund.status}

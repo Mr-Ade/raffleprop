@@ -92,7 +92,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stat cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
         <div className="stat-card">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '0.75rem' }}>
             <div style={{ width: 38, height: 38, borderRadius: 8, background: 'var(--green-50)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--green-primary)' }}>
@@ -273,7 +273,7 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
-            <table className="data-table">
+            <table className="data-table data-table-responsive">
               <thead>
                 <tr>
                   <th>Ticket #</th>
@@ -287,12 +287,12 @@ export default async function DashboardPage() {
               <tbody>
                 {tickets.slice(0, 5).map((t) => (
                   <tr key={t.id}>
-                    <td style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8125rem' }}>{t.ticketNumber}</td>
-                    <td style={{ fontSize: '0.8125rem', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.campaign?.title ?? '—'}</td>
-                    <td>{new Date(t.purchasedAt).toLocaleDateString('en-NG')}</td>
-                    <td>{t.quantity}</td>
-                    <td style={{ fontWeight: 700 }}>₦{Number(t.totalAmount).toLocaleString()}</td>
-                    <td>
+                    <td data-label="Ticket #" style={{ fontWeight: 600, fontFamily: 'monospace', fontSize: '0.8125rem' }}>{t.ticketNumber}</td>
+                    <td data-label="Campaign" style={{ fontSize: '0.8125rem', maxWidth: 180, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.campaign?.title ?? '—'}</td>
+                    <td data-label="Date">{new Date(t.purchasedAt).toLocaleDateString('en-NG')}</td>
+                    <td data-label="Qty">{t.quantity}</td>
+                    <td data-label="Amount" style={{ fontWeight: 700 }}>₦{Number(t.totalAmount).toLocaleString()}</td>
+                    <td data-label="Status">
                       <span className={`badge ${t.paymentStatus === 'SUCCESS' ? 'badge-green' : t.paymentStatus === 'PENDING' ? 'badge-gold' : 'badge-red'}`}>
                         {t.paymentStatus}
                       </span>
