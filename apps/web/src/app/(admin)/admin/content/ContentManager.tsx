@@ -12,7 +12,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 
 type Tab =
   | 'settings' | 'faqs' | 'testimonials' | 'winners'
-  | 'homepage' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages' | 'topics';
+  | 'homepage' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages' | 'topics' | 'comments';
 
 interface ContentPage {
   id: string;
@@ -1347,6 +1347,196 @@ function DocumentVaultPanel({ settings: initial, api, token, apiUrl }: { setting
   );
 }
 
+// ─── Comments Panel ───────────────────────────────────────────────────────────
+
+interface BlogComment {
+  id: string;
+  pageSlug: string;
+  body: string;
+  approved: boolean;
+  createdAt: string;
+  parentId: string | null;
+  user: { id: string; fullName: string; email: string };
+}
+
+function CommentsPanel({ api }: { api: ReturnType<typeof useApi> }) {
+  const [comments, setComments] = useState<BlogComment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [slugFilter, setSlugFilter] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'approved' | 'hidden'>('all');
+  const [msg, setMsg] = useState('');
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const qs = slugFilter ? `?slug=${encodeURIComponent(slugFilter)}` : '';
+      const res = await api(`/comments${qs}`) as { success: boolean; data: BlogComment[] };
+      setComments(res.data ?? []);
+    } catch (e) {
+      setMsg(`Error: ${(e as Error).message}`);
+    }
+    setLoading(false);
+  }, [api, slugFilter]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function toggleApprove(c: BlogComment) {
+    setMsg('');
+    try {
+      await api(`/comments/${c.id}`, 'PATCH', { approved: !c.approved });
+      setComments((prev) => prev.map((x) => x.id === c.id ? { ...x, approved: !c.approved } : x));
+      setMsg(c.approved ? 'Comment hidden.' : 'Comment approved.');
+    } catch (e) { setMsg(`Error: ${(e as Error).message}`); }
+    setTimeout(() => setMsg(''), 3000);
+  }
+
+  async function deleteComment(id: string) {
+    setMsg('');
+    try {
+      await api(`/comments/${id}`, 'DELETE');
+      setComments((prev) => prev.filter((x) => x.id !== id));
+      setMsg('Deleted.');
+    } catch (e) { setMsg(`Error: ${(e as Error).message}`); }
+    setTimeout(() => setMsg(''), 3000);
+  }
+
+  const filtered = comments.filter((c) => {
+    if (statusFilter === 'approved') return c.approved;
+    if (statusFilter === 'hidden') return !c.approved;
+    return true;
+  });
+
+  const approvedCount = comments.filter((c) => c.approved).length;
+  const hiddenCount = comments.filter((c) => !c.approved).length;
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <h2 style={{ fontSize: '1.125rem', fontWeight: 800 }}>Blog Comments</h2>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <StatusMsg msg={msg} />
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => void load()}>
+            <i className="fa-solid fa-rotate-right" /> Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Stats */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.75rem', marginBottom: '1.25rem' }}>
+        {[
+          { label: 'Total', value: comments.length, color: 'var(--text-primary)', icon: 'fa-comments' },
+          { label: 'Approved', value: approvedCount, color: '#16a34a', icon: 'fa-circle-check' },
+          { label: 'Hidden', value: hiddenCount, color: '#ca8a04', icon: 'fa-eye-slash' },
+        ].map((s) => (
+          <div key={s.label} className="admin-card" style={{ padding: '0.875rem', textAlign: 'center' }}>
+            <i className={`fa-solid ${s.icon}`} style={{ color: s.color, marginBottom: '0.25rem', display: 'block' }} />
+            <div style={{ fontSize: '1.375rem', fontWeight: 800, color: s.color }}>{s.value}</div>
+            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.label}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+        <input
+          className="admin-input"
+          placeholder="Filter by blog slug..."
+          value={slugFilter}
+          onChange={(e) => setSlugFilter(e.target.value)}
+          style={{ flex: 1, minWidth: 200 }}
+        />
+        <select
+          className="admin-input"
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value as 'all' | 'approved' | 'hidden')}
+          style={{ width: 'auto' }}
+        >
+          <option value="all">All Status</option>
+          <option value="approved">Approved</option>
+          <option value="hidden">Hidden</option>
+        </select>
+        {slugFilter && (
+          <button type="button" className="btn btn-outline btn-sm" onClick={() => setSlugFilter('')}>Clear</button>
+        )}
+      </div>
+
+      {/* Comment list */}
+      <div className="admin-card" style={{ padding: 0, overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <i className="fa-solid fa-spinner fa-spin" style={{ fontSize: '1.5rem', marginBottom: '0.5rem', display: 'block' }} />
+            Loading comments…
+          </div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+            <i className="fa-regular fa-comments" style={{ fontSize: '2rem', marginBottom: '0.75rem', display: 'block', opacity: 0.4 }} />
+            <p style={{ margin: 0 }}>{comments.length === 0 ? 'No comments yet.' : 'No comments match your filter.'}</p>
+          </div>
+        ) : (
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8375rem' }}>
+            <thead>
+              <tr style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border-light)' }}>
+                {['Author', 'Post', 'Comment', 'Type', 'Status', 'Date', 'Actions'].map((h) => (
+                  <th key={h} style={{ padding: '0.625rem 0.875rem', textAlign: 'left', fontWeight: 700, fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((c) => (
+                <tr key={c.id} style={{ borderBottom: '1px solid var(--border-light)', background: c.approved ? 'transparent' : 'rgba(250,204,21,0.05)' }}>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top' }}>
+                    <div style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{c.user.fullName}</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{c.user.email}</div>
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', maxWidth: 140 }}>
+                    <span style={{ fontSize: '0.775rem', color: 'var(--green-primary)', fontFamily: 'monospace', wordBreak: 'break-all' }}>{c.pageSlug}</span>
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', maxWidth: 300 }}>
+                    <p style={{ margin: 0, color: 'var(--text-secondary)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 3, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {c.body}
+                    </p>
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: 99, background: c.parentId ? '#ede9fe' : '#dbeafe', color: c.parentId ? '#7c3aed' : '#2563eb', fontWeight: 600 }}>
+                      {c.parentId ? 'Reply' : 'Comment'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                    <span style={{ fontSize: '0.75rem', padding: '0.15rem 0.5rem', borderRadius: 99, background: c.approved ? '#dcfce7' : '#fef9c3', color: c.approved ? '#16a34a' : '#ca8a04', fontWeight: 700 }}>
+                      {c.approved ? 'Approved' : 'Hidden'}
+                    </span>
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', whiteSpace: 'nowrap', fontSize: '0.775rem', color: 'var(--text-muted)' }}>
+                    {new Date(c.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </td>
+                  <td style={{ padding: '0.75rem 0.875rem', verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                    <div style={{ display: 'flex', gap: '0.375rem' }}>
+                      <button
+                        type="button"
+                        className={`btn btn-xs ${c.approved ? 'btn-outline' : 'btn-primary'}`}
+                        onClick={() => void toggleApprove(c)}
+                        title={c.approved ? 'Hide comment' : 'Approve comment'}
+                      >
+                        <i className={`fa-solid ${c.approved ? 'fa-eye-slash' : 'fa-check'}`} />
+                        {c.approved ? ' Hide' : ' Approve'}
+                      </button>
+                      <DeleteBtn onConfirm={() => void deleteComment(c.id)} />
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </div>
+      <p style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+        Showing {filtered.length} of {comments.length} comment{comments.length !== 1 ? 's' : ''}.
+        Hidden comments are not visible to the public.
+      </p>
+    </div>
+  );
+}
+
 // ─── Sidebar Nav ──────────────────────────────────────────────────────────────
 
 const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
@@ -1362,6 +1552,7 @@ const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'about',        label: 'About Page',          icon: 'fa-people-group' },
   { id: 'footer',       label: 'Footer & Nav',        icon: 'fa-newspaper' },
   { id: 'vault',        label: 'Document Vault',      icon: 'fa-folder-open' },
+  { id: 'comments',    label: 'Blog Comments',       icon: 'fa-comments' },
 ];
 
 // ─── Root ─────────────────────────────────────────────────────────────────────
@@ -1448,6 +1639,7 @@ export function ContentManager({
         {activeTab === 'vault'        && <DocumentVaultPanel settings={initialSettings} api={api} token={token} apiUrl={apiUrl} />}
         {activeTab === 'pages'        && <PagesPanel settings={initialSettings} api={api} token={token} apiUrl={apiUrl} />}
         {activeTab === 'topics'       && <BlogTopicsPanel settings={initialSettings} api={api} />}
+        {activeTab === 'comments'     && <CommentsPanel api={api} />}
       </div>
     </div>
   );
