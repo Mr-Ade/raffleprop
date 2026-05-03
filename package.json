@@ -19,7 +19,8 @@
     "db:migrate": "pnpm --filter=./packages/db migrate",
     "db:seed": "pnpm --filter=./packages/db seed",
     "db:studio": "pnpm --filter=./packages/db studio",
-    "test:api": "pnpm --filter @raffleprop/api test"
+    "test:api": "pnpm --filter @raffleprop/api test",
+    "start:prod": "pnpm --filter @raffleprop/db exec prisma migrate deploy && pnpm --filter @raffleprop/api start"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^7.0.0",
