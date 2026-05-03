@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export const revalidate = 30;
+export const dynamic = 'force-dynamic';
 
 const STATUS_LABEL: Record<string, string> = {
   LIVE: 'Live Now',

@@ -1351,6 +1351,8 @@ function DocumentVaultPanel({ settings: initial, api, token, apiUrl }: { setting
 
 const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'settings',     label: 'Site Settings',      icon: 'fa-gear' },
+  { id: 'pages',        label: 'CMS Pages',           icon: 'fa-file-lines' },
+  { id: 'topics',       label: 'Blog Topics',         icon: 'fa-tags' },
   { id: 'homepage',     label: 'Homepage',            icon: 'fa-house' },
   { id: 'trust',        label: 'Trust & Compliance',  icon: 'fa-shield-halved' },
   { id: 'how-it-works', label: 'How It Works',        icon: 'fa-list-ol' },
@@ -1360,8 +1362,6 @@ const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'about',        label: 'About Page',          icon: 'fa-people-group' },
   { id: 'footer',       label: 'Footer & Nav',        icon: 'fa-newspaper' },
   { id: 'vault',        label: 'Document Vault',      icon: 'fa-folder-open' },
-  { id: 'pages',        label: 'CMS Pages',           icon: 'fa-file-lines' },
-  { id: 'topics',       label: 'Blog Topics',         icon: 'fa-tags' },
 ];
 
 // ─── Root ─────────────────────────────────────────────────────────────────────

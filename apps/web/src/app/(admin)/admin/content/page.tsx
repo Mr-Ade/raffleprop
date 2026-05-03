@@ -5,7 +5,7 @@ import { ContentManager } from './ContentManager';
 
 export const metadata: Metadata = { title: 'Content Management — Admin' };
 
-const API_BASE = process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
+const API_BASE = process.env['API_URL'] ?? process.env['NEXT_PUBLIC_API_URL'] ?? 'http://localhost:3001';
 
 async function fetchAllContent(token: string) {
   try {

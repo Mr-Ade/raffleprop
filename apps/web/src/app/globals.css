@@ -2390,3 +2390,13 @@ a:focus-visible { outline: 3px solid var(--green-primary); outline-offset: 2px; 
   color: var(--text-secondary);
   line-height: 1.65;
 }
+
+/* ── Error / 404 pages ── */
+.error-page-wrap { min-height: 65vh; display: flex; align-items: center; padding: 4rem 1.5rem; padding-top: calc(4rem + 65px); }
+.error-page-container { max-width: 520px; text-align: center; }
+.error-icon { font-size: 3rem; color: var(--green-primary); margin-bottom: 1.25rem; }
+.error-page-code { font-size: 5rem; font-weight: 900; line-height: 1; color: var(--green-primary); margin-bottom: 0.5rem; }
+.error-page-title { font-size: 1.75rem; font-weight: 800; margin-bottom: 0.75rem; }
+.error-page-desc { font-size: 1rem; color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.65; }
+.error-page-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1.5rem; }
+.error-page-digest { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; }
