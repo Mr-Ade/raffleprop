@@ -136,8 +136,11 @@ export async function initiateTicketPurchase(input: {
   // Generate a unique payment reference
   const paymentRef = `RP-${Date.now()}-${ticketNanoid()}`;
   const campaignSeq = parseInt(campaign.id.replace(/\D/g, '').slice(0, 4) || '0001', 10);
-  const ticketsSold = await redisCounters.getTicketsSold(input.campaignId);
-  const ticketSeq = ticketsSold + 1;
+  // Use total DB ticket count (including PENDING) for sequencing so that a
+  // PENDING ticket whose webhook failed never blocks a subsequent purchase with
+  // a duplicate ticketNumber (Redis sold-counter only increments on SUCCESS).
+  const dbTicketCount = await prisma.ticket.count({ where: { campaignId: input.campaignId } });
+  const ticketSeq = dbTicketCount + 1;
 
   const gateway = input.gateway ?? PaymentGateway.PAYSTACK;
 
