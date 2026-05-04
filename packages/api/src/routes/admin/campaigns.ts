@@ -262,6 +262,7 @@ adminCampaignsRouter.post('/', validate(createCampaignSchema), async (req: Reque
       propertyFeatures: propertyFeatures ?? [],
       featuredImageKey: imageUrls?.[0] ?? null,
       galleryKeys: imageUrls ?? [],
+      fctLroRef: coreBody.fctLroRef ?? null,
       fccpcApprovalDate: fccpcApprovalDate ? new Date(fccpcApprovalDate) : null,
       valuationFirm: valuationFirm ?? null,
       valuationRef: valuationRef ?? null,
@@ -318,7 +319,7 @@ adminCampaignsRouter.put('/:id', validate(createCampaignSchema.partial()), async
     allowedGateways: rawAllowedGateways,
     // Prisma top-level rich fields
     description, featured, cOfOConfirmed, bedrooms, bathrooms, buildingArea,
-    propertyFeatures, imageUrls, fccpcApprovalDate,
+    propertyFeatures, imageUrls, fccpcApprovalDate, fctLroRef,
     valuationFirm, valuationRef, propertyLawyer,
     // Meta-only fields
     toilets, mapEmbedUrl, videoUrl, escrowAccountType, referralReward, referralFreeTicketN,
@@ -372,6 +373,7 @@ adminCampaignsRouter.put('/:id', validate(createCampaignSchema.partial()), async
       ...(buildingArea !== undefined ? { buildingArea: buildingArea as number | null } : {}),
       ...(propertyFeatures !== undefined ? { propertyFeatures: propertyFeatures as string[] } : {}),
       ...(imageUrls !== undefined ? { featuredImageKey: (imageUrls as string[])[0] ?? null, galleryKeys: imageUrls as string[] } : {}),
+      ...(fctLroRef !== undefined ? { fctLroRef: (fctLroRef as string | null) ?? null } : {}),
       ...(fccpcApprovalDate !== undefined ? { fccpcApprovalDate: fccpcApprovalDate ? new Date(fccpcApprovalDate as string) : null } : {}),
       ...(valuationFirm !== undefined ? { valuationFirm: valuationFirm as string | null } : {}),
       ...(valuationRef !== undefined ? { valuationRef: valuationRef as string | null } : {}),
