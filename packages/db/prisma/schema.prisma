@@ -165,6 +165,7 @@ model Campaign {
   minTickets      Int
   status          CampaignStatus @default(DRAFT)
   fccpcRef        String?
+  fctLroRef       String?  // FCT Lottery Regulatory Office permit reference
   lslgaRef        String?
   escrowBank              String?
   escrowAccountNo         String?
@@ -196,6 +197,7 @@ model Campaign {
   cOfOConfirmed   Boolean?       @default(false)
   // ── Discovery & ranking ────────────────────────────────────────────────────
   featured        Boolean        @default(false)  // pinned to top of listings
+  displayOrder    Int            @default(0)      // lower = shown earlier among featured campaigns
   hotScore        Float          @default(0)      // computed: velocity × completeness
   // ── Legal & trust ──────────────────────────────────────────────────────────
   propertyLawyer  String?        // e.g. "Bayo Akinlabi & Co."
@@ -517,6 +519,8 @@ model SiteSettings {
   privacyUrl          String?
   // ── Homepage sections ──────────────────────────────────────────────────────
   homeSeo             Json?    // { title, description } — admin-editable meta title/description for home page
+  campaignsSeo        Json?    // { title, description, ogImage } — admin-editable meta for /campaigns
+  campaignsPageContent Json?   // { heading, subheading, emptyStateHeading, emptyStateBody } — admin-editable copy
   heroSection         Json?    // { badgeText, heading, subheading }
   heroStats           Json?    // [{ label, value }] × 3
   statsSection        Json?    // [{ label, value }] × 4

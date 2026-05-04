@@ -12,7 +12,7 @@ import { RichTextEditor } from '@/components/RichTextEditor';
 
 type Tab =
   | 'settings' | 'faqs' | 'testimonials' | 'winners'
-  | 'homepage' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages' | 'topics' | 'comments';
+  | 'homepage' | 'campaigns' | 'trust' | 'how-it-works' | 'about' | 'footer' | 'vault' | 'pages' | 'topics' | 'comments';
 
 interface ContentPage {
   id: string;
@@ -594,6 +594,58 @@ function HomepagePanel({ settings: initial, api }: { settings: SiteSettings; api
       <SectionCard title="Notification Section">
         <Field label="Heading"><Input value={notif.heading ?? ''} onChange={(e) => setNotif((p) => ({ ...p, heading: e.target.value }))} /></Field>
         <Field label="Subtext"><Textarea value={notif.subtext ?? ''} onChange={(e) => setNotif((p) => ({ ...p, subtext: e.target.value }))} /></Field>
+      </SectionCard>
+    </div>
+  );
+}
+
+// ─── Campaigns Page Panel ─────────────────────────────────────────────────────
+
+function CampaignsPanel({ settings: initial, api }: { settings: SiteSettings; api: ReturnType<typeof useApi> }) {
+  const [seo, setSeo] = useState(initial.campaignsSeo ?? { title: '', description: '' });
+  const [content, setContent] = useState(initial.campaignsPageContent ?? { heading: '', subheading: '', emptyStateHeading: '', emptyStateBody: '' });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const save = async () => {
+    setSaving(true); setMsg('');
+    try {
+      await api('/settings', 'PUT', { campaignsSeo: seo, campaignsPageContent: content });
+      setMsg('Saved!');
+    } catch (e) { setMsg(`Error: ${(e as Error).message}`); }
+    setSaving(false);
+  };
+
+  return (
+    <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+        <h2 style={{ fontSize: '1.125rem', fontWeight: 800 }}>Campaigns Page Content</h2>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><StatusMsg msg={msg} /><SaveBtn saving={saving} onClick={save} /></div>
+      </div>
+      <SectionCard title="Campaigns Page SEO">
+        <Field label="Meta Title (max 70 chars)">
+          <Input placeholder="Win a Property in Nigeria | RaffleProp Campaigns" value={seo.title ?? ''} onChange={(e) => setSeo((p) => ({ ...p, title: e.target.value }))} maxLength={70} />
+        </Field>
+        <Field label="Meta Description (max 160 chars)">
+          <Textarea placeholder="Browse all live and upcoming property raffles..." value={seo.description ?? ''} onChange={(e) => setSeo((p) => ({ ...p, description: e.target.value }))} maxLength={160} />
+        </Field>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Leave blank to use built-in defaults. Appears in Google search results and link previews.</p>
+      </SectionCard>
+      <SectionCard title="Page Header Copy">
+        <Field label="Heading">
+          <Input placeholder="Win a Property" value={content.heading ?? ''} onChange={(e) => setContent((p) => ({ ...p, heading: e.target.value }))} />
+        </Field>
+        <Field label="Subheading">
+          <Textarea rows={2} placeholder="Browse all live and upcoming property raffles. Every draw is FCCPC-approved, escrow-protected, and independently witnessed." value={content.subheading ?? ''} onChange={(e) => setContent((p) => ({ ...p, subheading: e.target.value }))} />
+        </Field>
+      </SectionCard>
+      <SectionCard title="Empty State (no campaigns found)">
+        <Field label="Heading">
+          <Input placeholder="No Campaigns Found" value={content.emptyStateHeading ?? ''} onChange={(e) => setContent((p) => ({ ...p, emptyStateHeading: e.target.value }))} />
+        </Field>
+        <Field label="Body text">
+          <Textarea placeholder="There are no campaigns matching your filters right now." value={content.emptyStateBody ?? ''} onChange={(e) => setContent((p) => ({ ...p, emptyStateBody: e.target.value }))} />
+        </Field>
       </SectionCard>
     </div>
   );
@@ -1554,6 +1606,7 @@ const NAV_ITEMS: { id: Tab; label: string; icon: string }[] = [
   { id: 'pages',        label: 'CMS Pages',           icon: 'fa-file-lines' },
   { id: 'topics',       label: 'Blog Topics',         icon: 'fa-tags' },
   { id: 'homepage',     label: 'Homepage',            icon: 'fa-house' },
+  { id: 'campaigns',    label: 'Campaigns Page',      icon: 'fa-ticket' },
   { id: 'trust',        label: 'Trust & Compliance',  icon: 'fa-shield-halved' },
   { id: 'how-it-works', label: 'How It Works',        icon: 'fa-list-ol' },
   { id: 'faqs',         label: 'FAQs',                icon: 'fa-circle-question' },
@@ -1639,6 +1692,7 @@ export function ContentManager({
       <div style={{ flex: 1, minWidth: 0, paddingLeft: '2rem', paddingTop: '0.25rem' }}>
         {activeTab === 'settings'     && <SettingsPanel settings={initialSettings} api={api} />}
         {activeTab === 'homepage'     && <HomepagePanel settings={initialSettings} api={api} />}
+        {activeTab === 'campaigns'    && <CampaignsPanel settings={initialSettings} api={api} />}
         {activeTab === 'trust'        && <TrustPanel badges={initialTrustBadges} settings={initialSettings} api={api} />}
         {activeTab === 'how-it-works' && <HowItWorksPanel steps={initialHowItWorks} api={api} />}
         {activeTab === 'faqs'         && <FaqsPanel faqs={initialFaqs} api={api} />}

@@ -11,16 +11,16 @@ async function fetchPublishedCampaigns(): Promise<Array<{ slug: string; updatedA
       { next: { revalidate: 3600 } }
     )
     if (!res.ok) return []
-    const json = await res.json() as { success: boolean; data?: Array<{ slug: string; updatedAt?: string }> }
-    const live = json.data ?? []
+    const json = await res.json() as { success: boolean; data?: { data?: Array<{ slug: string; updatedAt?: string }> } }
+    const live = json.data?.data ?? []
 
     const res2 = await fetch(
       `${API_URL}/api/campaigns?status=DRAWN&pageSize=200`,
       { next: { revalidate: 3600 } }
     )
     if (!res2.ok) return live
-    const json2 = await res2.json() as { success: boolean; data?: Array<{ slug: string; updatedAt?: string }> }
-    return [...live, ...(json2.data ?? [])]
+    const json2 = await res2.json() as { success: boolean; data?: { data?: Array<{ slug: string; updatedAt?: string }> } }
+    return [...live, ...(json2.data?.data ?? [])]
   } catch {
     return []
   }
