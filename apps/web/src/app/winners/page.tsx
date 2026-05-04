@@ -63,7 +63,7 @@ export default async function WinnersPage() {
           <div style={{ display: 'flex', gap: '3rem', flexWrap: 'wrap' }}>
             {[
               { label: 'Total Winners', value: String(display.length) },
-              { label: 'Total Prize Value', value: totalPrize > 0 ? `₦${totalPrize.toLocaleString('en-NG')}` : `₦${display.length * 30000000}+` },
+              { label: 'Total Prize Value', value: totalPrize > 0 ? `₦${totalPrize.toLocaleString('en-NG')}` : display.length > 0 ? 'See individual cards' : '—' },
               { label: 'Draws Completed', value: String(display.length) },
               { label: 'Refund Rate', value: '100%' },
             ].map((s) => (
