@@ -2,13 +2,19 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
 import { api } from '@/lib/api';
-import { cms } from '@/lib/cms';
+import { cms, type CmsStats } from '@/lib/cms';
 import { CampaignCard } from '@/components/CampaignCard';
 import { StatCounter } from '@/components/StatCounter';
 import { FaqAccordion } from '@/components/FaqAccordion';
 import { CountdownTimer } from '@/components/CountdownTimer';
 import { TestimonialSubmitForm } from '@/components/TestimonialSubmitForm';
 import type { Campaign } from '@raffleprop/shared';
+
+function prizeMillion(naira: number): { amount: number; suffix: string } {
+  if (naira <= 0) return { amount: 0, suffix: '' };
+  const m = Math.floor(naira / 1_000_000);
+  return m > 0 ? { amount: m, suffix: 'M+' } : { amount: Math.floor(naira / 1_000), suffix: 'K+' };
+}
 
 export const revalidate = 60;
 
@@ -64,7 +70,7 @@ const FALLBACK_FAQS: { q: string; a: string }[] = [
 export default async function HomePage() {
   // Fetch featured campaigns first (pinned), then fill remaining slots by hotScore
   // Also fetch upcoming campaigns for the Coming Soon section, plus CMS content
-  const [featuredResp, hotResp, upcomingResp, settings, cmsWinners, cmsTestimonials, cmsBadges, cmsHowItWorks, cmsFaqs] = await Promise.all([
+  const [featuredResp, hotResp, upcomingResp, settings, cmsWinners, cmsTestimonials, cmsBadges, cmsHowItWorks, cmsFaqs, platformStats] = await Promise.all([
     api.getCampaigns({ pageSize: '6', status: 'LIVE', sortBy: 'hotScore', sortDir: 'desc' })
        .catch(() => ({ data: [] as Campaign[], total: 0 })),
     api.getCampaigns({ pageSize: '6', status: 'LIVE', sortBy: 'publishedAt', sortDir: 'desc' })
@@ -77,7 +83,17 @@ export default async function HomePage() {
     cms.getTrustBadges(),
     cms.getHowItWorks(),
     cms.getFaqs(),
+    cms.getStats(),
   ]);
+
+  const stats: CmsStats = platformStats ?? {
+    ticketsSoldToday: 0,
+    activeCampaigns: 0,
+    propertiesWon: 0,
+    totalTicketsSold: 0,
+    totalPrizeValue: 0,
+    prizesAwarded: 0,
+  };
 
   // Resolve CMS data — no fake fallbacks for Winners/Testimonials
   const trustBadges = cmsBadges.length > 0 ? cmsBadges : FALLBACK_TRUST_BADGES;
@@ -198,7 +214,7 @@ export default async function HomePage() {
               independently valued. Live draws you can watch and verify.
             </p>
 
-            {/* Live stats row — CMS-controlled or real API count only */}
+            {/* Live stats row — real-time from DB, always shown */}
             {settings?.heroStats && settings.heroStats.length >= 3 ? (
               <div className="hero-stats-row">
                 {settings.heroStats.slice(0, 3).map((stat, i) => {
@@ -216,16 +232,33 @@ export default async function HomePage() {
                   );
                 })}
               </div>
-            ) : liveCount > 0 ? (
-              <div className="hero-stats-row">
-                <div>
-                  <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                    <StatCounter to={liveCount} />
+            ) : (() => {
+              const pa = prizeMillion(stats.prizesAwarded);
+              return (
+                <div className="hero-stats-row">
+                  <div>
+                    <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                      <StatCounter to={stats.ticketsSoldToday} />
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>Tickets sold today</div>
                   </div>
-                  <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>Active campaigns</div>
+                  <div className="hero-stats-divider" />
+                  <div>
+                    <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                      <StatCounter to={stats.activeCampaigns} />
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>Active campaigns</div>
+                  </div>
+                  <div className="hero-stats-divider" />
+                  <div>
+                    <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
+                      ₦<StatCounter to={pa.amount} suffix={pa.suffix} />
+                    </div>
+                    <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>In prizes awarded</div>
+                  </div>
                 </div>
-              </div>
-            ) : null}
+              );
+            })()}
 
             {/* CTAs */}
             <div className="hero-cta-row">
@@ -336,10 +369,11 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── STATS — only rendered when CMS data is populated ── */}
-      {statsSection && statsSection.length >= 4 && (
-        <section className="stats-section">
-          <div className="container">
+      {/* ── STATS — always shown, real-time from DB (falls back to 0) ── */}
+      <section className="stats-section">
+        <div className="container">
+          {statsSection && statsSection.length >= 4 ? (
+            // Admin CMS override (e.g. for special campaigns / marketing)
             <div className="stats-grid">
               {statsSection.slice(0, 4).map((stat, i) => {
                 const num = parseFloat(String(stat.value).replace(/[^0-9.]/g, ''));
@@ -353,9 +387,40 @@ export default async function HomePage() {
                 );
               })}
             </div>
-          </div>
-        </section>
-      )}
+          ) : (() => {
+            const tpv = prizeMillion(stats.totalPrizeValue);
+            const ticketSuffix = stats.totalTicketsSold > 0 ? '+' : '';
+            return (
+              <div className="stats-grid">
+                <div>
+                  <div className="stat-number" style={{ color: '#fff' }}>
+                    <StatCounter to={stats.propertiesWon} />
+                  </div>
+                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Properties Won</div>
+                </div>
+                <div>
+                  <div className="stat-number" style={{ color: '#fff' }}>
+                    ₦<StatCounter to={tpv.amount} suffix={tpv.suffix} />
+                  </div>
+                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Prize Value</div>
+                </div>
+                <div>
+                  <div className="stat-number" style={{ color: 'var(--gold-light)' }}>
+                    <StatCounter to={stats.totalTicketsSold} suffix={ticketSuffix} />
+                  </div>
+                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Tickets Sold</div>
+                </div>
+                <div>
+                  <div className="stat-number" style={{ color: '#fff' }}>
+                    <StatCounter to={100} suffix="%" />
+                  </div>
+                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Refund Rate When Min Missed</div>
+                </div>
+              </div>
+            );
+          })()}
+        </div>
+      </section>
 
       {/* ── HOW IT WORKS ── */}
       <section className="section-pad" style={{ background: '#fff' }}>

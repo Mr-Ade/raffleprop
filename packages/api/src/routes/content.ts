@@ -373,6 +373,51 @@ publicContentRouter.post('/pages/:slug/comments', authenticate, async (req: Requ
   }
 });
 
+// GET /api/content/stats — platform statistics computed from live DB data
+publicContentRouter.get('/stats', async (_req: Request, res: Response, next: NextFunction) => {
+  try {
+    res.setHeader('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60');
+
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const [todayAgg, liveCount, drawnCount, allTimeAgg, totalPrizeAgg, awardedAgg] = await Promise.all([
+      prisma.ticket.aggregate({
+        _sum: { quantity: true },
+        where: { paymentStatus: 'SUCCESS', purchasedAt: { gte: todayStart } },
+      }),
+      prisma.campaign.count({ where: { status: 'LIVE' } }),
+      prisma.campaign.count({ where: { status: 'DRAWN' } }),
+      prisma.ticket.aggregate({
+        _sum: { quantity: true },
+        where: { paymentStatus: 'SUCCESS' },
+      }),
+      prisma.campaign.aggregate({
+        _sum: { marketValue: true },
+        where: { status: { in: ['LIVE', 'DRAWN', 'CLOSED', 'PAUSED'] as any } },
+      }),
+      prisma.campaign.aggregate({
+        _sum: { marketValue: true },
+        where: { status: 'DRAWN' as any },
+      }),
+    ]);
+
+    res.json({
+      success: true,
+      data: {
+        ticketsSoldToday: todayAgg._sum.quantity ?? 0,
+        activeCampaigns: liveCount,
+        propertiesWon: drawnCount,
+        totalTicketsSold: allTimeAgg._sum.quantity ?? 0,
+        totalPrizeValue: Number(totalPrizeAgg._sum.marketValue ?? 0),
+        prizesAwarded: Number(awardedAgg._sum.marketValue ?? 0),
+      },
+    });
+  } catch (err) {
+    next(err instanceof AppError ? err : new AppError(500, 'Failed to load stats'));
+  }
+});
+
 // POST /api/content/comments/:id/reply — authenticated users only
 publicContentRouter.post('/comments/:id/reply', authenticate, async (req: Request, res: Response, next: NextFunction) => {
   try {

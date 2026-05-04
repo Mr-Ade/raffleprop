@@ -163,6 +163,15 @@ export interface CmsTopic {
   count: number;
 }
 
+export interface CmsStats {
+  ticketsSoldToday: number;
+  activeCampaigns: number;
+  propertiesWon: number;
+  totalTicketsSold: number;
+  totalPrizeValue: number;
+  prizesAwarded: number;
+}
+
 // ─── Fetch helpers ────────────────────────────────────────────────────────────
 
 async function fetchCms<T>(path: string, revalidate = 300): Promise<T | null> {
@@ -225,4 +234,6 @@ export const cms = {
     fetchCmsPageList(`/pages?featured=${count}`).catch(() => null),
 
   getTopics: () => fetchCmsArray<CmsTopic>('/topics', 120).catch(() => []),
+
+  getStats: () => fetchCms<CmsStats>('/stats', 60).catch(() => null),
 };
