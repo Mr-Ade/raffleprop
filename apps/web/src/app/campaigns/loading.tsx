@@ -18,7 +18,7 @@ export default function CampaignsLoading() {
         </div>
 
         {/* Card grid skeleton */}
-        <div className="campaigns-grid">
+        <div className="campaign-grid">
           {Array.from({ length: 6 }).map((_, i) => (
             <div key={i} className="campaign-card" style={{ pointerEvents: 'none' }}>
               <div className="campaign-card-image" style={{ background: '#e5e7eb', animation: 'pulse 1.5s ease-in-out infinite' }} />

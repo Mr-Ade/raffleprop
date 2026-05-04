@@ -106,6 +106,17 @@ export function CampaignCard({ campaign, ticketsSold }: CampaignCardProps) {
             ⏰ Closing Soon
           </span>
         )}
+        {campaign.featured && !isClosingSoon && (
+          <span style={{
+            position: 'absolute', top: 12, right: 12,
+            background: 'var(--gold)', color: '#fff', borderRadius: 100,
+            padding: '0.2rem 0.6rem', fontSize: '0.7rem', fontWeight: 800,
+            display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+          }}>
+            <i className="fa-solid fa-star" style={{ fontSize: '0.6rem' }} aria-hidden="true" />
+            Featured
+          </span>
+        )}
       </div>
 
       {/* Card body */}

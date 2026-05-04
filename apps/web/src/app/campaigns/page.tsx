@@ -5,6 +5,8 @@ import { api } from '@/lib/api';
 import { cms } from '@/lib/cms';
 import { CampaignCard } from '@/components/CampaignCard';
 import { CampaignNotifyForm } from '@/components/CampaignNotifyForm';
+import { CampaignsFilters } from '@/components/CampaignsFilters';
+import { Suspense } from 'react';
 
 const SITE_URL = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://raffleprop.com';
 
@@ -91,13 +93,13 @@ export async function generateMetadata({
       title,
       description,
       siteName: 'RaffleProp',
-      images: [{ url: `${SITE_URL}/og-campaigns.jpg`, width: 1200, height: 630, alt: 'RaffleProp — Win Real Estate in Nigeria' }],
+      images: [{ url: `${SITE_URL}/images/hero-bg.jpg`, width: 1200, height: 630, alt: 'RaffleProp — Win Real Estate in Nigeria' }],
     },
     twitter: {
       card: 'summary_large_image',
       title,
       description,
-      images: [`${SITE_URL}/og-campaigns.jpg`],
+      images: [`${SITE_URL}/images/hero-bg.jpg`],
     },
   };
 }
@@ -291,42 +293,18 @@ export default async function CampaignsPage({ searchParams }: { searchParams: Pr
 
       <div style={{ padding: '2.5rem 1.5rem 5rem' }}>
         <div className="container">
-          {/* Filters row — hidden for past draws */}
-          <form method="get" style={{ display: activeTab === 'past' ? 'none' : 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '2rem', alignItems: 'center' }}>
-            {activeTab !== 'live' && <input type="hidden" name="tab" value={activeTab} />}
-            <input
-              name="search"
-              type="search"
-              defaultValue={sp.search ?? ''}
-              placeholder="Search by title or location…"
-              className="form-input"
-              style={{ flex: '1 1 200px', minWidth: 0 }}
-              aria-label="Search campaigns"
+          {/* Filters — client component for instant auto-apply on change */}
+          <Suspense>
+            <CampaignsFilters
+              states={STATES}
+              activeTab={activeTab}
+              initialState={sp.state}
+              initialPropertyType={sp.propertyType}
+              initialSearch={sp.search}
+              initialSort={sortRaw}
+              hasFilters={hasFilters}
             />
-            <select name="state" aria-label="Filter by state" defaultValue={sp.state ?? ''} className="form-select" style={{ flex: '0 1 150px', minWidth: 130 }}>
-              <option value="">All States</option>
-              {STATES.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select name="propertyType" aria-label="Filter by property type" defaultValue={sp.propertyType ?? ''} className="form-select" style={{ flex: '0 1 180px', minWidth: 150 }}>
-              <option value="">All Property Types</option>
-              {PROPERTY_TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-            <select name="sort" aria-label="Sort campaigns" defaultValue={sortRaw} className="form-select" style={{ flex: '0 1 200px', minWidth: 160 }}>
-              {SORT_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value}>{o.label}</option>
-              ))}
-            </select>
-            <button type="submit" className="btn btn-primary btn-sm">
-              <i className="fa-solid fa-sliders" style={{ marginRight: '0.375rem' }} aria-hidden="true" />
-              Apply
-            </button>
-            {hasFilters && (
-              <Link href={buildQuery({ state: undefined, propertyType: undefined, search: undefined, page: undefined })} className="btn btn-outline btn-sm">
-                <i className="fa-solid fa-xmark" style={{ marginRight: '0.375rem' }} aria-hidden="true" />
-                Clear
-              </Link>
-            )}
-          </form>
+          </Suspense>
 
           {/* Active filter chips */}
           {hasFilters && (
