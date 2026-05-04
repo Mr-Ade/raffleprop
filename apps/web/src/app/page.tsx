@@ -362,7 +362,7 @@ export default async function HomePage() {
           ) : (
             <div className="campaign-grid">
               {campaigns.map((c) => (
-                <CampaignCard key={c.id} campaign={c} daysToClose={daysUntil(c.drawDate)} />
+                <CampaignCard key={c.id} campaign={c} />
               ))}
             </div>
           )}
