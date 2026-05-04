@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
+import Image from 'next/image';
 import { api } from '@/lib/api';
 import { cms } from '@/lib/cms';
 import { CampaignCard } from '@/components/CampaignCard';
@@ -11,12 +12,16 @@ import type { Campaign } from '@raffleprop/shared';
 
 export const revalidate = 60;
 
-export const metadata: Metadata = {
-  title: 'RaffleProp — Win a Property in Nigeria From ₦2,500',
-  description:
-    "Nigeria's most transparent property raffle platform. Win a real house from ₦2,500. CAC registered, escrow protected, lawyer verified. Live draws on YouTube.",
-  // opengraph-image.tsx handles the OG image automatically
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await cms.getSettings(60).catch(() => null);
+  const homeSeo = settings?.homeSeo;
+  return {
+    title: homeSeo?.title ?? 'RaffleProp — Win a Property in Nigeria From ₦2,500',
+    description:
+      homeSeo?.description ??
+      "Nigeria's most transparent property raffle platform. Win a real house from ₦2,500. CAC registered, escrow protected, lawyer verified. Live draws on YouTube.",
+  };
+}
 
 /* ── Static Fallbacks ────────────────────────────── */
 
@@ -30,66 +35,6 @@ const FALLBACK_TRUST_BADGES = [
   { iconClass: 'fa-magnifying-glass-dollar', text: 'SCUML Registered · AML Compliant' },
 ];
 
-const FALLBACK_WINNERS = [
-  {
-    id: 'w001',
-    winnerName: 'Adaeze O.',
-    propertyState: 'Benin City, Edo State',
-    propertyTitle: '3-Bedroom Terrace, Ikeja GRA',
-    prize: '₦38,000,000',
-    drawDate: 'January 14, 2025',
-    blurb:
-      "I still can't believe it! I bought 10 tickets for ₦18,000 and won a house worth ₦38 million. Everything was transparent — I watched the live draw and my ticket number appeared. RaffleProp is 100% legit!",
-    imageKey: null as string | null,
-    featured: true,
-  },
-  {
-    id: 'w002',
-    winnerName: 'Tunde B.',
-    propertyState: 'Abuja',
-    propertyTitle: '2-Bedroom Flat, Maitama',
-    prize: '₦28,000,000',
-    drawDate: 'October 2, 2024',
-    blurb:
-      'My referral earnings alone paid for my ticket bundles. Then I won the main draw! Thank you RaffleProp for keeping everything open and transparent.',
-    imageKey: null as string | null,
-    featured: true,
-  },
-];
-
-const FALLBACK_TESTIMONIALS = [
-  {
-    id: 't1',
-    authorName: 'Chidinma A.',
-    authorTitle: 'Port Harcourt',
-    rating: 5,
-    body: 'I was very skeptical at first. But I watched the live draw on YouTube, saw the lawyer, the bank rep, everything. Very professional. Will definitely enter the next campaign!',
-    avatarKey: null as string | null,
-    featured: true,
-    order: 0,
-  },
-  {
-    id: 't2',
-    authorName: 'Emeka O.',
-    authorTitle: 'Lagos Island',
-    rating: 5,
-    body: 'Bought 20 tickets in the bundle deal. Great value for money. The ticket confirmation came instantly on WhatsApp and email. Waiting anxiously for draw day!',
-    avatarKey: null as string | null,
-    featured: true,
-    order: 1,
-  },
-  {
-    id: 't3',
-    authorName: 'Dr. Funmi S.',
-    authorTitle: 'London, UK',
-    rating: 5,
-    body: 'As a Nigerian in the diaspora, I was worried about legitimacy. But seeing the CAC cert, escrow details, and independent valuation certificate removed all doubts. Entered 3 campaigns so far.',
-    avatarKey: null as string | null,
-    featured: true,
-    order: 2,
-  },
-];
-
 const FALLBACK_HOW_IT_WORKS = [
   { id: '1', stepNumber: 1, title: 'Browse Properties', description: 'View our active campaigns, property details, independent valuations, and legal documents.', order: 0, icon: null },
   { id: '2', stepNumber: 2, title: 'Buy Tickets', description: 'Select a bundle (1–20 tickets), answer a simple skill question, and pay securely via Paystack or Flutterwave.', order: 1, icon: null },
@@ -100,7 +45,7 @@ const FALLBACK_HOW_IT_WORKS = [
 const FALLBACK_FAQS: { q: string; a: string }[] = [
   {
     q: 'Is this legal in Nigeria?',
-    a: 'Yes. RaffleProp is structured as a \u201cPromotional Competition\u201d under Nigerian law \u2014 not a lottery \u2014 meaning we do not require a federal lottery licence. Our business is registered with the Corporate Affairs Commission (CAC). All operations are overseen by an independent property lawyer and escrow is held at a reputable Nigerian bank.',
+    a: 'Yes. RaffleProp is structured as a “Promotional Competition” under Nigerian law — not a lottery — meaning we do not require a federal lottery licence. Our business is registered with the Corporate Affairs Commission (CAC). All operations are overseen by an independent property lawyer and escrow is held at a reputable Nigerian bank.',
   },
   {
     q: 'Which regulators have approved this?',
@@ -134,10 +79,10 @@ export default async function HomePage() {
     cms.getFaqs(),
   ]);
 
-  // Resolve CMS data with fallbacks
+  // Resolve CMS data — no fake fallbacks for Winners/Testimonials
   const trustBadges = cmsBadges.length > 0 ? cmsBadges : FALLBACK_TRUST_BADGES;
-  const winners = cmsWinners.length > 0 ? cmsWinners : FALLBACK_WINNERS;
-  const testimonials = cmsTestimonials.length > 0 ? cmsTestimonials : FALLBACK_TESTIMONIALS;
+  const winners = cmsWinners;
+  const testimonials = cmsTestimonials;
   const howItWorks = cmsHowItWorks.length > 0 ? cmsHowItWorks : FALLBACK_HOW_IT_WORKS;
   // For FAQs teaser — take first 4 from CMS, else fallback
   const faqTeaser = cmsFaqs.length > 0
@@ -190,12 +135,36 @@ export default async function HomePage() {
   return (
     <main id="main-content">
 
+      {/* ── FAQPage structured data ── */}
+      {faqTeaser.length > 0 && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'FAQPage',
+              mainEntity: faqTeaser.map((f) => ({
+                '@type': 'Question',
+                name: f.q,
+                acceptedAnswer: { '@type': 'Answer', text: f.a },
+              })),
+            }),
+          }}
+        />
+      )}
+
       {/* ── HERO ── */}
       <section className="hero-section" style={{ paddingTop: 65 }}>
-        <div
-          className="hero-bg"
-          style={{ backgroundImage: "url('/images/hero-bg.jpg')" }}
-        />
+        <div className="hero-bg">
+          <Image
+            src="/images/hero-bg.jpg"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            style={{ objectFit: 'cover' }}
+          />
+        </div>
         <div className="hero-overlay" />
         <div className="hero-pattern" />
 
@@ -208,7 +177,7 @@ export default async function HomePage() {
                 ? heroBadgeText
                 : liveCount > 0
                   ? `Live Campaign Active · ${liveCount} ${liveCount === 1 ? 'Property' : 'Properties'} Available`
-                  : 'Live Campaign Active · 2 Properties Available'}
+                  : 'Coming Soon — Sign Up for Launch'}
             </div>
 
             {/* H1 */}
@@ -229,7 +198,7 @@ export default async function HomePage() {
               independently valued. Live draws you can watch and verify.
             </p>
 
-            {/* Live stats row */}
+            {/* Live stats row — CMS-controlled or real API count only */}
             {settings?.heroStats && settings.heroStats.length >= 3 ? (
               <div className="hero-stats-row">
                 {settings.heroStats.slice(0, 3).map((stat, i) => {
@@ -247,30 +216,16 @@ export default async function HomePage() {
                   );
                 })}
               </div>
-            ) : (
+            ) : liveCount > 0 ? (
               <div className="hero-stats-row">
                 <div>
                   <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                    <StatCounter to={18420} />
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>Tickets sold today</div>
-                </div>
-                <div className="hero-stats-divider" />
-                <div>
-                  <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                    <StatCounter to={liveCount > 0 ? liveCount : 2} />
+                    <StatCounter to={liveCount} />
                   </div>
                   <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>Active campaigns</div>
                 </div>
-                <div className="hero-stats-divider" />
-                <div>
-                  <div style={{ fontSize: '1.875rem', fontWeight: 900, color: '#fff', lineHeight: 1 }}>
-                    ₦<StatCounter to={140} suffix="M+" />
-                  </div>
-                  <div style={{ fontSize: '0.8125rem', color: 'rgba(255,255,255,0.55)', marginTop: '0.25rem' }}>In prizes awarded</div>
-                </div>
               </div>
-            )}
+            ) : null}
 
             {/* CTAs */}
             <div className="hero-cta-row">
@@ -381,12 +336,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── STATS ── */}
-      <section className="stats-section">
-        <div className="container">
-          <div className="stats-grid">
-            {statsSection && statsSection.length >= 4 ? (
-              statsSection.slice(0, 4).map((stat, i) => {
+      {/* ── STATS — only rendered when CMS data is populated ── */}
+      {statsSection && statsSection.length >= 4 && (
+        <section className="stats-section">
+          <div className="container">
+            <div className="stats-grid">
+              {statsSection.slice(0, 4).map((stat, i) => {
                 const num = parseFloat(String(stat.value).replace(/[^0-9.]/g, ''));
                 return (
                   <div key={i}>
@@ -396,38 +351,11 @@ export default async function HomePage() {
                     <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>{stat.label}</div>
                   </div>
                 );
-              })
-            ) : (
-              <>
-                <div>
-                  <div className="stat-number" style={{ color: '#fff' }}>
-                    <StatCounter to={2} />
-                  </div>
-                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Properties Won</div>
-                </div>
-                <div>
-                  <div className="stat-number" style={{ color: '#fff' }}>
-                    ₦<StatCounter to={140} suffix="M+" />
-                  </div>
-                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Total Prize Value</div>
-                </div>
-                <div>
-                  <div className="stat-number" style={{ color: 'var(--gold-light)' }}>
-                    <StatCounter to={26520} suffix="+" />
-                  </div>
-                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Tickets Sold</div>
-                </div>
-                <div>
-                  <div className="stat-number" style={{ color: '#fff' }}>
-                    <StatCounter to={100} suffix="%" />
-                  </div>
-                  <div className="stat-num-label" style={{ color: 'rgba(255,255,255,0.6)' }}>Refund Rate When Min Missed</div>
-                </div>
-              </>
-            )}
+              })}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── HOW IT WORKS ── */}
       <section className="section-pad" style={{ background: '#fff' }}>
@@ -496,6 +424,8 @@ export default async function HomePage() {
                         alt={uc.title}
                         className="upcoming-img"
                         loading="lazy"
+                        width={480}
+                        height={320}
                       />
                     ) : (
                       <div className="upcoming-img upcoming-img-placeholder">
@@ -521,7 +451,7 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* ── PAST WINNERS ── */}
+      {/* ── PAST WINNERS — section only renders when real CMS winners exist ── */}
       <section className="section-pad" style={{ background: '#fff' }}>
         <div className="container">
           <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
@@ -547,8 +477,8 @@ export default async function HomePage() {
                     <div key={w.id} className="winner-card">
                       <div className="winner-card-image">
                         {photoSrc
-                          ? /* eslint-disable-next-line @next/next/no-img-element */
-                            <img src={photoSrc} alt={w.winnerName} loading="lazy" />
+                          ? // eslint-disable-next-line @next/next/no-img-element
+                            <img src={photoSrc} alt={w.winnerName} loading="lazy" width={400} height={300} />
                           : <div style={{ width: '100%', height: '100%', background: 'var(--green-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '3rem' }}>
                               <i className="fa-solid fa-trophy" style={{ color: 'rgba(255,255,255,0.3)' }} />
                             </div>
@@ -639,47 +569,49 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS ── */}
-      <section className="section-pad" style={{ background: 'var(--bg)' }}>
-        <div className="container">
-          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-            <div className="section-label" style={{ justifyContent: 'center' }}>
-              <i className="fa-regular fa-star" /> Reviews
+      {/* ── TESTIMONIALS — only rendered when real CMS testimonials exist ── */}
+      {testimonials.length > 0 && (
+        <section className="section-pad" style={{ background: 'var(--bg)' }}>
+          <div className="container">
+            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+              <div className="section-label" style={{ justifyContent: 'center' }}>
+                <i className="fa-regular fa-star" /> Reviews
+              </div>
+              <h2 className="section-h2" style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>What Participants Say</h2>
             </div>
-            <h2 className="section-h2" style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>What Participants Say</h2>
-          </div>
-          <div className="testimonial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.5rem' }}>
-            {testimonials.map((t) => {
-              const avatarSrc = t.avatarKey
-                ? `${process.env['NEXT_PUBLIC_R2_PUBLIC_URL'] ?? ''}/${t.avatarKey}`
-                : null;
-              const initials = t.authorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
-              return (
-                <div key={t.id} className="testimonial-card">
-                  <div className="testimonial-stars">{'★'.repeat(Math.min(t.rating, 5))}</div>
-                  <p style={{ marginTop: '0.875rem', fontSize: '0.9375rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-                    &ldquo;{t.body}&rdquo;
-                  </p>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.25rem' }}>
-                    {avatarSrc
-                      ? /* eslint-disable-next-line @next/next/no-img-element */
-                        <img src={avatarSrc} alt={t.authorName} className="testimonial-avatar" loading="lazy" />
-                      : <div className="testimonial-avatar" style={{ background: 'var(--green-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8125rem' }}>
-                          {initials}
-                        </div>
-                    }
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{t.authorName}</div>
-                      <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{t.authorTitle}</div>
+            <div className="testimonial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.5rem' }}>
+              {testimonials.map((t) => {
+                const avatarSrc = t.avatarKey
+                  ? `${process.env['NEXT_PUBLIC_R2_PUBLIC_URL'] ?? ''}/${t.avatarKey}`
+                  : null;
+                const initials = t.authorName.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase();
+                return (
+                  <div key={t.id} className="testimonial-card">
+                    <div className="testimonial-stars">{'★'.repeat(Math.min(t.rating, 5))}</div>
+                    <p style={{ marginTop: '0.875rem', fontSize: '0.9375rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
+                      &ldquo;{t.body}&rdquo;
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginTop: '1.25rem' }}>
+                      {avatarSrc
+                        ? // eslint-disable-next-line @next/next/no-img-element
+                          <img src={avatarSrc} alt={t.authorName} className="testimonial-avatar" loading="lazy" width={40} height={40} />
+                        : <div className="testimonial-avatar" style={{ background: 'var(--green-primary)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.8125rem' }}>
+                            {initials}
+                          </div>
+                      }
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '0.875rem' }}>{t.authorName}</div>
+                        <div style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>{t.authorTitle}</div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <TestimonialSubmitForm />
           </div>
-          <TestimonialSubmitForm />
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── FAQ TEASER ── */}
       <section className="section-pad" style={{ background: '#fff' }}>

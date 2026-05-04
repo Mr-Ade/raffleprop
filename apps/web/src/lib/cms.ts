@@ -53,6 +53,8 @@ export interface CmsSettings {
   aboutValues?: Array<{ icon?: string; title?: string; body?: string }> | null;
   // Blog
   blogTopics?: Array<{ icon?: string; label?: string }> | null;
+  // Home page SEO (admin-editable title/description)
+  homeSeo?: { title?: string; description?: string } | null;
   // Misc
   siteName?: string | null;
   tagline?: string | null;
