@@ -13,6 +13,20 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/campaign',
+        destination: '/campaigns',
+        permanent: true,
+      },
+      {
+        source: '/campaign/:slug',
+        destination: '/campaigns/:slug',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

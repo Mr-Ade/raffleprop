@@ -62,6 +62,20 @@ export const sseRateLimit = rateLimit({
   keyGenerator: (req) => req.ip ?? 'unknown',
 });
 
+// Campaign detail / ticket count: 60 requests per minute per IP
+export const campaignDetailRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  max: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  store: new RedisStore({
+    sendCommand,
+    prefix: 'rl:campaign_detail:',
+  }),
+  message: { success: false, error: 'Too many requests. Please slow down.' },
+  keyGenerator: (req) => req.ip ?? 'unknown',
+});
+
 // Campaign list: 120 requests per minute per IP (generous for public browsing)
 export const campaignListRateLimit = rateLimit({
   windowMs: 60 * 1000,

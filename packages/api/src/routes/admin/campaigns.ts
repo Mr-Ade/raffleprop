@@ -5,7 +5,7 @@ import { prisma, CampaignStatus, PaymentGateway } from '@raffleprop/db';
 import { Prisma } from '@raffleprop/db';
 import { authenticate, requireAdmin } from '../../middleware/auth';
 import { validate } from '../../middleware/validate';
-import { redisCounters } from '../../lib/redis';
+import { redisCounters, redisCache } from '../../lib/redis';
 import { generateSkillQuestions } from '../../services/question-generator.service';
 import { getPresignedDownloadUrl } from '../../services/storage.service';
 
@@ -39,6 +39,7 @@ const createCampaignSchema = z.object({
   totalTickets: z.number().int().min(100),
   minTickets: z.number().int().min(1),
   fccpcRef: z.string().optional(),
+  fctLroRef: z.string().optional(),
   lslgaRef: z.string().optional(),
   escrowBank: z.string().optional(),
   escrowAccountNo: z.string().optional(),
@@ -279,6 +280,18 @@ adminCampaignsRouter.post('/', validate(createCampaignSchema), async (req: Reque
   // Initialise Redis counter
   await redisCounters.setTicketsSold(campaign.id, 0);
 
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: req.user!.sub,
+      action: 'campaign.created',
+      entityType: 'Campaign',
+      entityId: campaign.id,
+      payload: { title: campaign.title, status: campaign.status, slug: campaign.slug },
+      ip: req.ip ?? null,
+    },
+  });
+
   res.status(201).json({ success: true, data: campaign });
 });
 
@@ -367,6 +380,21 @@ adminCampaignsRouter.put('/:id', validate(createCampaignSchema.partial()), async
     },
   });
 
+  // Invalidate cached list pages for this campaign's status
+  await redisCache.deletePattern('campaigns:*');
+
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: req.user!.sub,
+      action: 'campaign.updated',
+      entityType: 'Campaign',
+      entityId: campaign.id,
+      payload: { fields: Object.keys(rawBody).filter(k => !['skillQuestions'].includes(k)) },
+      ip: req.ip ?? null,
+    },
+  });
+
   res.json({ success: true, data: campaign });
 });
 
@@ -395,6 +423,19 @@ adminCampaignsRouter.post('/:id/publish', async (req: Request, res: Response) =>
   const updated = await prisma.campaign.update({
     where: { id: req.params['id'] as string },
     data: { status: CampaignStatus.UPCOMING, publishedAt: new Date() },
+  });
+
+  await redisCache.deletePattern('campaigns:*');
+
+  await prisma.auditLog.create({
+    data: {
+      actorId: req.user!.sub,
+      action: 'campaign.published',
+      entityType: 'Campaign',
+      entityId: updated.id,
+      payload: { status: CampaignStatus.UPCOMING, fccpcRef: updated.fccpcRef },
+      ip: req.ip ?? null,
+    },
   });
 
   res.json({ success: true, data: updated });
@@ -451,7 +492,21 @@ adminCampaignsRouter.patch('/:id/status', async (req: Request, res: Response) =>
       status,
       ...liveExtras,
       ...(status === CampaignStatus.CLOSED ? { closedAt: new Date() } : {}),
-      // PAUSED keeps existing publishedAt; no extra timestamp needed
+    },
+  });
+
+  // Invalidate all cached campaign list pages
+  await redisCache.deletePattern('campaigns:*');
+
+  // Audit log
+  await prisma.auditLog.create({
+    data: {
+      actorId: req.user!.sub,
+      action: 'campaign.status_changed',
+      entityType: 'Campaign',
+      entityId: updated.id,
+      payload: { from: campaign.status, to: status },
+      ip: req.ip ?? null,
     },
   });
 

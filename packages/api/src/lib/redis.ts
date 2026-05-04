@@ -95,7 +95,15 @@ export const redisCache = {
     } catch { /* cache miss on Redis failure is acceptable */ }
   },
 
-  async del(pattern: string): Promise<void> {
+  async del(key: string): Promise<void> {
+    if (!redisOk) return;
+    try {
+      await redis.del(apiCacheKey(key));
+    } catch { /* best-effort */ }
+  },
+
+  // Delete all cache keys matching a glob pattern (e.g. 'campaigns:*')
+  async deletePattern(pattern: string): Promise<void> {
     if (!redisOk) return;
     try {
       const keys = await redis.keys(apiCacheKey(pattern));

@@ -88,6 +88,9 @@ export interface SiteSettings {
   footerTagline?: string | null;
   termsUrl?: string | null;
   privacyUrl?: string | null;
+  // Campaigns page
+  campaignsSeo?: { title?: string; description?: string } | null;
+  campaignsPageContent?: { heading?: string; subheading?: string; emptyStateHeading?: string; emptyStateBody?: string } | null;
   // Homepage sections (JSON fields)
   homeSeo?: { title?: string; description?: string } | null;
   heroSection?: { badgeText?: string; heading?: string; subheading?: string } | null;

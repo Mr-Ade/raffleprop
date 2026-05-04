@@ -40,7 +40,9 @@ export interface Campaign {
   minTickets: number;
   status: CampaignStatus;
   fccpcRef?: string;
+  fctLroRef?: string;
   lslgaRef?: string;
+  displayOrder?: number;
   escrowBank?: string;
   escrowAccountNo?: string;
   skillQuestion: SkillQuestion;

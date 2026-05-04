@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { prisma, CampaignStatus } from '@raffleprop/db';
 import { redisCounters, redisCache } from '../lib/redis';
 import { validateQuery } from '../middleware/validate';
-import { campaignListRateLimit, sseRateLimit } from '../middleware/rateLimit';
+import { campaignListRateLimit, sseRateLimit, campaignDetailRateLimit } from '../middleware/rateLimit';
 
 export const campaignsRouter: import('express').Router = Router();
 
@@ -74,8 +74,9 @@ campaignsRouter.get('/', campaignListRateLimit, validateQuery(listQuerySchema), 
       skip,
       take: q.pageSize,
       orderBy: [
-        // Featured campaigns always float to top within the same page
+        // Featured campaigns float to top; within featured, sort by displayOrder ascending
         { featured: 'desc' },
+        { displayOrder: 'asc' as const },
         orderBy,
       ],
       select: {
@@ -95,7 +96,10 @@ campaignsRouter.get('/', campaignListRateLimit, validateQuery(listQuerySchema), 
         featuredImageKey: true,
         publishedAt: true,
         fccpcRef: true,
+        fctLroRef: true,
+        lslgaRef: true,
         featured: true,
+        displayOrder: true,
         hotScore: true,
         draw: {
           select: {
@@ -143,7 +147,7 @@ campaignsRouter.get('/', campaignListRateLimit, validateQuery(listQuerySchema), 
 });
 
 // ─── GET /api/campaigns/:slug ─────────────────────────────────────────────────
-campaignsRouter.get('/:slug', async (req: Request, res: Response) => {
+campaignsRouter.get('/:slug', campaignDetailRateLimit, async (req: Request, res: Response) => {
   const campaign = await prisma.campaign.findFirst({
     where: {
       slug: req.params['slug'] as string,
@@ -174,7 +178,7 @@ campaignsRouter.get('/:slug', async (req: Request, res: Response) => {
 });
 
 // ─── GET /api/campaigns/:id/tickets/count ─────────────────────────────────────
-campaignsRouter.get('/:id/tickets/count', async (req: Request, res: Response) => {
+campaignsRouter.get('/:id/tickets/count', campaignDetailRateLimit, async (req: Request, res: Response) => {
   const count = await redisCounters.getTicketsSold(req.params['id']!);
   res.json({ success: true, data: { ticketsSold: count } });
 });

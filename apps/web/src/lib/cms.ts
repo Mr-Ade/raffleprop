@@ -55,6 +55,15 @@ export interface CmsSettings {
   blogTopics?: Array<{ icon?: string; label?: string }> | null;
   // Home page SEO (admin-editable title/description)
   homeSeo?: { title?: string; description?: string } | null;
+  // Campaigns page SEO
+  campaignsSeo?: { title?: string; description?: string } | null;
+  // Campaigns page copy (header + empty state)
+  campaignsPageContent?: {
+    heading?: string;
+    subheading?: string;
+    emptyStateHeading?: string;
+    emptyStateBody?: string;
+  } | null;
   // Misc
   siteName?: string | null;
   tagline?: string | null;

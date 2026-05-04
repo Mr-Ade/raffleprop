@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -35,40 +36,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const desc = campaign.description ??
       `Win ${campaign.title} worth ₦${Number(campaign.marketValue).toLocaleString()} at ${campaign.propertyAddress}. Tickets from ₦${Number(campaign.ticketPrice).toLocaleString()}.`;
 
-    const jsonLd = {
-      '@context': 'https://schema.org',
-      '@type': 'Product',
-      name: campaign.title,
-      description: desc,
-      image: campaign.featuredImageKey ? [`${MEDIA_URL}/${campaign.featuredImageKey}`] : [],
-      offers: {
-        '@type': 'Offer',
-        priceCurrency: 'NGN',
-        price: Number(campaign.ticketPrice).toFixed(2),
-        availability: campaign.status === 'LIVE'
-          ? 'https://schema.org/InStock'
-          : 'https://schema.org/SoldOut',
-        url: `${SITE_URL}/campaigns/${campaign.slug}`,
-      },
-      ...(campaign.drawDate ? {
-        event: {
-          '@type': 'Event',
-          name: `${campaign.title} — Live Draw`,
-          startDate: campaign.drawDate,
-          location: {
-            '@type': 'Place',
-            name: campaign.propertyAddress,
-            address: {
-              '@type': 'PostalAddress',
-              addressLocality: campaign.propertyLga,
-              addressRegion: campaign.propertyState,
-              addressCountry: 'NG',
-            },
-          },
-        },
-      } : {}),
-    };
-
     return {
       title: campaign.title,
       description: desc,
@@ -76,9 +43,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         title: campaign.title,
         description: desc,
         images: campaign.featuredImageKey ? [`${MEDIA_URL}/${campaign.featuredImageKey}`] : [],
-      },
-      other: {
-        'application/ld+json': JSON.stringify(jsonLd),
       },
     };
   } catch {
@@ -154,6 +118,41 @@ export default async function CampaignDetailPage({ params }: Props) {
   const marketValue = Number(campaign.marketValue);
   const ticketPrice = Number(campaign.ticketPrice);
 
+  const campaignDesc = campaign.description ??
+    `Win ${campaign.title} worth ₦${marketValue.toLocaleString()} at ${campaign.propertyAddress}. Tickets from ₦${ticketPrice.toLocaleString()}.`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: campaign.title,
+    description: campaignDesc,
+    image: campaign.featuredImageKey ? [`${MEDIA_URL}/${campaign.featuredImageKey}`] : [],
+    offers: {
+      '@type': 'Offer',
+      priceCurrency: 'NGN',
+      price: ticketPrice.toFixed(2),
+      availability: isLive ? 'https://schema.org/InStock' : 'https://schema.org/SoldOut',
+      url: `${SITE_URL}/campaigns/${campaign.slug}`,
+    },
+    ...(campaign.drawDate ? {
+      event: {
+        '@type': 'Event',
+        name: `${campaign.title} — Live Draw`,
+        startDate: campaign.drawDate,
+        location: {
+          '@type': 'Place',
+          name: campaign.propertyAddress,
+          address: {
+            '@type': 'PostalAddress',
+            addressLocality: campaign.propertyLga,
+            addressRegion: campaign.propertyState,
+            addressCountry: 'NG',
+          },
+        },
+      },
+    } : {}),
+  };
+
   const availableDocs = docs
     ? (Object.entries(docs) as [keyof CampaignDocumentKeys, string | undefined][]).filter(([, v]) => !!v)
     : [];
@@ -179,6 +178,12 @@ export default async function CampaignDetailPage({ params }: Props) {
   }
 
   return (
+    <>
+      <Script
+        id="json-ld-campaign-product"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
     <div style={{ paddingTop: '65px' }}>
 
       {/* ── HERO CAROUSEL ── */}
@@ -767,5 +772,6 @@ export default async function CampaignDetailPage({ params }: Props) {
 
       </div>
     </div>
+    </>
   );
 }

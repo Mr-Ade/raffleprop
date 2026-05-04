@@ -101,7 +101,9 @@ export interface CampaignData {
   minTickets?: number;
   fccpcRef?: string | null;
   fccpcApprovalDate?: string | null;
+  fctLroRef?: string | null;
   lslgaRef?: string | null;
+  displayOrder?: number | null;
   escrowBank?: string | null;
   escrowAccountNo?: string | null;
   allowedGateways?: string[];
@@ -276,7 +278,9 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
   // ── Regulatory ────────────────────────────────────────────────────────────────
   const [fccpcRef, setFccpcRef]             = useState(initialData?.fccpcRef ?? '');
   const [fccpcDate, setFccpcDate]           = useState(toDateInput(initialData?.fccpcApprovalDate));
+  const [fctLroRef, setFctLroRef]           = useState(initialData?.fctLroRef ?? '');
   const [lslgaRef, setLslgaRef]             = useState(initialData?.lslgaRef ?? '');
+  const [displayOrder, setDisplayOrder]     = useState(initialData?.displayOrder ?? 0);
   const [nisvValuerName, setNisvValuer]     = useState(initialData?.valuationFirm ?? '');
   const [nisvRegNumber, setNisvReg]         = useState(initialData?.valuationRef ?? '');
   const [escrowBank, setEscrowBank]         = useState(initialData?.escrowBank ?? '');
@@ -515,7 +519,9 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
       allowedGateways,
       fccpcRef: fccpcRef || undefined,
       fccpcApprovalDate: fccpcDate || undefined,
+      fctLroRef: fctLroRef || undefined,
       lslgaRef: lslgaRef || undefined,
+      displayOrder: displayOrder ? Number(displayOrder) : undefined,
       escrowBank: escrowBank || undefined,
       escrowAccountNo: escrowAcc || undefined,
       escrowAccountType: escrowAccountType || undefined,
@@ -681,6 +687,17 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
           C of O Confirmed
           <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400 }}>(certificate of occupancy verified by legal)</span>
         </label>
+      </div>
+
+      {/* Display order */}
+      <div className="form-group" style={{ marginBottom: '1.25rem', maxWidth: 200 }}>
+        <label className="form-label">
+          <i className="fa-solid fa-sort" style={{ marginRight: '0.375rem', color: 'var(--text-muted)' }} />
+          Display Order
+        </label>
+        <input type="number" className="form-input" value={displayOrder} onChange={e => setDisplayOrder(Number(e.target.value))}
+          min={0} placeholder="0" disabled={!canEdit} />
+        <div className="form-hint">Lower = appears first on campaigns page (0 = default)</div>
       </div>
 
       {/* ═══════════════════════════════════════════════════════════════════════
@@ -1102,6 +1119,15 @@ export default function CampaignForm({ mode, initialData, token }: Props) {
           <label className="form-label">Approval Date</label>
           <input type="date" className="form-input" value={fccpcDate} onChange={e => setFccpcDate(e.target.value)} disabled={!canEdit} />
         </div>
+      </div>
+
+      {/* FCT-LRO — FCT/Abuja campaigns */}
+      <SubLabel icon="fa-id-card" color="#0369a1">FCT Lottery Regulatory Office (FCT-LRO)</SubLabel>
+      <div className="form-group" style={{ marginBottom: '1rem' }}>
+        <label className="form-label">FCT-LRO Permit Reference</label>
+        <input className="form-input" value={fctLroRef} onChange={e => setFctLroRef(e.target.value)}
+          placeholder="FCT-LRO/2024/RP/001" style={{ fontFamily: 'monospace' }} disabled={!canEdit} />
+        <div className="form-hint">Required for campaigns in Abuja (FCT)</div>
       </div>
 
       {/* LSLGA — Lagos only */}
