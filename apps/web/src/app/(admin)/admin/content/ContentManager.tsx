@@ -533,6 +533,7 @@ function WinnersPanel({ winners: initial, api, token, apiUrl }: { winners: Winne
 // ─── Homepage Panel ───────────────────────────────────────────────────────────
 
 function HomepagePanel({ settings: initial, api }: { settings: SiteSettings; api: ReturnType<typeof useApi> }) {
+  const [homeSeo, setHomeSeo] = useState(initial.homeSeo ?? { title: '', description: '' });
   const [hero, setHero] = useState(initial.heroSection ?? { badgeText: '', heading: '', subheading: '' });
   const [heroStats, setHeroStats] = useState(initial.heroStats ?? [{ label: '', value: '' }, { label: '', value: '' }, { label: '', value: '' }]);
   const [statsSection, setStatsSection] = useState(initial.statsSection ?? [{ label: '', value: '' }, { label: '', value: '' }, { label: '', value: '' }, { label: '', value: '' }]);
@@ -543,7 +544,7 @@ function HomepagePanel({ settings: initial, api }: { settings: SiteSettings; api
 
   const save = async () => {
     setSaving(true); setMsg('');
-    try { await api('/settings', 'PUT', { heroSection: hero, heroStats, statsSection, ctaBanner, notificationSection: notif }); setMsg('Saved!'); }
+    try { await api('/settings', 'PUT', { homeSeo, heroSection: hero, heroStats, statsSection, ctaBanner, notificationSection: notif }); setMsg('Saved!'); }
     catch (e) { setMsg(`Error: ${(e as Error).message}`); }
     setSaving(false);
   };
@@ -554,6 +555,15 @@ function HomepagePanel({ settings: initial, api }: { settings: SiteSettings; api
         <h2 style={{ fontSize: '1.125rem', fontWeight: 800 }}>Homepage Content</h2>
         <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}><StatusMsg msg={msg} /><SaveBtn saving={saving} onClick={save} /></div>
       </div>
+      <SectionCard title="Home Page SEO">
+        <Field label="Meta Title (max 70 chars)">
+          <Input placeholder="RaffleProp — Win a Property in Nigeria From ₦2,500" value={homeSeo.title ?? ''} onChange={(e) => setHomeSeo((p) => ({ ...p, title: e.target.value }))} maxLength={70} />
+        </Field>
+        <Field label="Meta Description (max 160 chars)">
+          <Textarea placeholder="Nigeria's most transparent property raffle platform..." value={homeSeo.description ?? ''} onChange={(e) => setHomeSeo((p) => ({ ...p, description: e.target.value }))} maxLength={160} />
+        </Field>
+        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Leave blank to use the built-in defaults. These appear in Google search results and link previews.</p>
+      </SectionCard>
       <SectionCard title="Hero Section">
         <Field label="Badge Text (top pill)"><Input placeholder="Live Campaign Active · 2 Properties Available" value={hero.badgeText ?? ''} onChange={(e) => setHero((p) => ({ ...p, badgeText: e.target.value }))} /></Field>
         <Field label="Main Heading (line 1)"><Input placeholder="Win a Property." value={hero.heading ?? ''} onChange={(e) => setHero((p) => ({ ...p, heading: e.target.value }))} /></Field>

@@ -89,6 +89,7 @@ export interface SiteSettings {
   termsUrl?: string | null;
   privacyUrl?: string | null;
   // Homepage sections (JSON fields)
+  homeSeo?: { title?: string; description?: string } | null;
   heroSection?: { badgeText?: string; heading?: string; subheading?: string } | null;
   heroStats?: Array<{ label: string; value: string }> | null;
   statsSection?: Array<{ label: string; value: string }> | null;

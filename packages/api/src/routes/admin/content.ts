@@ -31,6 +31,7 @@ const siteSettingsSchema = z.object({
   termsUrl:          z.string().url().optional().nullable(),
   privacyUrl:        z.string().url().optional().nullable(),
   // Homepage sections
+  homeSeo:             z.object({ title: z.string().max(70), description: z.string().max(160) }).optional().nullable(),
   heroSection:         z.object({ badgeText: z.string(), heading: z.string(), subheading: z.string() }).optional().nullable(),
   heroStats:           z.array(heroStatItem).length(3).optional().nullable(),
   statsSection:        z.array(heroStatItem).length(4).optional().nullable(),

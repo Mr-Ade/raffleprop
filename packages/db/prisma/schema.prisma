@@ -516,6 +516,7 @@ model SiteSettings {
   termsUrl            String?
   privacyUrl          String?
   // ── Homepage sections ──────────────────────────────────────────────────────
+  homeSeo             Json?    // { title, description } — admin-editable meta title/description for home page
   heroSection         Json?    // { badgeText, heading, subheading }
   heroStats           Json?    // [{ label, value }] × 3
   statsSection        Json?    // [{ label, value }] × 4
