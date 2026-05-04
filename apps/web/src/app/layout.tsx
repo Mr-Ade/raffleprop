@@ -41,10 +41,47 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   const settings = await cms.getSettings(300).catch(() => null);
   const banner = settings?.maintenanceBanner?.trim() ?? null;
 
+  const siteUrl = process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://raffleprop.com';
+
+  const organizationJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: 'RaffleProp',
+    url: siteUrl,
+    logo: `${siteUrl}/favicon.svg`,
+    description: 'FCCPC-regulated property raffle platform. Win your dream home through transparent, compliant ticket draws.',
+    contactPoint: {
+      '@type': 'ContactPoint',
+      contactType: 'customer service',
+      email: 'support@raffleprop.com',
+      availableLanguage: 'English',
+    },
+    sameAs: [
+      'https://twitter.com/raffleprop',
+    ],
+  };
+
+  const webSiteJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    name: 'RaffleProp',
+    url: siteUrl,
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteUrl}/campaigns?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
   return (
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }} />
         {/* Self-hosted Inter font */}
         <link rel="preload" href="/fonts/inter-latin.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="stylesheet" href="/fonts/inter.css" />
