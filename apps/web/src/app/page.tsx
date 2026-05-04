@@ -634,16 +634,17 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ── TESTIMONIALS — only rendered when real CMS testimonials exist ── */}
-      {testimonials.length > 0 && (
-        <section className="section-pad" style={{ background: 'var(--bg)' }}>
-          <div className="container">
-            <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-              <div className="section-label" style={{ justifyContent: 'center' }}>
-                <i className="fa-regular fa-star" /> Reviews
-              </div>
-              <h2 className="section-h2" style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>What Participants Say</h2>
+      {/* ── TESTIMONIALS ── */}
+      <section className="section-pad" style={{ background: 'var(--bg)' }}>
+        <div className="container">
+          <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+            <div className="section-label" style={{ justifyContent: 'center' }}>
+              <i className="fa-regular fa-star" /> Reviews
             </div>
+            <h2 className="section-h2" style={{ fontSize: '2rem', fontWeight: 900, letterSpacing: '-0.02em' }}>What Participants Say</h2>
+          </div>
+
+          {testimonials.length > 0 ? (
             <div className="testimonial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.5rem' }}>
               {testimonials.map((t) => {
                 const avatarSrc = t.avatarKey
@@ -673,10 +674,40 @@ export default async function HomePage() {
                 );
               })}
             </div>
-            <TestimonialSubmitForm />
-          </div>
-        </section>
-      )}
+          ) : (
+            <div className="testimonial-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '1.5rem' }}>
+              {[0, 1, 2].map((i) => (
+                <div key={i} style={{
+                  background: 'var(--card-bg)',
+                  borderRadius: 'var(--radius-xl)',
+                  border: '1.5px dashed var(--border)',
+                  padding: '2rem 1.5rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  textAlign: 'center',
+                  gap: '0.625rem',
+                }}>
+                  <div style={{ fontSize: '1.75rem', color: 'var(--border)', opacity: 0.7 }}>
+                    {'★★★★★'}
+                  </div>
+                  <div style={{ fontWeight: 700, fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
+                    First Review Coming Soon
+                  </div>
+                  <p style={{ fontSize: '0.8125rem', color: 'var(--text-muted)', lineHeight: 1.6, margin: 0 }}>
+                    Be among our first participants and share your experience. Every verified purchase is eligible.
+                  </p>
+                  <Link href="/campaigns" style={{ marginTop: '0.375rem', fontSize: '0.8125rem', fontWeight: 600, color: 'var(--green-primary)', textDecoration: 'none' }}>
+                    Browse active campaigns →
+                  </Link>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <TestimonialSubmitForm />
+        </div>
+      </section>
 
       {/* ── FAQ TEASER ── */}
       <section className="section-pad" style={{ background: '#fff' }}>
